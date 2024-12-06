@@ -5,7 +5,7 @@ import org.joml.Vector4f;
 
 public class Constants {
 
-    public static final String TITLE = "VoxelEngine";
+    public static final String TITLE = "Java Game Engine";
 
     public static final float FOV = (float) Math.toRadians(60);
     public static final float Z_NEAR = 0.01f;
