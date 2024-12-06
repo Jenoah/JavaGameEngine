@@ -1,12 +1,11 @@
 package game;
 
-import game.levels.Level0;
-import game.levels.Level1;
+import game.actual.levels.Level1;
+import game.demo.levels.Level0;
 import nl.jenoah.core.*;
 import nl.jenoah.core.debugging.Debug;
 import nl.jenoah.core.entity.*;
 import nl.jenoah.core.rendering.RenderManager;
-import nl.jenoah.core.shaders.ShaderManager;
 
 public class TestGame implements ILogic {
     private final RenderManager renderer;
@@ -27,9 +26,8 @@ public class TestGame implements ILogic {
     public void init() throws Exception {
         Debug.Log("Initiating game...");
         renderer.init();
-        //shaderManager.init();
 
-        Scene level = new Level0();
+        Scene level = new Level1();
 
         //window.setClearColor(0f, .9f, 1f, 0);
         window.setClearColor(0, 0, 0, 0);
