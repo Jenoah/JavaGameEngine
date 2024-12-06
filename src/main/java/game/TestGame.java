@@ -27,7 +27,7 @@ public class TestGame implements ILogic {
         Debug.Log("Initiating game...");
         renderer.init();
 
-        Scene level = new Level1();
+        Scene level = new Level0();
 
         //window.setClearColor(0f, .9f, 1f, 0);
         window.setClearColor(0, 0, 0, 0);
