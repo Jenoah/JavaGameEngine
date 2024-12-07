@@ -1,7 +1,5 @@
 package nl.jenoah.core.rendering;
 
-import game.Launcher;
-import nl.jenoah.core.EngineManager;
 import nl.jenoah.core.ModelManager;
 import nl.jenoah.core.fonts.fontRendering.FontRenderer;
 import nl.jenoah.core.gui.GuiRenderer;
@@ -23,7 +21,7 @@ public class RenderManager {
     private SkyboxRenderer skyboxRenderer;
 
     public RenderManager() {
-        window = Launcher.getWindow();
+        window = WindowManager.getInstance();
     }
 
     public void init() throws Exception {

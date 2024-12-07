@@ -1,6 +1,5 @@
 package nl.jenoah.core.shaders;
 
-import game.Launcher;
 import nl.jenoah.core.Camera;
 import nl.jenoah.core.entity.Entity;
 import nl.jenoah.core.entity.SceneManager;
@@ -47,7 +46,7 @@ public class UnlitShader extends Shader{
         shader.setUniform("textureSampler", 0);
         shader.setUniform("modelMatrix", modelMatrix);
         shader.setUniform("viewMatrix", viewMatrix);
-        shader.setUniform("projectionMatrix", Launcher.getWindow().getProjectionMatrix());
+        shader.setUniform("projectionMatrix", window.getProjectionMatrix());
         shader.setUniform("fogColor", SceneManager.fogColor);
         shader.setUniform("fogDensity", SceneManager.fogDensity);
     }

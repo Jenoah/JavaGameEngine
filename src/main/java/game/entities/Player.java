@@ -1,6 +1,5 @@
 package game.entities;
 
-import game.Launcher;
 import nl.jenoah.core.Camera;
 import nl.jenoah.core.ModelManager;
 import nl.jenoah.core.MouseInput;
@@ -16,8 +15,8 @@ import org.lwjgl.glfw.GLFW;
 
 public class Player extends GameObject {
 
-    private Camera camera;
-    private WindowManager windowManager;
+    private final Camera camera;
+    private final WindowManager windowManager;
 
     private Vector3f moveDelta;
     private float pitch = 0;
@@ -25,7 +24,7 @@ public class Player extends GameObject {
     private float moveSpeed = Constants.CAMERA_MOVE_SPEED;
 
     public Player(){
-        this.windowManager = Launcher.getWindow();
+        this.windowManager = WindowManager.getInstance();
         this.camera = new Camera();
         this.camera.setParent(this);
         moveDelta = new Vector3f(0, 0, 0);

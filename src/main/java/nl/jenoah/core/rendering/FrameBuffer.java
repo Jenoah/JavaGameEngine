@@ -1,6 +1,6 @@
 package nl.jenoah.core.rendering;
 
-import game.Launcher;
+import nl.jenoah.core.WindowManager;
 import org.lwjgl.opengl.*;
 
 import java.nio.ByteBuffer;
@@ -74,7 +74,7 @@ public class FrameBuffer {
      */
     public void unbindFrameBuffer() {
         GL30.glBindFramebuffer(GL30.GL_FRAMEBUFFER, 0);
-        GL11.glViewport(0, 0, Launcher.getWindow().getWidth(), Launcher.getWindow().getHeight());
+        GL11.glViewport(0, 0, WindowManager.getInstance().getWidth(), WindowManager.getInstance().getHeight());
     }
 
 

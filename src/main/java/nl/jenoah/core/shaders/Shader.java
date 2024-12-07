@@ -1,7 +1,7 @@
 package nl.jenoah.core.shaders;
 
-import game.Launcher;
 import nl.jenoah.core.Camera;
+import nl.jenoah.core.WindowManager;
 import nl.jenoah.core.entity.Entity;
 import nl.jenoah.core.entity.Material;
 import nl.jenoah.core.entity.SceneManager;
@@ -26,6 +26,7 @@ public class Shader {
 
     private int vertexShaderID;
     private int fragmentShaderID;
+    protected WindowManager window;
 
     public Shader() throws Exception{
         programID = GL20.glCreateProgram();
@@ -34,6 +35,7 @@ public class Shader {
         }
 
         uniforms = new HashMap<>();
+        window = WindowManager.getInstance();
     }
 
     public void init() throws Exception {
@@ -93,7 +95,7 @@ public class Shader {
         shader.setUniform("modelMatrix", modelMatrix);
         shader.setUniform("textureSampler", 0);
         shader.setUniform("viewMatrix", viewMatrix);
-        shader.setUniform("projectionMatrix", Launcher.getWindow().getProjectionMatrix());
+        shader.setUniform("projectionMatrix", window.getProjectionMatrix());
         shader.setUniform("fogColor", SceneManager.fogColor);
         shader.setUniform("fogDensity", SceneManager.fogDensity);
     }

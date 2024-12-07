@@ -6,7 +6,7 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
-import game.Launcher;
+import nl.jenoah.core.WindowManager;
 
 /**
  * Provides functionality for getting the values from a font file.
@@ -26,7 +26,7 @@ public class MetaFile {
 	private static final String SPLITTER = " ";
 	private static final String NUMBER_SEPARATOR = ",";
 
-	private double aspectRatio;
+	private final double aspectRatio;
 
 	private double verticalPerPixelSize;
 	private double horizontalPerPixelSize;
@@ -35,10 +35,10 @@ public class MetaFile {
 	private int paddingWidth;
 	private int paddingHeight;
 
-	private Map<Integer, Character> metaData = new HashMap<Integer, Character>();
+	private final Map<Integer, Character> metaData = new HashMap<Integer, Character>();
 
 	private BufferedReader reader;
-	private Map<String, String> values = new HashMap<String, String>();
+	private final Map<String, String> values = new HashMap<String, String>();
 
 	/**
 	 * Opens a font file in preparation for reading.
@@ -47,7 +47,7 @@ public class MetaFile {
 	 *            - the font file.
 	 */
 	protected MetaFile(File file) {
-		this.aspectRatio = (double) Launcher.getWindow().getWidth() / (double) Launcher.getWindow().getHeight();
+		this.aspectRatio = (double) WindowManager.getInstance().getWidth() / (double) WindowManager.getInstance().getHeight();
 		openFile(file);
 		loadPaddingData();
 		loadLineSizes();

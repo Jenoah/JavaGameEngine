@@ -1,5 +1,5 @@
 # JavaGameEngine
-A simple Java game engine using LWJGL 3 and some of my own implementations
+A simple Java game.myGame engine using LWJGL 3 and some of my own implementations
 
 ## Includes
 - 3D rendering
@@ -10,7 +10,7 @@ A simple Java game engine using LWJGL 3 and some of my own implementations
 - Post processing
 
 ## Examples
-There is one simple demo scene that contains all of the implementations above
+There is one simple game.demo scene that contains all of the implementations above
 ![preview image of render](git-files/images/preview1.png)
 
 A thing I have been working on myself in this engine would be a simple procedural landscape generation.

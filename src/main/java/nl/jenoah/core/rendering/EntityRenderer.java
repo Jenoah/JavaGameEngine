@@ -1,18 +1,9 @@
 package nl.jenoah.core.rendering;
 
-import game.Launcher;
 import nl.jenoah.core.Camera;
-import nl.jenoah.core.shaders.BlinnPhongShader;
 import nl.jenoah.core.shaders.Shader;
-import nl.jenoah.core.shaders.ShaderManager;
 import nl.jenoah.core.entity.Entity;
 import nl.jenoah.core.entity.Model;
-import nl.jenoah.core.lighting.DirectionalLight;
-import nl.jenoah.core.lighting.PointLight;
-import nl.jenoah.core.lighting.SpotLight;
-import nl.jenoah.core.utils.Transformation;
-import nl.jenoah.core.utils.Utils;
-import org.joml.Matrix4f;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL13;
 import org.lwjgl.opengl.GL20;
@@ -22,7 +13,7 @@ import java.util.*;
 
 public class EntityRenderer implements IRenderer{
 
-    private List<Entity> entities;
+    private final List<Entity> entities;
 
     public EntityRenderer(){
         entities = new ArrayList<>();

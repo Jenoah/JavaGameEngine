@@ -1,6 +1,5 @@
 package nl.jenoah.core.shaders;
 
-import game.Launcher;
 import nl.jenoah.core.Camera;
 import nl.jenoah.core.entity.Entity;
 import nl.jenoah.core.entity.SceneManager;
@@ -8,8 +7,6 @@ import nl.jenoah.core.utils.Constants;
 import nl.jenoah.core.utils.Transformation;
 import nl.jenoah.core.utils.Utils;
 import org.joml.Matrix4f;
-
-import static org.lwjgl.opengl.GL11.glDepthMask;
 
 public class BillboardShader extends Shader{
     public BillboardShader() throws Exception {
@@ -38,7 +35,7 @@ public class BillboardShader extends Shader{
     @Override
     public void prepare(Entity entity, Camera camera) {
         Matrix4f viewMatrix = Transformation.getViewMatrix(camera);
-        Matrix4f projectionMatrix = Launcher.getWindow().getProjectionMatrix();
+        Matrix4f projectionMatrix = window.getProjectionMatrix();
 
         Shader shader = entity.getModel().getMaterial().getShader();
         shader.setUniform("gamma", Constants.GAMMA);

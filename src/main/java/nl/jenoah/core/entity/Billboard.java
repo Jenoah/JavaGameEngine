@@ -1,6 +1,5 @@
 package nl.jenoah.core.entity;
 
-import game.Launcher;
 import nl.jenoah.core.shaders.ShaderManager;
 import org.joml.Vector3f;
 

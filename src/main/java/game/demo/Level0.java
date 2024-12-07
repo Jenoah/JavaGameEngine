@@ -1,4 +1,4 @@
-package game.demo.levels;
+package game.demo;
 
 import nl.jenoah.core.EngineManager;
 import nl.jenoah.core.ModelManager;

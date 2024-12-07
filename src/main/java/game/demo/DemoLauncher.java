@@ -1,23 +1,23 @@
-package game;
+package game.demo;
 
 import nl.jenoah.core.EngineManager;
 import nl.jenoah.core.WindowManager;
 import nl.jenoah.core.utils.Constants;
 import org.lwjgl.Version;
 
-public class Launcher {
+public class DemoLauncher {
     private static WindowManager window;
-    private static TestGame game;
+    private static DemoGame game;
 
     public static void main(String[] args){
         System.out.println(Version.getVersion());
 
         window = new WindowManager(Constants.TITLE, 1280, 720, false);
-        game = new TestGame();
+        game = new DemoGame();
         EngineManager engine = new EngineManager();
 
         try{
-            engine.start();
+            engine.start(game);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -27,7 +27,7 @@ public class Launcher {
         return window;
     }
 
-    public static TestGame getGame() {
+    public static DemoGame getGame() {
         return game;
     }
 }

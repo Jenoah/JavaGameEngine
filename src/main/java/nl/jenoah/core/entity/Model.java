@@ -1,14 +1,12 @@
 package nl.jenoah.core.entity;
 
-import game.Launcher;
 import nl.jenoah.core.ModelManager;
-import nl.jenoah.core.shaders.Shader;
 import nl.jenoah.core.shaders.ShaderManager;
 
 public class Model {
 
-    private int id;
-    private int vertexCount;
+    private final int id;
+    private final int vertexCount;
     private boolean isDoubleSided = false;
     private Material material;
 

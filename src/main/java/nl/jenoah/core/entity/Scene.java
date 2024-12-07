@@ -1,6 +1,5 @@
 package nl.jenoah.core.entity;
 
-import game.Launcher;
 import game.entities.Player;
 import nl.jenoah.core.ModelManager;
 import nl.jenoah.core.MouseInput;
@@ -19,9 +18,9 @@ import java.util.*;
 
 public class Scene {
     private List<Entity> entities;
-    private List<GameObject> gameObjects;
-    private List<GuiObject> guiObjects;
-    private Map<FontType, List<GUIText>> textObjects;
+    private final List<GameObject> gameObjects;
+    private final List<GuiObject> guiObjects;
+    private final Map<FontType, List<GUIText>> textObjects;
     private Vector3f fogColor = new Vector3f(1);
     private float fogDensity = 0.01f;
 
@@ -39,12 +38,12 @@ public class Scene {
     protected String levelName = "Undefined Scene";
 
     public Scene(){
-        this.entities = new ArrayList<Entity>();
-        this.gameObjects = new ArrayList<GameObject>();
-        this.guiObjects = new ArrayList<GuiObject>();
+        this.entities = new ArrayList<>();
+        this.gameObjects = new ArrayList<>();
+        this.guiObjects = new ArrayList<>();
         this.modelManager = ModelManager.getInstance();
-        this.windowManager = Launcher.getWindow();
-        this.textObjects = new HashMap<FontType, List<GUIText>>();
+        this.windowManager = WindowManager.getInstance();
+        this.textObjects = new HashMap<>();
 
         this.player = new Player();
         init();
@@ -193,11 +192,7 @@ public class Scene {
         TextMeshData data = font.loadText(textObject);
         int id = modelManager.getFontLoader().load(data.getVertexPositions(), data.getTextureCoords());
         textObject.setMeshInfo(id, data.getVertexCount());
-        List<GUIText> textBatch = textObjects.get(font);
-        if(textBatch == null){
-            textBatch = new ArrayList<GUIText>();
-            textObjects.put(font, textBatch);
-        }
+        List<GUIText> textBatch = textObjects.computeIfAbsent(font, k -> new ArrayList<GUIText>());
         textBatch.add(textObject);
     }
 

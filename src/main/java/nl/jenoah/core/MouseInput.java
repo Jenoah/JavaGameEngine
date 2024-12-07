@@ -1,11 +1,8 @@
 package nl.jenoah.core;
 
-import game.Launcher;
-import nl.jenoah.core.debugging.Debug;
 import org.joml.Vector2d;
 import org.joml.Vector2f;
 import org.lwjgl.glfw.GLFW;
-import org.lwjgl.system.windows.INPUT;
 
 public class MouseInput {
 
@@ -14,22 +11,24 @@ public class MouseInput {
 
     private boolean lbDown = false;
     private boolean rbDown = false;
-    private long windowLong;
+    private final long windowLong;
+    private final WindowManager window;
 
     public MouseInput(){
         previousPosition = new Vector2d(-1, -1);
         currentPosition = new Vector2d(0, 0);
         mouseDelta = new Vector2f();
-        windowLong = Launcher.getWindow().getWindow();
+        window = WindowManager.getInstance();
+        windowLong = window.getWindow();
     }
 
     public void init(){
-        GLFW.glfwSetCursorPosCallback(Launcher.getWindow().getWindow(), (window, xPos, yPos) -> {
+        GLFW.glfwSetCursorPosCallback(window.getWindow(), (window, xPos, yPos) -> {
             currentPosition.x = xPos;
             currentPosition.y = yPos;
         });
 
-        GLFW.glfwSetMouseButtonCallback(Launcher.getWindow().getWindow(), (window, button, action, mods) -> {
+        GLFW.glfwSetMouseButtonCallback(window.getWindow(), (window, button, action, mods) -> {
             lbDown = button == GLFW.GLFW_MOUSE_BUTTON_1 && action == GLFW.GLFW_PRESS;
             rbDown = button == GLFW.GLFW_MOUSE_BUTTON_2 && action == GLFW.GLFW_PRESS;
         });
@@ -69,8 +68,8 @@ public class MouseInput {
     }
 
     public Vector2d getMousePositionInViewport(){
-        double mousePositionX = 1.0 / Launcher.getWindow().getWidth() * currentPosition.x;
-        double mousePositionY = 1.0 / Launcher.getWindow().getHeight() * currentPosition.y;
+        double mousePositionX = 1.0 / window.getWidth() * currentPosition.x;
+        double mousePositionY = 1.0 / window.getHeight() * currentPosition.y;
 
         return new Vector2d(mousePositionX, mousePositionY);
     }
@@ -80,14 +79,14 @@ public class MouseInput {
     }
 
     public void hide(){
-        if (GLFW.glfwGetInputMode(Launcher.getWindow().getWindow(), GLFW.GLFW_CURSOR) != GLFW.GLFW_CURSOR_DISABLED) {
-            GLFW.glfwSetInputMode(Launcher.getWindow().getWindow(), GLFW.GLFW_CURSOR, GLFW.GLFW_CURSOR_DISABLED);
+        if (GLFW.glfwGetInputMode(windowLong, GLFW.GLFW_CURSOR) != GLFW.GLFW_CURSOR_DISABLED) {
+            GLFW.glfwSetInputMode(windowLong, GLFW.GLFW_CURSOR, GLFW.GLFW_CURSOR_DISABLED);
         }
     }
 
     public void show(){
-        if (GLFW.glfwGetInputMode(Launcher.getWindow().getWindow(), GLFW.GLFW_CURSOR) != GLFW.GLFW_CURSOR_NORMAL) {
-            GLFW.glfwSetInputMode(Launcher.getWindow().getWindow(), GLFW.GLFW_CURSOR, GLFW.GLFW_CURSOR_NORMAL);
+        if (GLFW.glfwGetInputMode(windowLong, GLFW.GLFW_CURSOR) != GLFW.GLFW_CURSOR_NORMAL) {
+            GLFW.glfwSetInputMode(windowLong, GLFW.GLFW_CURSOR, GLFW.GLFW_CURSOR_NORMAL);
         }
     }
 }

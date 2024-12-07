@@ -1,6 +1,5 @@
 package nl.jenoah.core.rendering;
 
-import game.Launcher;
 import nl.jenoah.core.ModelManager;
 import nl.jenoah.core.WindowManager;
 import nl.jenoah.core.entity.Model;
@@ -21,11 +20,10 @@ public class PostProcessing {
     private static PPFXVerticalBlurEffect verticalBlurEffectPass1;
     private static PPFXBrightEffect brightEffect;
     private static PPFXCombineEffect combineEffect;
-    private static WindowManager window;
 
     public static void init(){
         quad = getQuad();
-        window = Launcher.getWindow();
+        WindowManager window = WindowManager.getInstance();
 
         //Blurring
         horizontalBlurEffectPass1 = new PPFXHorizontalBlurEffect(window.getWidth() / bloomSize, window.getHeight() / bloomSize);

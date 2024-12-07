@@ -1,6 +1,5 @@
 package nl.jenoah.core.skybox;
 
-import game.Launcher;
 import nl.jenoah.core.Camera;
 import nl.jenoah.core.entity.SceneManager;
 import nl.jenoah.core.shaders.Shader;
@@ -8,8 +7,6 @@ import nl.jenoah.core.utils.Constants;
 import nl.jenoah.core.utils.Transformation;
 import nl.jenoah.core.utils.Utils;
 import org.joml.Matrix4f;
-import org.joml.Vector2f;
-import org.joml.Vector3f;
 
 public class SkyboxShader extends Shader {
 
@@ -38,7 +35,7 @@ public class SkyboxShader extends Shader {
         viewMatrix.m30(0);
         viewMatrix.m31(0);
         viewMatrix.m32(0);
-        Matrix4f projectionMatrix = Launcher.getWindow().getProjectionMatrix();
+        Matrix4f projectionMatrix = window.getProjectionMatrix();
 
         setUniform("gamma", Constants.GAMMA);
         setUniform("viewMatrix", viewMatrix);

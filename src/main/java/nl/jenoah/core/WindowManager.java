@@ -18,7 +18,8 @@ public class WindowManager {
     private int width, height;
     private long window;
 
-    private boolean resize, vSync;
+    private boolean resize;
+    private final boolean vSync;
 
     private final Matrix4f projectionMatrix;
 
@@ -28,6 +29,18 @@ public class WindowManager {
         this.height = height;
         this.vSync = vSync;
         projectionMatrix = new Matrix4f();
+        instance = this;
+    }
+
+    private static WindowManager instance = null;
+
+    public static synchronized WindowManager getInstance()
+    {
+        if (instance == null) {
+            Debug.Log("Window manager not set");
+        }
+
+        return instance;
     }
 
     public void init(){

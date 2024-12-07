@@ -1,7 +1,5 @@
 package nl.jenoah.core;
 
-import game.Launcher;
-import nl.jenoah.core.utils.Constants;
 import org.lwjgl.glfw.GLFW;
 import org.lwjgl.glfw.GLFWErrorCallback;
 
@@ -12,7 +10,6 @@ public class EngineManager {
 
     private static int fps;
     private static int currentFrameCount = 0;
-    private static float frameTime = 1.0f / FRAMERATE;
 
     private boolean isRunning;
 
@@ -21,18 +18,18 @@ public class EngineManager {
     private ILogic gameLogic;
     private MouseInput mouseInput;
 
-    private void init() throws Exception{
+    private void init(ILogic gameLogic) throws Exception{
         GLFW.glfwSetErrorCallback(errorCallback = GLFWErrorCallback.createPrint(System.err));
-        window = Launcher.getWindow();
-        gameLogic = Launcher.getGame();
+        window =  WindowManager.getInstance();
+        this.gameLogic = gameLogic;
         mouseInput = new MouseInput();
         window.init();
         gameLogic.init();
         mouseInput.init();
     }
 
-    public void start() throws Exception{
-        init();
+    public void start(ILogic gameLogic) throws Exception{
+        init(gameLogic);
         if(isRunning)
             return;
         System.out.println("Starting Engine...");
@@ -56,6 +53,7 @@ public class EngineManager {
             unprocessedTime += passedTime / (double)NANOSECOND;
             frameCounter += passedTime;
 
+            float frameTime = 1.0f / FRAMERATE;
             while(unprocessedTime > frameTime){
                 render = true;
                 unprocessedTime -= frameTime;
