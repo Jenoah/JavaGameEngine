@@ -121,6 +121,9 @@ public class Level0 extends Scene {
 
         resolutionLabel = new GUIText("Resolution: x", 1f, jetbrainFontType, new Vector2f(0.03f, 0.125f), 0.25f, false);
         addText(resolutionLabel);
+
+        GUIText instructionLabel = new GUIText(" Move: WASD + Q and E \nRotate: RMB + move mouse \nHigher speed: Left shift", 1f, jetbrainFontType, new Vector2f(0.03f, 0.16f), 0.25f, false);
+        addText(instructionLabel);
     }
 
     @Override
