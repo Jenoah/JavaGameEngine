@@ -13,8 +13,7 @@ uniform mat4 modelMatrix;
 uniform mat4 viewMatrix;
 uniform mat4 projectionMatrix;
 uniform float fogDensity;
-
-const float fogGradient = 1.5;
+uniform float fogGradient;
 
 void main(){
     vec4 worldPosition = modelMatrix * vec4(position, 1.0);

@@ -9,7 +9,6 @@ import java.nio.IntBuffer;
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.lwjgl.opengl.GL12.GL_CLAMP_TO_EDGE;
 import static org.lwjgl.stb.STBImage.stbi_set_flip_vertically_on_load;
 
 public class TextureLoader {
@@ -47,18 +46,16 @@ public class TextureLoader {
         GL11.glBindTexture(GL11.GL_TEXTURE_2D, id);
         GL11.glPixelStorei(GL11.GL_UNPACK_ALIGNMENT, 1);
 
-        int format;
+        int format = GL30.GL_SRGB_ALPHA;
         if (comp.get() == 3) {
             if ((width & 3) != 0) {
                 GL11.glPixelStorei(GL11.GL_UNPACK_ALIGNMENT, 2 - (width & 1));
             }
-            format = GL11.GL_RGB;
             alphaFormat = GL11.GL_RGB;
         } else {
             GL11.glEnable(GL11.GL_BLEND);
             GL11.glBlendFunc(GL11.GL_ONE, GL11.GL_ONE_MINUS_SRC_ALPHA);
 
-            format = GL30.GL_SRGB_ALPHA;
             alphaFormat = GL11.GL_RGBA;
         }
 
@@ -131,7 +128,7 @@ public class TextureLoader {
 
     private static TextureData getTextureData(String fileName){
             ByteBuffer imageBuffer;
-            int width, height, alphaFormat;
+            int width, height;
             IntBuffer comp;
 
             try(MemoryStack stack = MemoryStack.stackPush()){

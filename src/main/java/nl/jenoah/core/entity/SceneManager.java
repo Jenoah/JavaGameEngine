@@ -1,6 +1,5 @@
 package nl.jenoah.core.entity;
 
-import nl.jenoah.core.ModelManager;
 import nl.jenoah.core.debugging.Debug;
 import org.joml.Vector3f;
 
@@ -12,6 +11,7 @@ public class SceneManager {
     private Scene currentScene = null;
     public static Vector3f fogColor = new Vector3f(1);
     public static float fogDensity = 0.01f;
+    public static float fogGradient = 15f;
 
     private static SceneManager instance = null;
 
@@ -44,6 +44,7 @@ public class SceneManager {
         this.currentScene = scenes.get(sceneIndex);
         fogColor = currentScene.getFogColor();
         fogDensity = currentScene.getFogDensity();
+        fogGradient = currentScene.getFogGradient();
         Debug.Log("Loading " + currentScene.getLevelName());
     }
 

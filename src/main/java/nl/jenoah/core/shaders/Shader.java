@@ -56,6 +56,7 @@ public class Shader {
         createUniform("projectionMatrix");
         createUniform("fogColor");
         createUniform("fogDensity");
+        createUniform("fogGradient");
     }
 
     public void createVertexShader(String shaderCode) throws Exception{
@@ -98,6 +99,7 @@ public class Shader {
         shader.setUniform("projectionMatrix", window.getProjectionMatrix());
         shader.setUniform("fogColor", SceneManager.fogColor);
         shader.setUniform("fogDensity", SceneManager.fogDensity);
+        shader.setUniform("fogGradient", SceneManager.fogGradient);
     }
 
     public void prepare(){

@@ -32,6 +32,7 @@ public class UnlitShader extends Shader{
         createUniform("projectionMatrix");
         createUniform("fogColor");
         createUniform("fogDensity");
+        createUniform("fogGradient");
     }
 
     @Override
@@ -49,5 +50,6 @@ public class UnlitShader extends Shader{
         shader.setUniform("projectionMatrix", window.getProjectionMatrix());
         shader.setUniform("fogColor", SceneManager.fogColor);
         shader.setUniform("fogDensity", SceneManager.fogDensity);
+        shader.setUniform("fogGradient", SceneManager.fogGradient);
     }
 }

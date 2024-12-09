@@ -24,6 +24,7 @@ public class Scene {
     private final Map<FontType, List<GUIText>> textObjects;
     private Vector3f fogColor = new Vector3f(1);
     private float fogDensity = 0.01f;
+    private float fogGradient = 15f;
 
     protected Player player;
 
@@ -33,7 +34,6 @@ public class Scene {
     private SpotLight[] spotLights = new SpotLight[0];
     private DirectionalLight directionalLight;
 
-    protected ModelManager modelManager;
     protected final WindowManager windowManager;
 
     protected String levelName = "Undefined Scene";
@@ -220,7 +220,15 @@ public class Scene {
         return fogDensity;
     }
 
+    public float getFogGradient() {
+        return fogGradient;
+    }
+
     public void setFogDensity(float fogDensity) {
         this.fogDensity = fogDensity;
+    }
+
+    public void setFogGradient(float fogGradient){
+        this.fogGradient = fogGradient;
     }
 }

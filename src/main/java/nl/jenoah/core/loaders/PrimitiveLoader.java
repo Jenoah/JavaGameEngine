@@ -4,6 +4,7 @@ import nl.jenoah.core.ModelManager;
 import nl.jenoah.core.entity.Model;
 
 public class PrimitiveLoader {
+    private static float textureScale = 1f;
 
     public static Model getQuad(){
         float[] vertices = new float[]{
@@ -29,7 +30,18 @@ public class PrimitiveLoader {
                 0.0f, 0.0f, 1.0f  // Bottom-left
         };
 
+        for (int i = 0; i < textureCoords.length; i++) {
+            textureCoords[i] *= textureScale;
+        }
+
+        textureScale = 1;
+
         return PrimitiveLoader.loadModel(vertices, textureCoords, indices, normals);
+    }
+
+    public static Model getQuad(float textureScale){
+        PrimitiveLoader.textureScale = textureScale;
+        return getQuad();
     }
 
     public static Model getCube() {

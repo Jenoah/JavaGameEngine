@@ -1,7 +1,6 @@
 package game.demo;
 
 import nl.jenoah.core.EngineManager;
-import nl.jenoah.core.ModelManager;
 import nl.jenoah.core.MouseInput;
 import nl.jenoah.core.entity.*;
 import nl.jenoah.core.fonts.fontMeshCreator.FontType;
@@ -38,33 +37,34 @@ public class Level0 extends Scene {
         super.init();
         levelName = "Level 0";
         setFogColor(new Vector3f(0.6f, 0.65f, .8f));
-        setFogDensity(.01f);
+        setFogDensity(.025f);
+        setFogGradient(5f);
+
+        //Textures
+        Texture blockPaletteTexture = new Texture(TextureLoader.loadTexture("textures/blockPallete.png"));
+        Texture barnTexture = new Texture(TextureLoader.loadTexture("textures/barn.png"));
 
         //Models
-        Model barnModel = OBJLoader.loadOBJModel("/models/barn.obj");
-        barnModel.setTexture(new Texture(TextureLoader.loadTexture("textures/barn.png")), 32f);
+        Model barnModel = OBJLoader.loadOBJModel("/models/barn.obj", barnTexture);
         Entity barn = new Entity(barnModel, new Vector3f(0, -1f, -10f), new Vector3f(0, 0, 0), 1f);
         addEntity(barn);
 
-        Model monkModel = OBJLoader.loadOBJModel("/models/monk.obj");
-        monkModel.setTexture(new Texture(TextureLoader.loadTexture("textures/blockPallete.png")), 32f);
+        Model monkModel = OBJLoader.loadOBJModel("/models/monk.obj", blockPaletteTexture);
         Entity monk = new Entity(monkModel, new Vector3f(0, 0.5f, -10f), new Vector3f(0, 0, 0), 1);
         addEntity(monk);
 
-        Model pointLightProxyModel = OBJLoader.loadOBJModel("/models/cube.obj");
-        pointLightProxyModel.setTexture(new Texture(TextureLoader.loadTexture("textures/blockPallete.png")), .8f);
+        Model pointLightProxyModel = OBJLoader.loadOBJModel("/models/cube.obj", blockPaletteTexture);
         proxyEntity = new Entity(pointLightProxyModel, new Vector3f(0, 0.5f, -7f), new Vector3f(0, 0, 0), .1f);
         addEntity(proxyEntity);
 
-        Texture lightProxyTexture = new Texture(TextureLoader.loadTexture("textures/barn.png", false, false));
-        Billboard lightProxy = new Billboard(PrimitiveLoader.getQuad(), lightProxyTexture, 0.1f);
+        Billboard lightProxy = new Billboard(PrimitiveLoader.getQuad(), barnTexture, 0.1f);
         lightProxy.setPosition(new Vector3f(0, 1f ,0));
         addEntity(lightProxy);
         lightProxy.setParent(proxyEntity);
 
-        Model groundModel = PrimitiveLoader.getQuad();
-        groundModel.setTexture(new Texture(TextureLoader.loadTexture("sprites/square.png")), 1f);
-        groundModel.getMaterial().setAmbientColor(new Vector4f(0.3f, 0.75f, 0.15f, 1));
+        Model groundModel = PrimitiveLoader.getQuad(8);
+        groundModel.setTexture(new Texture("textures/dirt.jpg"));
+        groundModel.getMaterial().setAmbientColor(new Vector4f(.5f, .5f, .5f, 1f));
         Entity groundEntity = new Entity(groundModel, new Vector3f(0, -1, 0), new Vector3f(-90, 0, 0), 20);
         addEntity(groundEntity);
 
@@ -100,14 +100,12 @@ public class Level0 extends Scene {
         addSpotLight(spotLight1);
         addSpotLight(spotLight2);
 
-
-
         ShaderManager.getInstance().getLitShader().setLights(getDirectionalLight(), getPointLights(), getSpotLights());
 
         addGameObject(player);
 
         //UI
-        GuiObject testSprite = new GuiObject(TextureLoader.loadTexture("sprites/square.png", true), new Vector2f(-.7f, .7f), new Vector2f(.25f));
+        GuiObject testSprite = new GuiObject(new Vector2f(-.7125f, .675f), new Vector2f(.25f, .275f));
         testSprite.setColor(new Vector4f(0.1f, 0.1f, 0.1f, 0.7f));
         addGUI(testSprite);
 
@@ -125,7 +123,7 @@ public class Level0 extends Scene {
         resolutionLabel = new GUIText("Resolution: x", 1f, jetbrainFontType, new Vector2f(0.03f, 0.125f), 0.25f, false);
         addText(resolutionLabel);
 
-        GUIText instructionLabel = new GUIText(" Move: WASD + Q and E \nRotate: RMB + move mouse \nHigher speed: Left shift", 1f, jetbrainFontType, new Vector2f(0.03f, 0.16f), 0.25f, false);
+        GUIText instructionLabel = new GUIText(" Move: WASD + Q and E \nRotate: RMB + move mouse \nHigher speed: Left shift \nMove light: UP / DOWN arrows", 1f, jetbrainFontType, new Vector2f(0.03f, 0.16f), 0.25f, false);
         addText(instructionLabel);
     }
 

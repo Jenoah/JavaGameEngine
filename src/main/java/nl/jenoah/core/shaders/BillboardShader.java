@@ -30,6 +30,7 @@ public class BillboardShader extends Shader{
         createUniform("projectionMatrix");
         createUniform("fogColor");
         createUniform("fogDensity");
+        createUniform("fogGradient");
     }
 
     @Override
@@ -45,5 +46,6 @@ public class BillboardShader extends Shader{
         shader.setUniform("textureSampler", 0);
         shader.setUniform("fogColor", SceneManager.fogColor);
         shader.setUniform("fogDensity", SceneManager.fogDensity);
+        shader.setUniform("fogGradient", SceneManager.fogGradient);
     }
 }

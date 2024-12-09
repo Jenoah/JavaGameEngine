@@ -10,8 +10,7 @@ uniform mat4 projectionMatrix;
 uniform mat4 viewMatrix;
 uniform vec3 objectPosition;
 uniform float fogDensity;
-
-const float fogGradient = 1.5;
+uniform float fogGradient;
 
 void main(){
     vec3 cameraRight = vec3(viewMatrix[0][0], viewMatrix[1][0], viewMatrix[2][0]); // Right vector

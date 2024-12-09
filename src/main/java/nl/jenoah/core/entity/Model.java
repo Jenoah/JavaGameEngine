@@ -1,6 +1,5 @@
 package nl.jenoah.core.entity;
 
-import nl.jenoah.core.ModelManager;
 import nl.jenoah.core.loaders.TextureLoader;
 import nl.jenoah.core.shaders.ShaderManager;
 

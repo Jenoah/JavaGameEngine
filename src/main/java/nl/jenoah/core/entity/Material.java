@@ -10,7 +10,7 @@ public class Material {
     private Vector4f diffuseColor;
     private Vector4f specularColor;
 
-    private float reflectance;
+    private float reflectance = 32;
     private Texture texture;
 
     private Shader shader;
@@ -21,7 +21,6 @@ public class Material {
         this.specularColor = Constants.DEFAULT_COLOR;
         this.texture = null;
         this.shader = shader;
-        reflectance = 0;
     }
 
     public Material(Shader shader, Vector4f color, float reflectance){

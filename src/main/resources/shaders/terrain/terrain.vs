@@ -15,8 +15,8 @@ uniform mat4 modelMatrix;
 uniform mat4 viewMatrix;
 uniform mat4 projectionMatrix;
 uniform float fogDensity;
+uniform float fogGradient;
 
-const float fogGradient = 1.5;
 const vec3 bottomColor = vec3(1, .75, .3);
 const vec3 middleColor = vec3(0, .75, .3);
 const vec3 topColor = vec3(.8, .8, .8);
