@@ -13,44 +13,17 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class ModelManager {
-    private List<Integer> vaos = new ArrayList<>();
-    private List<Integer> vbos = new ArrayList<>();
+    private static List<Integer> vaos = new ArrayList<>();
+    private static List<Integer> vbos = new ArrayList<>();
 
-    private OBJLoader objLoader;
-    private TextureLoader textureLoader = new TextureLoader();
-    private PrimitiveLoader primitiveLoader;
-    private RAWLoader rawLoader;
-    private GUILoader guiLoader;
-    private FontLoader fontLoader;
-
-    private static ModelManager instance = null;
-
-    public static synchronized ModelManager getInstance()
-    {
-        if (instance == null) {
-            instance = new ModelManager();
-            instance.init();
-        }
-
-        return instance;
-    }
-
-    private void init(){
-        objLoader = new OBJLoader();
-        primitiveLoader = new PrimitiveLoader();
-        rawLoader = new RAWLoader();
-        guiLoader = new GUILoader();
-        fontLoader = new FontLoader();
-    }
-
-    public int createVAO(){
+    public static int createVAO(){
         int id = GL30.glGenVertexArrays();
         vaos.add(id);
         GL30.glBindVertexArray(id);
         return id;
     }
 
-    public void StoreIndicesBuffer(int[] indices){
+    public static void StoreIndicesBuffer(int[] indices){
         int vbo = GL15.glGenBuffers();
         vbos.add(vbo);
         GL30.glBindBuffer(GL30.GL_ELEMENT_ARRAY_BUFFER, vbo);
@@ -58,7 +31,7 @@ public class ModelManager {
         GL30.glBufferData(GL30.GL_ELEMENT_ARRAY_BUFFER, buffer, GL30.GL_STATIC_DRAW);
     }
 
-    public void storeDataInAttributeList(int attributeNumber, int vertexCount, float[] data){
+    public static void storeDataInAttributeList(int attributeNumber, int vertexCount, float[] data){
         int vbo = GL15.glGenBuffers();
         vbos.add(vbo);
         GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, vbo);
@@ -68,40 +41,16 @@ public class ModelManager {
         GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, 0);
     }
 
-    public void unbind(){
+    public static void unbind(){
         GL30.glBindVertexArray(0);
     }
 
-    public void cleanUp(){
+    public static void cleanUp(){
         for(int vao: vaos){
             GL30.glDeleteVertexArrays(vao);
         }for(int vbo: vbos){
             GL30.glDeleteBuffers(vbo);
         }
-        textureLoader.cleanUp();
-    }
-
-    public OBJLoader getObjLoader() {
-        return objLoader;
-    }
-
-    public PrimitiveLoader getPrimitiveLoader() {
-        return primitiveLoader;
-    }
-
-    public RAWLoader getRAWLoader() {
-        return rawLoader;
-    }
-
-    public TextureLoader getTextureLoader() {
-        return textureLoader;
-    }
-
-    public GUILoader getGuiLoader(){
-        return guiLoader;
-    }
-
-    public FontLoader getFontLoader() {
-        return fontLoader;
+        TextureLoader.cleanUp();
     }
 }

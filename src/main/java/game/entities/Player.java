@@ -5,6 +5,7 @@ import nl.jenoah.core.ModelManager;
 import nl.jenoah.core.MouseInput;
 import nl.jenoah.core.WindowManager;
 import nl.jenoah.core.entity.*;
+import nl.jenoah.core.loaders.OBJLoader;
 import nl.jenoah.core.shaders.ShaderManager;
 import nl.jenoah.core.utils.Constants;
 import org.joml.Quaternionf;
@@ -29,7 +30,7 @@ public class Player extends GameObject {
         this.camera.setParent(this);
         moveDelta = new Vector3f(0, 0, 0);
 
-        Model pointLightProxyModel = ModelManager.getInstance().getObjLoader().loadOBJModel("/models/cube.obj");
+        Model pointLightProxyModel = OBJLoader.loadOBJModel("/models/cube.obj");
         pointLightProxyModel.setTexture(null);
         Entity feet = new Entity(pointLightProxyModel, new Vector3f(0, -1f, 0), new Vector3f(0, 0, 0), .1f);
         feet.getModel().setMaterial(new Material(ShaderManager.getInstance().getUnlitShader()));

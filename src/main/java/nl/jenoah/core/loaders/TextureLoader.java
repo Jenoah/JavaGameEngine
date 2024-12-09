@@ -14,11 +14,12 @@ import static org.lwjgl.stb.STBImage.stbi_set_flip_vertically_on_load;
 
 public class TextureLoader {
 
-    private final List<Integer> textures = new ArrayList<>();
-    private boolean flipTexture = true;
-    private boolean pointFilter = false;
+    private static final List<Integer> textures = new ArrayList<>();
+    private static boolean flipTexture = true;
+    private static boolean pointFilter = false;
+    private static boolean repeatTexture = true;
 
-    public int loadTexture(String fileName){
+    public static int loadTexture(String fileName){
         ByteBuffer imageBuffer;
         int width, height, alphaFormat;
         IntBuffer comp;
@@ -67,8 +68,14 @@ public class TextureLoader {
 
         GL30.glGenerateMipmap(GL11.GL_TEXTURE_2D);
 
-        GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_WRAP_S, GL12.GL_CLAMP_TO_EDGE); // or GL_CLAMP_TO_EDGE
-        GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_WRAP_T, GL12.GL_REPEAT); // or GL_CLAMP_TO_EDGE
+
+        if(repeatTexture) {
+            GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_WRAP_T, GL12.GL_REPEAT); // or GL_CLAMP_TO_EDGE
+            GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_WRAP_S, GL12.GL_REPEAT); // or GL_CLAMP_TO_EDGE
+        }else{
+            GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_WRAP_T, GL12.GL_CLAMP_TO_EDGE); // or GL_CLAMP_TO_EDGE
+            GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_WRAP_S, GL12.GL_CLAMP_TO_EDGE); // or GL_CLAMP_TO_EDGE
+        }
 
         if(pointFilter) {
             GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MIN_FILTER, GL11.GL_NEAREST_MIPMAP_LINEAR);
@@ -85,24 +92,32 @@ public class TextureLoader {
         return id;
     }
 
-    public int loadTexture(String fileName, boolean pointFilter){
-        this.pointFilter = pointFilter;
+    public static int loadTexture(String fileName, boolean pointFilter){
+        TextureLoader.pointFilter = pointFilter;
         return loadTexture(fileName);
     }
 
-    public int loadTexture(String fileName, boolean pointFilter, boolean flipTexture){
-        this.pointFilter = pointFilter;
-        this.flipTexture = flipTexture;
+
+    public static int loadTexture(String fileName, boolean pointFilter, boolean flipTexture){
+        TextureLoader.pointFilter = pointFilter;
+        TextureLoader.flipTexture = flipTexture;
         return loadTexture(fileName);
     }
 
-    public int loadCubeMapTexture(String[] fileNames){
+    public static int loadTexture(String fileName, boolean pointFilter, boolean flipTexture, boolean repeatTexture){
+        TextureLoader.pointFilter = pointFilter;
+        TextureLoader.repeatTexture = repeatTexture;
+        TextureLoader.flipTexture = flipTexture;
+        return loadTexture(fileName);
+    }
+
+    public static int loadCubeMapTexture(String[] fileNames){
         int textureID = GL11.glGenTextures();
         GL13.glActiveTexture(GL13.GL_TEXTURE0);
         GL11.glBindTexture(GL13.GL_TEXTURE_CUBE_MAP, textureID);
 
         for(int i = 0; i < fileNames.length; i++){
-            TextureData data = getTextureData(fileNames[i]);
+            TextureData data = TextureLoader.getTextureData(fileNames[i]);
             GL11.glTexImage2D(GL13.GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL11.GL_RGBA, data.getWidth(), data.getHeight(), 0, GL11.GL_RGBA, GL11.GL_UNSIGNED_BYTE, data.buffer);
         }
         GL11.glTexParameteri(GL13.GL_TEXTURE_CUBE_MAP, GL11.GL_TEXTURE_MAG_FILTER, GL11.GL_LINEAR);
@@ -114,7 +129,7 @@ public class TextureLoader {
         return textureID;
     }
 
-    private TextureData getTextureData(String fileName){
+    private static TextureData getTextureData(String fileName){
             ByteBuffer imageBuffer;
             int width, height, alphaFormat;
             IntBuffer comp;
@@ -141,13 +156,13 @@ public class TextureLoader {
     }
 
 
-    public void cleanUp(){
+    public static void cleanUp(){
         for(int texture: textures){
             GL11.glDeleteTextures(texture);
         }
     }
 
-    private class TextureData{
+    private static class TextureData{
         private int width, height;
         private ByteBuffer buffer;
 

@@ -28,7 +28,7 @@ public class RenderManager {
         entityRenderer = new EntityRenderer();
         transparentEntityRenderer = new EntityRenderer();
 
-        guiRenderer = new GuiRenderer(ModelManager.getInstance().getGuiLoader());
+        guiRenderer = new GuiRenderer();
         fontRenderer = new FontRenderer();
         skyboxRenderer = new SkyboxRenderer(new String[]{"textures/skyboxes/clouds1/right.png", "textures/skyboxes/clouds1/left.png", "textures/skyboxes/clouds1/top.png", "textures/skyboxes/clouds1/bottom.png", "textures/skyboxes/clouds1/back.png", "textures/skyboxes/clouds1/front.png"});
 

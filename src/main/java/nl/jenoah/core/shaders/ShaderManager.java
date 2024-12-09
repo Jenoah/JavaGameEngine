@@ -8,6 +8,7 @@ public class ShaderManager {
     TerrainShader terrainShader;
     UnlitShader unlitShader;
     BillboardShader billboardShader;
+    TriplanarShader triplanarShader;
 
     private static ShaderManager instance = null;
 
@@ -37,6 +38,8 @@ public class ShaderManager {
         return terrainShader;
     }
 
+    public TriplanarShader getTriplanarShader() { return triplanarShader; }
+
     public void init(){
         try {
             litShader = new BlinnPhongShader();
@@ -50,6 +53,9 @@ public class ShaderManager {
 
             terrainShader = new TerrainShader();
             terrainShader.init();
+
+            triplanarShader = new TriplanarShader();
+            triplanarShader.init();
         } catch (Exception e) {
             throw new RuntimeException(e);
         }

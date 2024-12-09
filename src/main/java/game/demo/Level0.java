@@ -10,6 +10,9 @@ import nl.jenoah.core.gui.GuiObject;
 import nl.jenoah.core.lighting.DirectionalLight;
 import nl.jenoah.core.lighting.PointLight;
 import nl.jenoah.core.lighting.SpotLight;
+import nl.jenoah.core.loaders.OBJLoader;
+import nl.jenoah.core.loaders.PrimitiveLoader;
+import nl.jenoah.core.loaders.TextureLoader;
 import nl.jenoah.core.shaders.ShaderManager;
 import nl.jenoah.core.utils.Calculus;
 import nl.jenoah.core.utils.Conversion;
@@ -38,29 +41,29 @@ public class Level0 extends Scene {
         setFogDensity(.01f);
 
         //Models
-        Model barnModel = modelManager.getObjLoader().loadOBJModel("/models/barn.obj");
-        barnModel.setTexture(new Texture(modelManager.getTextureLoader().loadTexture("textures/barn.png")), 32f);
+        Model barnModel = OBJLoader.loadOBJModel("/models/barn.obj");
+        barnModel.setTexture(new Texture(TextureLoader.loadTexture("textures/barn.png")), 32f);
         Entity barn = new Entity(barnModel, new Vector3f(0, -1f, -10f), new Vector3f(0, 0, 0), 1f);
         addEntity(barn);
 
-        Model monkModel = modelManager.getObjLoader().loadOBJModel("/models/monk.obj");
-        monkModel.setTexture(new Texture(modelManager.getTextureLoader().loadTexture("textures/blockPallete.png")), 32f);
+        Model monkModel = OBJLoader.loadOBJModel("/models/monk.obj");
+        monkModel.setTexture(new Texture(TextureLoader.loadTexture("textures/blockPallete.png")), 32f);
         Entity monk = new Entity(monkModel, new Vector3f(0, 0.5f, -10f), new Vector3f(0, 0, 0), 1);
         addEntity(monk);
 
-        Model pointLightProxyModel = modelManager.getObjLoader().loadOBJModel("/models/cube.obj");
-        pointLightProxyModel.setTexture(new Texture(modelManager.getTextureLoader().loadTexture("textures/blockPallete.png")), .8f);
+        Model pointLightProxyModel = OBJLoader.loadOBJModel("/models/cube.obj");
+        pointLightProxyModel.setTexture(new Texture(TextureLoader.loadTexture("textures/blockPallete.png")), .8f);
         proxyEntity = new Entity(pointLightProxyModel, new Vector3f(0, 0.5f, -7f), new Vector3f(0, 0, 0), .1f);
         addEntity(proxyEntity);
 
-        Texture lightProxyTexture = new Texture(modelManager.getTextureLoader().loadTexture("textures/barn.png", false, false));
-        Billboard lightProxy = new Billboard(modelManager.getPrimitiveLoader().getQuad(), lightProxyTexture, 0.1f);
+        Texture lightProxyTexture = new Texture(TextureLoader.loadTexture("textures/barn.png", false, false));
+        Billboard lightProxy = new Billboard(PrimitiveLoader.getQuad(), lightProxyTexture, 0.1f);
         lightProxy.setPosition(new Vector3f(0, 1f ,0));
         addEntity(lightProxy);
         lightProxy.setParent(proxyEntity);
 
-        Model groundModel = modelManager.getPrimitiveLoader().getQuad();
-        groundModel.setTexture(new Texture(modelManager.getTextureLoader().loadTexture("sprites/square.png")), 1f);
+        Model groundModel = PrimitiveLoader.getQuad();
+        groundModel.setTexture(new Texture(TextureLoader.loadTexture("sprites/square.png")), 1f);
         groundModel.getMaterial().setAmbientColor(new Vector4f(0.3f, 0.75f, 0.15f, 1));
         Entity groundEntity = new Entity(groundModel, new Vector3f(0, -1, 0), new Vector3f(-90, 0, 0), 20);
         addEntity(groundEntity);
@@ -104,12 +107,12 @@ public class Level0 extends Scene {
         addGameObject(player);
 
         //UI
-        GuiObject testSprite = new GuiObject(ModelManager.getInstance().getTextureLoader().loadTexture("sprites/square.png", true), new Vector2f(-.7f, .7f), new Vector2f(.25f));
+        GuiObject testSprite = new GuiObject(TextureLoader.loadTexture("sprites/square.png", true), new Vector2f(-.7f, .7f), new Vector2f(.25f));
         testSprite.setColor(new Vector4f(0.1f, 0.1f, 0.1f, 0.7f));
         addGUI(testSprite);
 
         //Text
-        FontType jetbrainFontType = new FontType(ModelManager.getInstance().getTextureLoader().loadTexture("fonts/jetbrains/jetbrains.png", false, false), new File("fonts/jetbrains/jetbrains.fnt"));
+        FontType jetbrainFontType = new FontType(TextureLoader.loadTexture("fonts/jetbrains/jetbrains.png", false, false), new File("fonts/jetbrains/jetbrains.fnt"));
         GUIText statusLabel = new GUIText("Stats", 1.25f, jetbrainFontType, new Vector2f(0.03f, 0.03f), 0.25f, false);
         addText(statusLabel);
 

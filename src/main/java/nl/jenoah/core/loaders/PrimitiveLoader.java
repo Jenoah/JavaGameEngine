@@ -4,13 +4,8 @@ import nl.jenoah.core.ModelManager;
 import nl.jenoah.core.entity.Model;
 
 public class PrimitiveLoader {
-    private ModelManager modelManager;
 
-    public PrimitiveLoader(){
-        this.modelManager = ModelManager.getInstance();
-    }
-
-    public Model getQuad(){
+    public static Model getQuad(){
         float[] vertices = new float[]{
                 -0.5f,  -0.5f, 0.0f, // Top-left
                 0.5f,  -0.5f, 0.0f, // Top-right
@@ -34,10 +29,10 @@ public class PrimitiveLoader {
                 0.0f, 0.0f, 1.0f  // Bottom-left
         };
 
-        return loadModel(vertices, textureCoords, indices, normals);
+        return PrimitiveLoader.loadModel(vertices, textureCoords, indices, normals);
     }
 
-    public Model getCube() {
+    public static Model getCube() {
         // Define the vertices for the cube
         float[] vertices = new float[]{
                 // Front face
@@ -186,24 +181,24 @@ public class PrimitiveLoader {
     }
 
 
-    public Model loadModel(float[] vertices, float[] textureCoords, int[] indices, float[] normals){
-        int id = modelManager.createVAO();
+    public static Model loadModel(float[] vertices, float[] textureCoords, int[] indices, float[] normals){
+        int id = ModelManager.createVAO();
 
-        modelManager.StoreIndicesBuffer(indices);
-        modelManager.storeDataInAttributeList(0, 3, vertices);
-        modelManager.storeDataInAttributeList(1, 2, textureCoords);
-        modelManager.storeDataInAttributeList(2, 3, normals);
+        ModelManager.StoreIndicesBuffer(indices);
+        ModelManager.storeDataInAttributeList(0, 3, vertices);
+        ModelManager.storeDataInAttributeList(1, 2, textureCoords);
+        ModelManager.storeDataInAttributeList(2, 3, normals);
 
-        modelManager.unbind();
+        ModelManager.unbind();
         return new Model(id, indices.length);
     }
 
-    public Model loadModel(float[] vertices){
-        int id = modelManager.createVAO();
+    public static Model loadModel(float[] vertices){
+        int id = ModelManager.createVAO();
 
-        modelManager.storeDataInAttributeList(0, 3, vertices);
+        ModelManager.storeDataInAttributeList(0, 3, vertices);
 
-        modelManager.unbind();
+        ModelManager.unbind();
         return new Model(id, vertices.length);
     }
 }

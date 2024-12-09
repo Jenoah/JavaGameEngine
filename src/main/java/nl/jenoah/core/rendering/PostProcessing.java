@@ -3,6 +3,7 @@ package nl.jenoah.core.rendering;
 import nl.jenoah.core.ModelManager;
 import nl.jenoah.core.WindowManager;
 import nl.jenoah.core.entity.Model;
+import nl.jenoah.core.loaders.PrimitiveLoader;
 import nl.jenoah.core.shaders.postProcessing.effects.*;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL20;
@@ -44,7 +45,7 @@ public class PostProcessing {
                 1, -1, 0.0f  // Bottom-left
         };
 
-        return ModelManager.getInstance().getPrimitiveLoader().loadModel(vertices);
+        return PrimitiveLoader.loadModel(vertices);
     }
 
     public static void render(int colourTexture){

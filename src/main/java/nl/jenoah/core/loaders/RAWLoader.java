@@ -4,28 +4,22 @@ import nl.jenoah.core.ModelManager;
 import nl.jenoah.core.entity.Model;
 
 public class RAWLoader {
-    private ModelManager modelManager;
+    public static Model loadModel(float[] vertices, float[] textureCoords, int[] indices, float[] normals){
+        int id = ModelManager.createVAO();
 
-    public RAWLoader(){
-        this.modelManager = ModelManager.getInstance();
-    }
+        ModelManager.StoreIndicesBuffer(indices);
+        ModelManager.storeDataInAttributeList(0, 3, vertices);
+        ModelManager.storeDataInAttributeList(1, 2, textureCoords);
+        ModelManager.storeDataInAttributeList(2, 3, normals);
 
-    public Model loadModel(float[] vertices, float[] textureCoords, int[] indices, float[] normals){
-        int id = modelManager.createVAO();
-
-        modelManager.StoreIndicesBuffer(indices);
-        modelManager.storeDataInAttributeList(0, 3, vertices);
-        modelManager.storeDataInAttributeList(1, 2, textureCoords);
-        modelManager.storeDataInAttributeList(2, 3, normals);
-
-        modelManager.unbind();
+        ModelManager.unbind();
         return new Model(id, indices.length);
     }
 
-    public Model loadModel(float[] vertices, int dimensions){
-        int id = modelManager.createVAO();
-        modelManager.storeDataInAttributeList(0, dimensions, vertices);
-        modelManager.unbind();
+    public static Model loadModel(float[] vertices, int dimensions){
+        int id = ModelManager.createVAO();
+        ModelManager.storeDataInAttributeList(0, dimensions, vertices);
+        ModelManager.unbind();
         return new Model(id, vertices.length / dimensions);
     }
 }

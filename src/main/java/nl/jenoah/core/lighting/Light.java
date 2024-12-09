@@ -2,6 +2,7 @@ package nl.jenoah.core.lighting;
 
 import nl.jenoah.core.ModelManager;
 import nl.jenoah.core.entity.*;
+import nl.jenoah.core.loaders.PrimitiveLoader;
 import nl.jenoah.core.shaders.ShaderManager;
 import org.joml.Vector3f;
 import org.joml.Vector4f;
@@ -83,7 +84,7 @@ public class Light extends GameObject {
 
     public void showProxy(){
         if(proxy == null){
-            Model lightProxyModel = new Model(ModelManager.getInstance().getPrimitiveLoader().getQuad(), "textures/lightDirection.png");
+            Model lightProxyModel = new Model(PrimitiveLoader.getQuad(), "textures/lightDirection.png");
             Material proxyMaterial = lightProxyModel.getMaterial();
             proxyMaterial.setShader(ShaderManager.getInstance().getUnlitShader());
             proxyMaterial.setAmbientColor(new Vector4f(color, 1));

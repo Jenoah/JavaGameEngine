@@ -8,7 +8,6 @@ import org.joml.Vector2f;
 public class TerrainShader extends BlinnPhongShader{
     private Vector2f terrainHeight = new Vector2f(-1, 1);
 
-
     public TerrainShader() throws Exception {
         super();
     }

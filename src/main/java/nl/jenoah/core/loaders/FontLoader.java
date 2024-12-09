@@ -4,19 +4,13 @@ import nl.jenoah.core.ModelManager;
 
 public class FontLoader {
 
-    private ModelManager modelManager;
+    public static int load(float[] positions, float[] textureCoords){
+        int id = ModelManager.createVAO();
 
-    public FontLoader(){
-        this.modelManager = ModelManager.getInstance();
-    }
+        ModelManager.storeDataInAttributeList(0, 2, positions);
+        ModelManager.storeDataInAttributeList(1, 2, textureCoords);
 
-    public int load(float[] positions, float[] textureCoords){
-        int id = modelManager.createVAO();
-
-        modelManager.storeDataInAttributeList(0, 2, positions);
-        modelManager.storeDataInAttributeList(1, 2, textureCoords);
-
-        modelManager.unbind();
+        ModelManager.unbind();
         return id;
     }
 

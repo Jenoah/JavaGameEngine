@@ -1,5 +1,7 @@
 package nl.jenoah.core.entity;
 
+import nl.jenoah.core.loaders.TextureLoader;
+
 public class Texture {
 
     private final int id;
@@ -10,5 +12,13 @@ public class Texture {
 
     public Texture(int id) {
         this.id = id;
+    }
+
+    public Texture(String texturePath){
+        this.id = TextureLoader.loadTexture(texturePath);
+    }
+
+    public Texture(String texturePath, boolean pointFilter){
+        this.id = TextureLoader.loadTexture(texturePath, pointFilter);
     }
 }

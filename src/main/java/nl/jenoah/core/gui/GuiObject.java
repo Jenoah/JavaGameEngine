@@ -18,6 +18,13 @@ public class GuiObject extends GameObject {
         this.setScale(scale.x, scale.y);
     }
 
+    public GuiObject(Vector2f position, Vector2f scale) {
+        super();
+        this.texture = -1;
+        this.setPosition(position.x, position.y);
+        this.setScale(scale.x, scale.y);
+    }
+
     public void setColor(Vector4f color){
         this.color = color;
     }

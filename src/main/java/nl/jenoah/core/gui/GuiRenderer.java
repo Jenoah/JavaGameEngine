@@ -14,7 +14,7 @@ public class GuiRenderer {
     private final Model quad;
     private GuiShader shader;
 
-    public GuiRenderer(GUILoader loader){
+    public GuiRenderer(){
         float[] positions = {
                 -1f, -1f,
                 1f, -1f,
@@ -23,7 +23,7 @@ public class GuiRenderer {
 
         };
 
-        quad = loader.load(positions);
+        quad = GUILoader.load(positions);
         try {
             shader = new GuiShader();
             shader.init();
@@ -41,8 +41,10 @@ public class GuiRenderer {
         for (GuiObject gui: guiObjects) {
             shader.prepare(gui);
             shader.setColor(gui.getColor());
-            GL13.glActiveTexture(GL13.GL_TEXTURE0);
-            GL11.glBindTexture(GL11.GL_TEXTURE_2D, gui.getTexture());
+            if(gui.getTexture() != -1) {
+                GL13.glActiveTexture(GL13.GL_TEXTURE0);
+                GL11.glBindTexture(GL11.GL_TEXTURE_2D, gui.getTexture());
+            }
             GL11.glDrawArrays(GL11.GL_TRIANGLE_STRIP, 0, 4);
         }
 

@@ -5,18 +5,12 @@ import nl.jenoah.core.entity.Model;
 
 public class GUILoader {
 
-    private ModelManager modelManager;
+    public static Model load(float[] position){
+        int id = ModelManager.createVAO();
 
-    public GUILoader(){
-        this.modelManager = ModelManager.getInstance();
-    }
+        ModelManager.storeDataInAttributeList(0, 2, position);
 
-    public Model load(float[] position){
-        int id = modelManager.createVAO();
-
-        modelManager.storeDataInAttributeList(0, 2, position);
-
-        modelManager.unbind();
+        ModelManager.unbind();
         return new Model(id, position.length);
     }
 }

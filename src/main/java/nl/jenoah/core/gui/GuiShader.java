@@ -25,12 +25,14 @@ public class GuiShader extends Shader {
     public void createRequiredUniforms() throws Exception {
         createUniform("modelMatrix");
         createUniform("uiColor");
+        createUniform("hasTexture");
     }
 
     public void prepare(GuiObject guiObject) {
         Matrix4f modelMatrix = Transformation.getModelMatrix(guiObject);
         setUniform("modelMatrix", modelMatrix);
         setUniform("uiColor", color);
+        setUniform("hasTexture", guiObject.getTexture() == -1 ? 0 : 1);
     }
 
     public void setColor(Vector4f color){

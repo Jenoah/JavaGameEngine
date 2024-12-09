@@ -1,6 +1,7 @@
 package nl.jenoah.core.entity;
 
 import nl.jenoah.core.ModelManager;
+import nl.jenoah.core.loaders.TextureLoader;
 import nl.jenoah.core.shaders.ShaderManager;
 
 public class Model {
@@ -35,7 +36,7 @@ public class Model {
         this.material = model.getMaterial();
 
         if(!texturePath.isEmpty()){
-            this.material.setTexture(new Texture(ModelManager.getInstance().getTextureLoader().loadTexture(texturePath)));
+            this.material.setTexture(new Texture(TextureLoader.loadTexture(texturePath)));
         }
     }
 

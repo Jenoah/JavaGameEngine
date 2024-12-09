@@ -1,5 +1,6 @@
 package nl.jenoah.core.shaders.postProcessing.effects;
 
+import nl.jenoah.core.debugging.Debug;
 import nl.jenoah.core.rendering.ImageRenderer;
 import nl.jenoah.core.shaders.postProcessing.PPFXCombineShader;
 import nl.jenoah.core.shaders.postProcessing.PPFXContrastShader;
@@ -39,6 +40,8 @@ public class PPFXCombineEffect {
         GL11.glBindTexture(GL11.GL_TEXTURE_2D, primaryTextureID);
         GL13.glActiveTexture(GL13.GL_TEXTURE1);
         GL11.glBindTexture(GL11.GL_TEXTURE_2D, secondaryTextureID);
+
+        //Debug.Log("DO THING ABOVE IN THE PPFXCOMBINEEFFECT CLASS TO THE TRIPLANAR SHADER TEXTURE LOADING?");
 
         shader.setPrimaryTextureID(0);
         shader.setSecondaryTextureID(1);
