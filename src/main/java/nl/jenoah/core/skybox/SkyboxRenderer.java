@@ -3,7 +3,6 @@ package nl.jenoah.core.skybox;
 import nl.jenoah.core.Camera;
 import nl.jenoah.core.ModelManager;
 import nl.jenoah.core.entity.Model;
-import nl.jenoah.core.loaders.RAWLoader;
 import nl.jenoah.core.loaders.TextureLoader;
 import org.lwjgl.opengl.*;
 
@@ -53,12 +52,12 @@ public class SkyboxRenderer {
             SIZE, -SIZE,  SIZE
     };
 
-    private Model cube;
-    private int textureID;
-    private SkyboxShader shader;
+    private final Model cube;
+    private final int textureID;
+    private final SkyboxShader shader;
 
     public SkyboxRenderer(String[] textureFiles){
-        cube = RAWLoader.loadModel(VERTICES, 3);
+        cube = ModelManager.loadModel(VERTICES, 3);
         textureID = TextureLoader.loadCubeMapTexture(textureFiles);
 
         try {

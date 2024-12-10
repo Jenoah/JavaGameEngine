@@ -198,11 +198,13 @@ public class PrimitiveLoader {
 
         ModelManager.StoreIndicesBuffer(indices);
         ModelManager.storeDataInAttributeList(0, 3, vertices);
-        ModelManager.storeDataInAttributeList(1, 2, textureCoords);
+        int textureCoordID = ModelManager.storeDataInAttributeList(1, 2, textureCoords);
         ModelManager.storeDataInAttributeList(2, 3, normals);
 
         ModelManager.unbind();
-        return new Model(id, indices.length);
+        Model model = new Model(id, indices.length);
+        model.setTextureCoordinates(textureCoordID, textureCoords);
+        return model;
     }
 
     public static Model loadModel(float[] vertices){

@@ -62,7 +62,8 @@ public class Level0 extends Scene {
         addEntity(lightProxy);
         lightProxy.setParent(proxyEntity);
 
-        Model groundModel = PrimitiveLoader.getQuad(8);
+        Model groundModel = PrimitiveLoader.getQuad();
+        groundModel.setTextureScale(8);
         groundModel.setTexture(new Texture("textures/dirt.jpg"));
         groundModel.getMaterial().setAmbientColor(new Vector4f(.5f, .5f, .5f, 1f));
         Entity groundEntity = new Entity(groundModel, new Vector3f(0, -1, 0), new Vector3f(-90, 0, 0), 20);

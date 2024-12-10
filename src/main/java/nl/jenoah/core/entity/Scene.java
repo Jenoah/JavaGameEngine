@@ -12,7 +12,6 @@ import nl.jenoah.core.gui.GuiObject;
 import nl.jenoah.core.lighting.DirectionalLight;
 import nl.jenoah.core.lighting.PointLight;
 import nl.jenoah.core.lighting.SpotLight;
-import nl.jenoah.core.loaders.FontLoader;
 import org.joml.Vector3f;
 
 import java.util.*;
@@ -190,7 +189,7 @@ public class Scene {
     public void addText(GUIText textObject){
         FontType font = textObject.getFont();
         TextMeshData data = font.loadText(textObject);
-        int id = FontLoader.load(data.getVertexPositions(), data.getTextureCoords());
+        int id = ModelManager.loadModelID(data.getVertexPositions(), data.getTextureCoords());
         textObject.setMeshInfo(id, data.getVertexCount());
         List<GUIText> textBatch = textObjects.computeIfAbsent(font, k -> new ArrayList<GUIText>());
         textBatch.add(textObject);

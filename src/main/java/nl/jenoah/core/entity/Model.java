@@ -1,7 +1,13 @@
 package nl.jenoah.core.entity;
 
+import nl.jenoah.core.debugging.Debug;
 import nl.jenoah.core.loaders.TextureLoader;
 import nl.jenoah.core.shaders.ShaderManager;
+import nl.jenoah.core.utils.Utils;
+import org.lwjgl.opengl.GL11;
+import org.lwjgl.opengl.GL15;
+import org.lwjgl.opengl.GL20;
+import java.nio.FloatBuffer;
 
 public class Model {
 
@@ -9,6 +15,8 @@ public class Model {
     private final int vertexCount;
     private boolean isDoubleSided = false;
     private Material material;
+    private float textureCoords[];
+    private int textureCoordVBOID = -1;
 
     public Model(int id, int vertexCount){
         this.id = id;
@@ -74,5 +82,28 @@ public class Model {
 
     public boolean isDoubleSided() {
         return isDoubleSided;
+    }
+
+    public void setTextureScale(float textureScale){
+        if(textureCoords == null || textureCoordVBOID == -1){
+            Debug.Log("Texture coordinates not set");
+            return;
+        }
+
+        float[] updatedTextureCoords = textureCoords;
+        for (int i = 0; i < updatedTextureCoords.length; i++) {
+            updatedTextureCoords[i] *= textureScale;
+        }
+
+        GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, textureCoordVBOID);
+        FloatBuffer buffer = Utils.storeDataInFloatBuffer(updatedTextureCoords);
+        GL15.glBufferData(GL15.GL_ARRAY_BUFFER, buffer, GL15.GL_STATIC_DRAW);
+        GL20.glVertexAttribPointer(1, vertexCount, GL11.GL_FLOAT, false, 0, 0);
+        GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, 0);
+    }
+
+    public void setTextureCoordinates(int VBOID, float[] textureCoordinates){
+        this.textureCoordVBOID = VBOID;
+        this.textureCoords = textureCoordinates;
     }
 }

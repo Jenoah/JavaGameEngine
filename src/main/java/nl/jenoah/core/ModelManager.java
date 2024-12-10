@@ -1,7 +1,11 @@
 package nl.jenoah.core;
 
+import nl.jenoah.core.entity.Model;
 import nl.jenoah.core.loaders.*;
+import nl.jenoah.core.utils.Conversion;
 import nl.jenoah.core.utils.Utils;
+import org.joml.Vector2f;
+import org.joml.Vector3f;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL15;
 import org.lwjgl.opengl.GL20;
@@ -13,8 +17,79 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class ModelManager {
-    private static List<Integer> vaos = new ArrayList<>();
-    private static List<Integer> vbos = new ArrayList<>();
+    private static final List<Integer> vaos = new ArrayList<>();
+    private static final List<Integer> vbos = new ArrayList<>();
+
+    public static Model loadModel(float[] vertices, float[] textureCoords, int[] indices){
+        int id = createVAO();
+
+        StoreIndicesBuffer(indices);
+        storeDataInAttributeList(0, 3, vertices);
+        int textureCoordsVBOID = storeDataInAttributeList(1, 2, textureCoords);
+        unbind();
+
+        Model model = new Model(id, indices.length);
+        model.setTextureCoordinates(textureCoordsVBOID, textureCoords);
+        return model;
+    }
+
+    //LWJGL Vectors
+    public static Model loadModel(Vector3f[] vertices, Vector2f[] textureCoords, List<Integer> indices){
+        float[] verticesStripped = Conversion.v3ToFloatArray(vertices);
+        float[] textureCoordsStripped = Conversion.v2ToFloatArray(textureCoords);
+        int[] indicesStripped = indices.stream().mapToInt((Integer v) -> v).toArray();
+
+        return loadModel(verticesStripped, textureCoordsStripped, indicesStripped);
+    }
+
+    //LWJLG Vectors + normals
+    public static Model loadModel(Vector3f[] vertices, Vector2f[] textureCoords, float[] normals, List<Integer> indices){
+        float[] verticesStripped = Conversion.v3ToFloatArray(vertices);
+        float[] textureCoordsStripped = Conversion.v2ToFloatArray(textureCoords);
+        int[] indicesStripped = indices.stream().mapToInt((Integer v) -> v).toArray();
+
+        return loadModel(verticesStripped, textureCoordsStripped, normals, indicesStripped);
+    }
+
+    public static Model loadModel(float[] vertices, float[] textureCoords, float[] normals, int[] indices){
+        int id = createVAO();
+
+        StoreIndicesBuffer(indices);
+        storeDataInAttributeList(0, 3, vertices);
+        int textureCoordsVBOID = storeDataInAttributeList(1, 2, textureCoords);
+        storeDataInAttributeList(2, 3, normals);
+        unbind();
+
+        Model model = new Model(id, indices.length);
+        model.setTextureCoordinates(textureCoordsVBOID, textureCoords);
+        return model;
+    }
+
+    public static Model loadModel(float[] position){
+        int id = ModelManager.createVAO();
+
+        ModelManager.storeDataInAttributeList(0, 2, position);
+
+        ModelManager.unbind();
+        return new Model(id, position.length);
+    }
+
+    public static Model loadModel(float[] vertices, int dimensions){
+        int id = ModelManager.createVAO();
+        ModelManager.storeDataInAttributeList(0, dimensions, vertices);
+        ModelManager.unbind();
+        return new Model(id, vertices.length / dimensions);
+    }
+
+    public static int loadModelID(float[] positions, float[] textureCoords){
+        int id = ModelManager.createVAO();
+
+        storeDataInAttributeList(0, 2, positions);
+        storeDataInAttributeList(1, 2, textureCoords);
+
+        ModelManager.unbind();
+        return id;
+    }
 
     public static int createVAO(){
         int id = GL30.glGenVertexArrays();
@@ -31,7 +106,7 @@ public class ModelManager {
         GL30.glBufferData(GL30.GL_ELEMENT_ARRAY_BUFFER, buffer, GL30.GL_STATIC_DRAW);
     }
 
-    public static void storeDataInAttributeList(int attributeNumber, int vertexCount, float[] data){
+    public static int storeDataInAttributeList(int attributeNumber, int vertexCount, float[] data){
         int vbo = GL15.glGenBuffers();
         vbos.add(vbo);
         GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, vbo);
@@ -39,6 +114,7 @@ public class ModelManager {
         GL15.glBufferData(GL15.GL_ARRAY_BUFFER, buffer, GL15.GL_STATIC_DRAW);
         GL20.glVertexAttribPointer(attributeNumber, vertexCount, GL11.GL_FLOAT, false, 0, 0);
         GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, 0);
+        return vbo;
     }
 
     public static void unbind(){

@@ -8,7 +8,6 @@ import nl.jenoah.core.utils.Conversion;
 import nl.jenoah.core.utils.Utils;
 import org.joml.Vector2f;
 import org.joml.Vector3f;
-import org.joml.Vector3i;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -101,7 +100,7 @@ public class OBJLoader {
         int[] indicesArray = finalIndices.stream().mapToInt((Integer v) -> v).toArray();
 
 
-        return OBJLoader.loadModel(Conversion.v3ToFloatArray(finalVertices), Conversion.v2ToFloatArray(finalTextures), Conversion.v3ToFloatArray(finalNormals), indicesArray);
+        return ModelManager.loadModel(Conversion.v3ToFloatArray(finalVertices), Conversion.v2ToFloatArray(finalTextures), Conversion.v3ToFloatArray(finalNormals), indicesArray);
     }
 
     public static Model loadOBJModel(String fileName, Texture texturePath) {
@@ -109,43 +108,6 @@ public class OBJLoader {
         model.setTexture(texturePath);
 
         return model;
-    }
-
-    public static Model loadModel(float[] vertices, float[] textureCoords, float[] normals, int[] indices){
-        int id = ModelManager.createVAO();
-
-        ModelManager.StoreIndicesBuffer(indices);
-        ModelManager.storeDataInAttributeList(0, 3, vertices);
-        ModelManager.storeDataInAttributeList(1, 2, textureCoords);
-        ModelManager.storeDataInAttributeList(2, 3, normals);
-        ModelManager.unbind();
-        return new Model(id, indices.length);
-    }
-
-    public static Model loadModel(float[] vertices, float[] textureCoords, int[] indices){
-        int id = ModelManager.createVAO();
-
-        ModelManager.StoreIndicesBuffer(indices);
-        ModelManager.storeDataInAttributeList(0, 3, vertices);
-        ModelManager.storeDataInAttributeList(1, 2, textureCoords);
-        ModelManager.unbind();
-        return new Model(id, indices.length);
-    }
-
-    public static Model loadModel(Vector3f[] vertices, Vector2f[] textureCoords, List<Integer> indices){
-        float[] verticesStripped = Conversion.v3ToFloatArray(vertices);
-        float[] textureCoordsStripped = Conversion.v2ToFloatArray(textureCoords);
-        int[] indicesStripped = indices.stream().mapToInt((Integer v) -> v).toArray();
-
-        return loadModel(verticesStripped, textureCoordsStripped, indicesStripped);
-    }
-
-    public static Model loadModel(Vector3f[] vertices, Vector2f[] textureCoords, float[] normals, List<Integer> indices){
-        float[] verticesStripped = Conversion.v3ToFloatArray(vertices);
-        float[] textureCoordsStripped = Conversion.v2ToFloatArray(textureCoords);
-        int[] indicesStripped = indices.stream().mapToInt((Integer v) -> v).toArray();
-
-        return loadModel(verticesStripped, textureCoordsStripped, normals, indicesStripped);
     }
 
 

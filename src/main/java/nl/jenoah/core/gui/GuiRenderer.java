@@ -1,7 +1,7 @@
 package nl.jenoah.core.gui;
 
+import nl.jenoah.core.ModelManager;
 import nl.jenoah.core.entity.Model;
-import nl.jenoah.core.loaders.GUILoader;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL13;
 import org.lwjgl.opengl.GL20;
@@ -12,7 +12,7 @@ import java.util.List;
 public class GuiRenderer {
 
     private final Model quad;
-    private GuiShader shader;
+    private final GuiShader shader;
 
     public GuiRenderer(){
         float[] positions = {
@@ -20,10 +20,9 @@ public class GuiRenderer {
                 1f, -1f,
                 -1f, 1f,
                 1f, 1f,
-
         };
 
-        quad = GUILoader.load(positions);
+        quad = ModelManager.loadModel(positions);
         try {
             shader = new GuiShader();
             shader.init();
