@@ -7,13 +7,16 @@ A simple Java game.myGame engine using LWJGL 3 and some of my own implementation
 
 ## Includes
 - 3D rendering
-- Lighting
+- Simple lighting
 - Custom shaders
 - Simple UI
 - Text rendering(Credits to [Thin Matrix's font rendering tutorial](https://www.youtube.com/watch?v=mnIQEQoHHCU))
 - Post processing
+- Marching cubes, multi-threaded terrain generation
 
 ## Examples
+### **_Pictures below are outdated_**
+
 There is one simple game demo scene that contains all the implementations above
 ![preview image of render](git-files/images/preview1.png)
 
