@@ -15,6 +15,7 @@ import java.util.Scanner;
 
 public class Utils {
     public static SimplexNoise simplexNoise = new SimplexNoise();
+    public static FastNoise fastNoise = new FastNoise();
 
     public static FloatBuffer storeDataInFloatBuffer(float[] data){
         FloatBuffer buffer = MemoryUtil.memAllocFloat(data.length);
@@ -25,6 +26,7 @@ public class Utils {
     public static void setNoiseSeed(int seed){
         SimplexNoise.RANDOMSEED = seed;
         simplexNoise = new SimplexNoise();
+        fastNoise.SetSeed(seed);
     }
 
     public static IntBuffer storeDataInIntBuffer(int[] data){

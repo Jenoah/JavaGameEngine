@@ -2,8 +2,8 @@ package nl.jenoah.core.utils;
 
 import org.joml.Vector2f;
 import org.joml.Vector3f;
+import org.joml.Vector3i;
 
-import java.util.ArrayList;
 import java.util.List;
 
 public class Conversion {
@@ -88,7 +88,14 @@ public class Conversion {
 
         // Build the string result
         return (isNegative ? "-" : "") + intPart + "." + (decimalPart < 10 ? "0" : "") + decimalPart;
+    }
 
+    public static Vector3i ToVector3i(Vector3f a){
+        return new Vector3i((int)a.x, (int)a.y, (int)a.z);
+    }
+
+    public static Vector3f ToVector3f(Vector3i a){
+        return new Vector3f(a.x, a.y, a.z);
     }
 
 }

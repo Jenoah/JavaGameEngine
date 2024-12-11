@@ -2,6 +2,7 @@ package nl.jenoah.core;
 
 import nl.jenoah.core.entity.Model;
 import nl.jenoah.core.loaders.*;
+import nl.jenoah.core.utils.Calculus;
 import nl.jenoah.core.utils.Conversion;
 import nl.jenoah.core.utils.Utils;
 import org.joml.Vector2f;
@@ -63,6 +64,16 @@ public class ModelManager {
         Model model = new Model(id, indices.length);
         model.setTextureCoordinates(textureCoordsVBOID, textureCoords);
         return model;
+    }
+
+    public static Model loadModel(float[] vertices, int[] indices){
+        int id = createVAO();
+
+        StoreIndicesBuffer(indices);
+        storeDataInAttributeList(0, 3, vertices);
+        unbind();
+
+        return new Model(id, indices.length);
     }
 
     public static Model loadModel(float[] position){
@@ -128,5 +139,65 @@ public class ModelManager {
             GL30.glDeleteBuffers(vbo);
         }
         TextureLoader.cleanUp();
+    }
+
+    public static Vector3f[] calculateNormals(Vector3f[] vertices, int[] triangles){
+        Vector3f[] normals = new Vector3f[vertices.length];
+
+        int triangleCount = triangles.length / 3;
+
+        for(int i = 0; i < triangleCount; i++){
+            int normalTriangleIndex = i * 3;
+            int vertexIndexA = triangles[normalTriangleIndex];
+            int vertexIndexB = triangles[normalTriangleIndex + 1];
+            int vertexIndexC = triangles[normalTriangleIndex + 2];
+
+            Vector3f CB = Calculus.subtractVectors(vertices[vertexIndexB], vertices[vertexIndexA]);
+            Vector3f CA = Calculus.subtractVectors(vertices[vertexIndexC], vertices[vertexIndexA]);
+
+            Vector3f triangleNormal = CB.cross(CA).normalize();
+
+            normals[vertexIndexA] = triangleNormal;
+            normals[vertexIndexB] = triangleNormal;
+            normals[vertexIndexC] = triangleNormal;
+        }
+
+        return normals;
+    }
+
+    public static Vector3f[] calculateNormals(List<Vector3f> vertices, List<Integer> triangles){
+        return calculateNormals(vertices.toArray(new Vector3f[0]), triangles.stream().mapToInt(i->i).toArray());
+    }
+
+    public static Vector2f[] generateUVs(List<Vector3f> vertices, List<Integer> triangles, Vector3f[] normals){
+        Vector2f[] uvs = new Vector2f[triangles.size()];
+        for (int i = 0; i < triangles.size() - 2; i += 3) {
+            Vector3f norm = new Vector3f(normals[i]);
+
+            float dotX = Math.abs(norm.dot(new Vector3f(1, 0, 0)));
+            float dotY = Math.abs(norm.dot(new Vector3f(0, 1, 0)));
+            float dotZ = Math.abs(norm.dot(new Vector3f(0, 0, 1)));
+
+            if (dotX > dotY && dotX > dotZ) {
+                for (int j = 0; j < 3; j++) {
+                    int triangleIndex = triangles.get(i + j);
+                    uvs[triangleIndex] = new Vector2f(vertices.get(triangleIndex).z, vertices.get(triangleIndex).y);
+                }
+            } else {
+                if (dotY > dotX && dotY > dotZ) {
+                    for (int j = 0; j < 3; j++) {
+                        int triangleIndex = triangles.get(i + j);
+                        uvs[triangleIndex] = new Vector2f(vertices.get(triangleIndex).x, vertices.get(triangleIndex).z);
+                    }
+                } else {
+                    for (int j = 0; j < 3; j++) {
+                        int triangleIndex = triangles.get(i + j);
+                        uvs[triangleIndex] = new Vector2f(vertices.get(triangleIndex).x, vertices.get(triangleIndex).y);
+                    }
+                }
+            }
+        }
+
+        return uvs;
     }
 }

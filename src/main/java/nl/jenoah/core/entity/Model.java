@@ -15,7 +15,7 @@ public class Model {
     private final int vertexCount;
     private boolean isDoubleSided = false;
     private Material material;
-    private float textureCoords[];
+    private float[] textureCoords;
     private int textureCoordVBOID = -1;
 
     public Model(int id, int vertexCount){

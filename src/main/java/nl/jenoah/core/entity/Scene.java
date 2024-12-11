@@ -48,9 +48,9 @@ public class Scene {
         init();
     }
 
-    public void init() {
+    public void init() { }
 
-    }
+    public void postStart(){ }
 
     public void update(MouseInput mouseInput){
         for(GameObject gameObject: gameObjects){

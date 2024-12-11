@@ -4,7 +4,7 @@ import org.joml.Vector3f;
 
 public class Entity extends GameObject{
 
-    private Model model;
+    private final Model model;
     private boolean transparent = false;
     private boolean isEnabled = true;
 
@@ -13,6 +13,13 @@ public class Entity extends GameObject{
         setPosition(position);
         setRotation(rotation);
         setScale(scale);
+    }
+
+    public Entity(Model model, Vector3f position, Vector3f rotation, Vector3f scale) {
+        this.model = model;
+        setPosition(position);
+        setRotation(rotation);
+        setScale(scale.x, scale.y, scale.z);
     }
 
     public Entity(Model model, Vector3f position, Vector3f rotation, float scale, boolean transparent) {

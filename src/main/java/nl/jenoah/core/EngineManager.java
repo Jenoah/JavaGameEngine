@@ -1,5 +1,6 @@
 package nl.jenoah.core;
 
+import nl.jenoah.core.entity.SceneManager;
 import org.lwjgl.glfw.GLFW;
 import org.lwjgl.glfw.GLFWErrorCallback;
 
@@ -26,6 +27,7 @@ public class EngineManager {
         window.init();
         gameLogic.init();
         mouseInput.init();
+        SceneManager.getInstance().getCurrentScene().postStart();
     }
 
     public void start(ILogic gameLogic) throws Exception{

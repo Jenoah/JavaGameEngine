@@ -1,5 +1,7 @@
 package game.demo;
 
+import game.terrain.MarchingChunk;
+import game.terrain.TerrainGeneration;
 import nl.jenoah.core.EngineManager;
 import nl.jenoah.core.MouseInput;
 import nl.jenoah.core.entity.*;
@@ -16,6 +18,7 @@ import nl.jenoah.core.shaders.ShaderManager;
 import nl.jenoah.core.utils.Calculus;
 import nl.jenoah.core.utils.Conversion;
 import nl.jenoah.core.utils.Transformation;
+import nl.jenoah.core.utils.Utils;
 import org.joml.Math;
 import org.joml.Vector2f;
 import org.joml.Vector3f;
@@ -23,6 +26,7 @@ import org.joml.Vector4f;
 import org.lwjgl.glfw.GLFW;
 
 import java.io.File;
+import java.util.Queue;
 
 public class Level0 extends Scene {
 
@@ -33,12 +37,20 @@ public class Level0 extends Scene {
     private GUIText positionLabel;
     private GUIText resolutionLabel;
 
+    //Terrain
+    private final int renderDistance = 4;
+    private TerrainGeneration terrainGeneration;
+
     @Override public void init() {
         super.init();
         levelName = "Level 0";
-        setFogColor(new Vector3f(0.6f, 0.65f, .8f));
+        terrainGeneration = new TerrainGeneration(renderDistance);
+        Utils.setNoiseSeed(123);
+        player.setPosition(0, 6.5f, 0);
+
+        setFogColor(new Vector3f(0.7f, 0.75f, .8f));
         setFogDensity(.025f);
-        setFogGradient(5f);
+        setFogGradient(10f);
 
         //Textures
         Texture blockPaletteTexture = new Texture(TextureLoader.loadTexture("textures/blockPallete.png"));
@@ -46,29 +58,22 @@ public class Level0 extends Scene {
 
         //Models
         Model barnModel = OBJLoader.loadOBJModel("/models/barn.obj", barnTexture);
-        Entity barn = new Entity(barnModel, new Vector3f(0, -1f, -10f), new Vector3f(0, 0, 0), 1f);
+        Entity barn = new Entity(barnModel, new Vector3f(0, 5f, -10f), new Vector3f(0, 0, 0), 1f);
         addEntity(barn);
 
         Model monkModel = OBJLoader.loadOBJModel("/models/monk.obj", blockPaletteTexture);
-        Entity monk = new Entity(monkModel, new Vector3f(0, 0.5f, -10f), new Vector3f(0, 0, 0), 1);
+        Entity monk = new Entity(monkModel, new Vector3f(0, 6.5f, -10f), new Vector3f(0, 0, 0), 1);
         addEntity(monk);
 
-        Model pointLightProxyModel = OBJLoader.loadOBJModel("/models/cube.obj", blockPaletteTexture);
-        proxyEntity = new Entity(pointLightProxyModel, new Vector3f(0, 0.5f, -7f), new Vector3f(0, 0, 0), .1f);
-        addEntity(proxyEntity);
+        Model groundBlock = PrimitiveLoader.getCube();
+        groundBlock.setTexture(new Texture("textures/rock.jpg"), 8f);
+        Entity groundBlockEntity = new Entity(groundBlock, new Vector3f(0, 2.5f, -10), new Vector3f(0f), new Vector3f(10, 5, 12));
+        addEntity(groundBlockEntity);
 
-        Billboard lightProxy = new Billboard(PrimitiveLoader.getQuad(), barnTexture, 0.1f);
-        lightProxy.setPosition(new Vector3f(0, 1f ,0));
+        Billboard lightProxy = new Billboard(PrimitiveLoader.getQuad(), new Texture("textures/Prozac.jpeg", false, false), .1f);
+        lightProxy.setPosition(new Vector3f(0, 6f ,-7));
+        proxyEntity = lightProxy;
         addEntity(lightProxy);
-        lightProxy.setParent(proxyEntity);
-
-        Model groundModel = PrimitiveLoader.getQuad();
-        groundModel.setTextureScale(8);
-        groundModel.setTexture(new Texture("textures/dirt.jpg"));
-        groundModel.getMaterial().setAmbientColor(new Vector4f(.5f, .5f, .5f, 1f));
-        Entity groundEntity = new Entity(groundModel, new Vector3f(0, -1, 0), new Vector3f(-90, 0, 0), 20);
-        addEntity(groundEntity);
-
 
         //Lighting
         //Directional Light
@@ -101,8 +106,6 @@ public class Level0 extends Scene {
         addSpotLight(spotLight1);
         addSpotLight(spotLight2);
 
-        ShaderManager.getInstance().getLitShader().setLights(getDirectionalLight(), getPointLights(), getSpotLights());
-
         addGameObject(player);
 
         //UI
@@ -126,6 +129,22 @@ public class Level0 extends Scene {
 
         GUIText instructionLabel = new GUIText(" Move: WASD + Q and E \nRotate: RMB + move mouse \nHigher speed: Left shift \nMove light: UP / DOWN arrows", 1f, jetbrainFontType, new Vector2f(0.03f, 0.16f), 0.25f, false);
         addText(instructionLabel);
+
+        //Shaders
+        int grassTextureID = TextureLoader.loadTexture("textures/grass.jpg");
+        int rockTextureID = TextureLoader.loadTexture("textures/rock.jpg");
+        ShaderManager.getInstance().getTriplanarShader().setTextureIDs(grassTextureID, rockTextureID);
+        ShaderManager.getInstance().getTriplanarShader().setBlendFactor(32);
+
+        ShaderManager.getInstance().getLitShader().setLights(getDirectionalLight(), getPointLights(), getSpotLights());
+        ShaderManager.getInstance().getTriplanarShader().setLights(getDirectionalLight(), getPointLights(), getSpotLights());
+    }
+
+    @Override
+    public void postStart() {
+        super.postStart();
+        terrainGeneration.start();
+        terrainGeneration.setUpdatePosition(player.getPosition());
     }
 
     @Override
@@ -152,5 +171,33 @@ public class Level0 extends Scene {
         fpsLabel.setText("FPS: " + EngineManager.getFps());
         positionLabel.setText("Position: " + Conversion.V3ToString(player.getPosition()));
         resolutionLabel.setText("Resolution: " + windowManager.getWidth() + " x " + windowManager.getHeight());
+        updateTerrain();
+    }
+
+    private void updateTerrain(){
+        terrainGeneration.setUpdatePosition(player.getPosition());
+        Queue<MarchingChunk> marchingQueue = terrainGeneration.getMarchingChunksQueue();
+        while(!marchingQueue.isEmpty()){
+            MarchingChunk chunk = marchingQueue.poll();
+            if(!chunk.isReady){
+                terrainGeneration.requeueChunk(chunk);
+                continue;
+            }
+
+            chunk.publishChunk();
+
+            Entity chunkEntity = chunk.getChunkEntity();
+            if(chunkEntity != null) {
+                chunkEntity.getModel().getMaterial().setShader(ShaderManager.getInstance().getTriplanarShader());
+                addEntity(chunk.getChunkEntity());
+            }
+        }
+        terrainGeneration.restockQueue();
+    }
+
+    @Override
+    public void cleanUp() {
+        terrainGeneration.end();
+        super.cleanUp();
     }
 }

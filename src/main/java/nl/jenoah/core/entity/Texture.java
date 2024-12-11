@@ -21,4 +21,8 @@ public class Texture {
     public Texture(String texturePath, boolean pointFilter){
         this.id = TextureLoader.loadTexture(texturePath, pointFilter);
     }
+
+    public Texture(String texturePath, boolean pointFilter, boolean flipped){
+        this.id = TextureLoader.loadTexture(texturePath, pointFilter, flipped);
+    }
 }
