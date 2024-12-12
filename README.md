@@ -18,10 +18,10 @@ A simple Java game.myGame engine using LWJGL 3 and some of my own implementation
 ### **_Pictures below are outdated_**
 
 There is one simple game demo scene that contains all the implementations above
-![preview image of render](git-files/images/preview1.png)
+![preview image of render](git-files/images/preview2.png)
 
 A thing I have been working on myself in this engine would be a simple procedural landscape generation.
 Although it might be in a very early stage, it is working and keeping a consistent framerate without stutter on the chunk generation.
-
-![preview gif of procedural rendering](git-files/images/preview_proc_gen_simple.gif)
-
+<p align="center">
+<img alt='preview of procedural generation in the Java game engine' src="https://github.com/Jenoah/JavaGameEngine/tree/main/git-files/images/preview_proc_gen_lighting_shaders.gif"/>
+</p>
