@@ -22,6 +22,6 @@ There is one simple game demo scene that contains all the implementations above
 
 A thing I have been working on myself in this engine would be a simple procedural landscape generation.
 Although it might be in a very early stage, it is working and keeping a consistent framerate without stutter on the chunk generation.
-<div style="text-align: center;">
+<p style="text-align: center;">
     <img style='text-align: center; margin: 0 auto' height='266' width='480' alt='preview of procedural generation in the Java game engine' src="/git-files/images/preview_proc_gen_lighting_shaders.gif"/>
-</div>
+</p>
