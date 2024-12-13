@@ -1,6 +1,7 @@
 package nl.jenoah.core.rendering;
 
 import nl.jenoah.core.Camera;
+import nl.jenoah.core.entity.Material;
 import nl.jenoah.core.shaders.Shader;
 import nl.jenoah.core.entity.Entity;
 import nl.jenoah.core.entity.Model;
@@ -13,10 +14,10 @@ import java.util.*;
 
 public class EntityRenderer implements IRenderer{
 
-    private final List<Entity> entities;
+    private final HashMap<Material, List<Entity>> entities;
 
     public EntityRenderer(){
-        entities = new ArrayList<>();
+        entities = new HashMap<>();
     }
 
     @Override
@@ -25,19 +26,19 @@ public class EntityRenderer implements IRenderer{
 
     @Override
     public void render(Camera camera) {
-        for(Entity entity: entities) {
-            Shader shader = entity.getModel().getMaterial().getShader();
-
+        entities.forEach((mat, entList) -> {
+            Shader shader = mat.getShader();
             shader.bind();
             shader.render(camera);
 
-            bind(entity.getModel());
-            shader.prepare(entity, camera);
-            GL11.glDrawElements(GL11.GL_TRIANGLES, entity.getModel().getVertexCount(), GL11.GL_UNSIGNED_INT, 0);
-            unbind();
-
+            for(Entity e : entList){
+                bind(e.getModel());
+                shader.prepare(e, camera);
+                GL11.glDrawElements(GL11.GL_TRIANGLES, e.getModel().getVertexCount(), GL11.GL_UNSIGNED_INT, 0);
+                unbind();
+            }
             shader.unbind();
-        }
+        });
         entities.clear();
     }
 
@@ -79,12 +80,25 @@ public class EntityRenderer implements IRenderer{
 
     @Override
     public void cleanUp() {
-        for(Entity entity: entities) {
-            entity.getModel().getMaterial().getShader().cleanUp();
+        for(Material mat: entities.keySet()) {
+            mat.getShader().cleanUp();
         }
     }
 
-    public List<Entity> getEntities() {
-        return entities;
+    public void addEntity(Entity entity){
+        Material mat = entity.getModel().getMaterial();
+        if(this.entities.containsKey(mat)){
+            this.entities.get(mat).add(entity);
+        }else{
+            this.entities.put(mat, new ArrayList<>(){{add(entity);}});
+        }
+    }
+
+    public final List<Entity> getEntities() {
+        List<Entity> entityList = new ArrayList<>();
+        entities.forEach((mat, ent) -> {
+            entityList.addAll(ent);
+        });
+        return entityList;
     }
 }

@@ -90,8 +90,7 @@ public class WindowManager {
 
         GLFW.glfwMakeContextCurrent(window);
 
-        if(isvSync())
-            GLFW.glfwSwapInterval(1);
+        GLFW.glfwSwapInterval(isvSync() ? 1 : 0);
 
         GLFW.glfwShowWindow(window);
 

@@ -31,11 +31,14 @@ import java.util.Queue;
 public class Level0 extends Scene {
 
     private Entity proxyEntity;
+    private Entity monkeyEntity;
 
     //Labels
     private GUIText fpsLabel;
     private GUIText positionLabel;
     private GUIText resolutionLabel;
+
+    private float UIUpdateTime = 0f;
 
     //Terrain
     private final int renderDistance = 4;
@@ -62,8 +65,8 @@ public class Level0 extends Scene {
         addEntity(barn);
 
         Model monkModel = OBJLoader.loadOBJModel("/models/monk.obj", blockPaletteTexture);
-        Entity monk = new Entity(monkModel, new Vector3f(0, 6.5f, -10f), new Vector3f(0, 0, 0), 1);
-        addEntity(monk);
+        monkeyEntity = new Entity(monkModel, new Vector3f(0, 6.5f, -10f), new Vector3f(0, 0, 0), 1);
+        addEntity(monkeyEntity);
 
         Model groundBlock = PrimitiveLoader.getCube();
         groundBlock.setTexture(new Texture("textures/rock.jpg"), 8f);
@@ -127,7 +130,7 @@ public class Level0 extends Scene {
         resolutionLabel = new GUIText("Resolution: x", 1f, jetbrainFontType, new Vector2f(0.03f, 0.125f), 0.25f, false);
         addText(resolutionLabel);
 
-        GUIText instructionLabel = new GUIText(" Move: WASD + Q and E \nRotate: RMB + move mouse \nHigher speed: Left shift \nMove light: UP / DOWN arrows", 1f, jetbrainFontType, new Vector2f(0.03f, 0.16f), 0.25f, false);
+        GUIText instructionLabel = new GUIText(" Move: WASD + Q and E \nRotate: RMB + move mouse \nHigher speed: Left shift \nMove cat and lights: Arrows", 1f, jetbrainFontType, new Vector2f(0.03f, 0.16f), 0.25f, false);
         addText(instructionLabel);
 
         //Shaders
@@ -152,22 +155,30 @@ public class Level0 extends Scene {
         super.handleInput();
 
         if(windowManager.isKeyPressed(GLFW.GLFW_KEY_UP)){
-            proxyEntity.setPosition(Calculus.addVectors(proxyEntity.getPosition(), new Vector3f(0, 0, -0.05f)));
+            proxyEntity.setPosition(Calculus.addVectors(proxyEntity.getPosition(), new Vector3f(0, 0, -5f * EngineManager.getDeltaTime())));
         }
         if(windowManager.isKeyPressed(GLFW.GLFW_KEY_DOWN)){
-            proxyEntity.setPosition(Calculus.addVectors(proxyEntity.getPosition(), new Vector3f(0, 0, 0.05f)));
+            proxyEntity.setPosition(Calculus.addVectors(proxyEntity.getPosition(), new Vector3f(0, 0, 5f * EngineManager.getDeltaTime())));
+        }
+        if(windowManager.isKeyPressed(GLFW.GLFW_KEY_LEFT)){
+            proxyEntity.setPosition(Calculus.addVectors(proxyEntity.getPosition(), new Vector3f(-5f * EngineManager.getDeltaTime(), 0, 0)));
+        }
+        if(windowManager.isKeyPressed(GLFW.GLFW_KEY_RIGHT)){
+            proxyEntity.setPosition(Calculus.addVectors(proxyEntity.getPosition(), new Vector3f(5f * EngineManager.getDeltaTime(), 0, 0)));
         }
     }
 
     @Override
     public void update(MouseInput mouseInput) {
         super.update(mouseInput);
-        getEntities().get(1).lookAt(player.getPosition());
+        UIUpdateTime += EngineManager.getDeltaTime();
+        monkeyEntity.lookAt(player.getPosition());
 
-        getSpotLights()[0].setConeDirection(Transformation.rotateDirection(getSpotLights()[0].getConeDirection(), new Vector3f(0, 1.5f, 0)));
-        getSpotLights()[1].setConeDirection(Transformation.rotateDirection(getSpotLights()[1].getConeDirection(), new Vector3f(0, 1.5f, 0)));
+        getSpotLights()[0].setConeDirection(Transformation.rotateDirection(getSpotLights()[0].getConeDirection(), new Vector3f(0, 90f * EngineManager.getDeltaTime(), 0)));
+        getSpotLights()[1].setConeDirection(Transformation.rotateDirection(getSpotLights()[1].getConeDirection(), new Vector3f(0, 90f * EngineManager.getDeltaTime(), 0)));
 
-        if(EngineManager.getFrameCount() % 30 != 0) return;
+        if(UIUpdateTime < 0.2f) return;
+        UIUpdateTime = 0;
         fpsLabel.setText("FPS: " + EngineManager.getFps());
         positionLabel.setText("Position: " + Conversion.V3ToString(player.getPosition()));
         resolutionLabel.setText("Resolution: " + windowManager.getWidth() + " x " + windowManager.getHeight());

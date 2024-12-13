@@ -1,9 +1,6 @@
 package game.entities;
 
-import nl.jenoah.core.Camera;
-import nl.jenoah.core.ModelManager;
-import nl.jenoah.core.MouseInput;
-import nl.jenoah.core.WindowManager;
+import nl.jenoah.core.*;
 import nl.jenoah.core.entity.*;
 import nl.jenoah.core.loaders.OBJLoader;
 import nl.jenoah.core.shaders.ShaderManager;
@@ -67,7 +64,7 @@ public class Player extends GameObject {
         if(windowManager.isKeyPressed(GLFW.GLFW_KEY_LEFT_CONTROL) || windowManager.isKeyPressed(GLFW.GLFW_KEY_Q)){
             moveDelta.y = -1;
         }
-        moveSpeed = windowManager.isKeyPressed(GLFW.GLFW_KEY_LEFT_SHIFT) ? Constants.CAMERA_MOVE_SPEED * 4f : Constants.CAMERA_MOVE_SPEED;
+        moveSpeed = windowManager.isKeyPressed(GLFW.GLFW_KEY_LEFT_SHIFT) ? Constants.CAMERA_MOVE_SPEED * 4f * EngineManager.getDeltaTime() : Constants.CAMERA_MOVE_SPEED * EngineManager.getDeltaTime();
     }
 
     private void move(){
@@ -78,7 +75,7 @@ public class Player extends GameObject {
     private void rotate(MouseInput mouseInput){
         if(mouseInput.isRbDown()){
             Vector2f rotationVector = mouseInput.getMouseDelta();
-            moveRotation(rotationVector.x * Constants.MOUSE_SENSITIVITY, rotationVector.y * Constants.MOUSE_SENSITIVITY);
+            moveRotation(rotationVector.x * Constants.MOUSE_SENSITIVITY * EngineManager.getDeltaTime(), rotationVector.y * Constants.MOUSE_SENSITIVITY * EngineManager.getDeltaTime());
             //mouseInput.hide();
         } else {
             // Show the cursor when the right button is not pressed

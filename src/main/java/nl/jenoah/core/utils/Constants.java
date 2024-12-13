@@ -14,8 +14,8 @@ public class Constants {
     public static final float GAMMA = 2.2f;
 
     public static final float SPECULAR_POWER = .5f;
-    public static final float CAMERA_MOVE_SPEED = 0.025f;
-    public static final float MOUSE_SENSITIVITY = 0.02f;
+    public static final float CAMERA_MOVE_SPEED = 3f;
+    public static final float MOUSE_SENSITIVITY = 2f;
 
 
     public static final int CHUNK_SIZE = 16;
