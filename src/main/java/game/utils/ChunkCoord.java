@@ -30,15 +30,20 @@ public class ChunkCoord{
         return x<xi ? xi-1 : xi;
     }
 
-    public static boolean isEqual(ChunkCoord a, ChunkCoord b){
-        return a.x == b.x && a.y == b.y && a.z == b.z;
-    }
-
     @Override
     public boolean equals(Object obj) {
         if(obj == this) return true;
         if(!(obj instanceof ChunkCoord b)) return false;
         return this.x == b.x && this.y == b.y && this.z == b.z;
+    }
+
+    public static boolean compareToVector(ChunkCoord a, Vector3f b){
+
+        int x = fastfloor((int)b.x / (float) Constants.CHUNK_SIZE) * Constants.CHUNK_SIZE;
+        int y = fastfloor((int)b.y / (float)Constants.CHUNK_SIZE) * Constants.CHUNK_SIZE;
+        int z = fastfloor((int)b.z / (float)Constants.CHUNK_SIZE) * Constants.CHUNK_SIZE;
+
+        return a.x == x && a.y == y && a.z == z;
     }
 
     @Override

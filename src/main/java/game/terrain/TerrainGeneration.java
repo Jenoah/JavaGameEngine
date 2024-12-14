@@ -11,7 +11,6 @@ import org.joml.Vector3f;
 
 import java.util.ArrayDeque;
 import java.util.HashMap;
-import java.util.Objects;
 import java.util.Queue;
 
 public class TerrainGeneration extends Thread{
@@ -68,9 +67,8 @@ public class TerrainGeneration extends Thread{
 
     public void setUpdatePosition(Vector3f updatePosition){
         playerPosition = updatePosition;
-        ChunkCoord playerChunkCoord = ChunkCoord.toChunkCoord(updatePosition);
-        if(!Objects.equals(previousPlayerChunkCoord, playerChunkCoord)){
-            previousPlayerChunkCoord = playerChunkCoord;
+        if(!ChunkCoord.compareToVector(previousPlayerChunkCoord, playerPosition)){
+            previousPlayerChunkCoord = ChunkCoord.toChunkCoord(updatePosition);
             this.canUpdate = true;
         }
     }
