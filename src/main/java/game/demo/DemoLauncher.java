@@ -12,7 +12,7 @@ public class DemoLauncher {
     public static void main(String[] args){
         System.out.println(Version.getVersion());
 
-        window = new WindowManager(Constants.TITLE, 1280, 720, false);
+        window = new WindowManager(Constants.TITLE, 1280, 720, true);
         game = new DemoGame();
         EngineManager engine = new EngineManager();
 

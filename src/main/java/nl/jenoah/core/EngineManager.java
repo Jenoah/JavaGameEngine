@@ -4,20 +4,23 @@ import nl.jenoah.core.entity.SceneManager;
 import org.lwjgl.glfw.GLFW;
 import org.lwjgl.glfw.GLFWErrorCallback;
 
+import static org.lwjgl.glfw.GLFW.glfwGetTime;
+
 public class EngineManager {
-
-    public static final long NANOSECOND = 1000000000L;
-    public static final float FRAMERATE = 1000;
-
-    private static int fps;
-    private static int currentFrameCount = 0;
-
     private boolean isRunning;
 
     private WindowManager window;
     private GLFWErrorCallback errorCallback;
     private ILogic gameLogic;
     private MouseInput mouseInput;
+
+    private static double lastLoopTime = 0;
+    private static float timeCount = 0;
+    private static int fps;
+    public static int fpsCount;
+    private int ups;
+    private int upsCount;
+    private static float deltaTime;
 
     private void init(ILogic gameLogic) throws Exception{
         GLFW.glfwSetErrorCallback(errorCallback = GLFWErrorCallback.createPrint(System.err));
@@ -28,6 +31,7 @@ public class EngineManager {
         gameLogic.init();
         mouseInput.init();
         SceneManager.getInstance().getCurrentScene().postStart();
+        lastLoopTime = getTime();
     }
 
     public void start(ILogic gameLogic) throws Exception{
@@ -39,6 +43,21 @@ public class EngineManager {
     }
 
     public void run(){
+        isRunning = true;
+        while(isRunning){
+            if(window.windowShouldClose()) stop();
+
+            setDeltaTime();
+            deltaTime = getDeltaTime();
+            input();
+            update(deltaTime);
+            render();
+        }
+        cleanUp();
+    }
+
+    /*
+    public void runOLD(){
         this.isRunning = true;
 
         int frames = 0;
@@ -82,26 +101,37 @@ public class EngineManager {
         }
 
         cleanUp();
-    }
+    }*/
 
-    public void stop(){
+    private void stop(){
         if(!isRunning)
             return;
         isRunning = false;
     }
 
-    public void input(){
+    private void input(){
         mouseInput.input();
         gameLogic.input();
     }
 
-    public void render(){
+    private void render(){
         gameLogic.render();
         window.update();
     }
 
-    public void update(float interval){
+    private void update(float interval){
         gameLogic.update(interval, mouseInput);
+        if (timeCount > 1f) {
+            fps = fpsCount;
+            fpsCount = 0;
+
+            ups = upsCount;
+            upsCount = 0;
+
+            timeCount -= 1f;
+        }
+        updateFPS();
+        updateUPS();
     }
 
     public void cleanUp(){
@@ -115,11 +145,27 @@ public class EngineManager {
         return fps;
     }
 
-    public static void setFps(int fps) {
-        EngineManager.fps = fps;
+    public static double getTime() {
+        return glfwGetTime();
     }
 
-    public static int getFrameCount(){
-        return currentFrameCount;
+    private void setDeltaTime() {
+        double time = getTime();
+        float delta = (float) (time - lastLoopTime);
+        lastLoopTime = time;
+        timeCount += delta;
+        deltaTime = delta;
+    }
+
+    public static float getDeltaTime(){
+        return deltaTime;
+    }
+
+    private void updateFPS() {
+        fpsCount++;
+    }
+
+    private void updateUPS() {
+        upsCount++;
     }
 }

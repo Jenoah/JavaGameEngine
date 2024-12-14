@@ -1,6 +1,5 @@
 package nl.jenoah.core.rendering;
 
-import nl.jenoah.core.ModelManager;
 import nl.jenoah.core.fonts.fontRendering.FontRenderer;
 import nl.jenoah.core.gui.GuiRenderer;
 import nl.jenoah.core.WindowManager;
@@ -72,9 +71,9 @@ public class RenderManager {
     public void processEntity(Entity entity){
         if(!entity.isEnabled()) return;
         if(entity.isTransparent()){
-            transparentEntityRenderer.getEntities().add(entity);
+            transparentEntityRenderer.addEntity(entity);
         }else {
-            entityRenderer.getEntities().add(entity);
+            entityRenderer.addEntity(entity);
         }
     }
 
