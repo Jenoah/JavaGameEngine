@@ -1,5 +1,5 @@
 # JavaGameEngine
-A simple Java game.myGame engine using LWJGL 3 and some of my own implementations
+A simple Java Game engine using LWJGL 3 and some of my own implementations
 
 ## How to run
 - Run the 'Demo/DemoLauncher.java'
