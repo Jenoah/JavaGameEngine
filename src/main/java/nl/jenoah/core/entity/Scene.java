@@ -77,7 +77,7 @@ public class Scene {
     }
 
     public void addEntity(Entity entity){
-        if (entity == null || transparentEntities.containsValue(entity) || solidEntities.containsValue(entity)) {
+        if (entity == null)/* || transparentEntities.values().contains(entity) || solidEntities.containsValue(entity))*/ {
             return;
         }
 
