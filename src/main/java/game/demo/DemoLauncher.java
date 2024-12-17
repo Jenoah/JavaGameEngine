@@ -1,6 +1,7 @@
 package game.demo;
 
 import nl.jenoah.core.EngineManager;
+import nl.jenoah.core.Settings;
 import nl.jenoah.core.WindowManager;
 import nl.jenoah.core.utils.Constants;
 import org.lwjgl.Version;
@@ -12,7 +13,7 @@ public class DemoLauncher {
     public static void main(String[] args){
         System.out.println(Version.getVersion());
 
-        window = new WindowManager(Constants.TITLE, 1280, 720, true);
+        window = new WindowManager(Constants.TITLE, 1280, 720, Settings.isUseVSync());
         game = new DemoGame();
         EngineManager engine = new EngineManager();
 
