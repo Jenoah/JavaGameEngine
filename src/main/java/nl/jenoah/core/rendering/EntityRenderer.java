@@ -14,7 +14,7 @@ import java.util.*;
 
 public class EntityRenderer implements IRenderer{
 
-    private final HashMap<Material, List<Entity>> entities;
+    private HashMap<Material, List<Entity>> entities;
 
     public EntityRenderer(){
         entities = new HashMap<>();
@@ -26,12 +26,15 @@ public class EntityRenderer implements IRenderer{
 
     @Override
     public void render(Camera camera) {
+        if(entities.isEmpty()) return;
+        //Debug.Log("Count is " + entities.size());
         entities.forEach((mat, entList) -> {
             Shader shader = mat.getShader();
             shader.bind();
             shader.render(camera);
 
             for(Entity e : entList){
+                if(!e.isEnabled()) continue;
                 bind(e.getModel());
                 shader.prepare(e, camera);
                 GL11.glDrawElements(GL11.GL_TRIANGLES, e.getModel().getVertexCount(), GL11.GL_UNSIGNED_INT, 0);
@@ -39,7 +42,7 @@ public class EntityRenderer implements IRenderer{
             }
             shader.unbind();
         });
-        entities.clear();
+        //entities.clear();
     }
 
     @Override
@@ -92,6 +95,10 @@ public class EntityRenderer implements IRenderer{
         }else{
             this.entities.put(mat, new ArrayList<>(){{add(entity);}});
         }
+    }
+
+    public void setEntities(HashMap<Material, List<Entity>> entities){
+        this.entities = entities;
     }
 
     public final List<Entity> getEntities() {

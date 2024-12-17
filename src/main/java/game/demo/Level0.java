@@ -141,6 +141,8 @@ public class Level0 extends Scene {
 
         ShaderManager.getInstance().getLitShader().setLights(getDirectionalLight(), getPointLights(), getSpotLights());
         ShaderManager.getInstance().getTriplanarShader().setLights(getDirectionalLight(), getPointLights(), getSpotLights());
+
+
     }
 
     @Override

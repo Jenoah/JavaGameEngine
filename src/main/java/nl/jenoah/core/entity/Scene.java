@@ -17,7 +17,8 @@ import org.joml.Vector3f;
 import java.util.*;
 
 public class Scene {
-    private List<Entity> entities;
+    private final HashMap<Material, List<Entity>> transparentEntities;
+    private final HashMap<Material, List<Entity>> solidEntities;
     private final List<GameObject> gameObjects;
     private final List<GuiObject> guiObjects;
     private final Map<FontType, List<GUIText>> textObjects;
@@ -38,7 +39,8 @@ public class Scene {
     protected String levelName = "Undefined Scene";
 
     public Scene(){
-        this.entities = new ArrayList<>();
+        this.transparentEntities = new HashMap<>();
+        this.solidEntities = new HashMap<>();
         this.gameObjects = new ArrayList<>();
         this.guiObjects = new ArrayList<>();
         this.windowManager = WindowManager.getInstance();
@@ -66,21 +68,32 @@ public class Scene {
         ModelManager.cleanUp();
     }
 
-    public List<Entity> getEntities() {
-        return entities;
+    public HashMap<Material, List<Entity>> getTransparentEntities() {
+        return transparentEntities;
     }
 
-
-    public void setEntities(List<Entity> entities) {
-        this.entities = entities;
+    public HashMap<Material, List<Entity>> getSolidEntities() {
+        return solidEntities;
     }
 
     public void addEntity(Entity entity){
-        if (entity == null || entities.contains(entity)) {
+        if (entity == null || transparentEntities.containsValue(entity) || solidEntities.containsValue(entity)) {
             return;
         }
 
-            this.entities.add(entity);
+        if (entity.isTransparent()) {
+            addToEntityList(transparentEntities, entity);
+        } else {
+            //addToEntityList(solidEntities, entity);
+            Material mat = entity.getModel().getMaterial();
+
+            if(solidEntities.containsKey(mat)){
+                solidEntities.get(mat).add(entity);
+            }else{
+                solidEntities.put(mat, new ArrayList<>(){{add(entity);}});
+            }
+        }
+
 
         if (entity.getChildren() != null) {
             for (GameObject child : entity.getChildren()) {
@@ -93,6 +106,16 @@ public class Scene {
         }
 
         addGameObject(entity);
+    }
+
+    private void addToEntityList(HashMap<Material, List<Entity>> entityList, Entity entity){
+        Material mat = entity.getModel().getMaterial();
+
+        if(entityList.containsKey(mat)){
+            entityList.get(mat).add(entity);
+        }else{
+            entityList.put(mat, new ArrayList<>(){{add(entity);}});
+        }
     }
 
     public void addGameObject(GameObject gameObject){

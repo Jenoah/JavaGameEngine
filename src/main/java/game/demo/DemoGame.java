@@ -4,7 +4,6 @@ import nl.jenoah.core.ILogic;
 import nl.jenoah.core.MouseInput;
 import nl.jenoah.core.WindowManager;
 import nl.jenoah.core.debugging.Debug;
-import nl.jenoah.core.entity.Entity;
 import nl.jenoah.core.entity.Scene;
 import nl.jenoah.core.entity.SceneManager;
 import nl.jenoah.core.rendering.RenderManager;
@@ -45,9 +44,8 @@ public class DemoGame implements ILogic {
 
         sceneManager.getCurrentScene().update(mouseInput);
 
-        for(Entity entity : sceneManager.getCurrentScene().getEntities()){
-            renderer.processEntity(entity);
-        }
+        renderer.processEntities(sceneManager.getCurrentScene().getSolidEntities());
+        renderer.processEntities(sceneManager.getCurrentScene().getTransparentEntities());
     }
 
     @Override

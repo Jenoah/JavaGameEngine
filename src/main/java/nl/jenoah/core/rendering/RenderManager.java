@@ -1,5 +1,6 @@
 package nl.jenoah.core.rendering;
 
+import nl.jenoah.core.entity.Material;
 import nl.jenoah.core.fonts.fontRendering.FontRenderer;
 import nl.jenoah.core.gui.GuiRenderer;
 import nl.jenoah.core.WindowManager;
@@ -7,6 +8,9 @@ import nl.jenoah.core.entity.Entity;
 import nl.jenoah.core.entity.Scene;
 import nl.jenoah.core.skybox.SkyboxRenderer;
 import org.lwjgl.opengl.GL11;
+
+import java.util.HashMap;
+import java.util.List;
 
 import static org.lwjgl.opengl.GL11.glViewport;
 
@@ -68,12 +72,12 @@ public class RenderManager {
         fontRenderer.render(currentScene.getTextObjects());
     }
 
-    public void processEntity(Entity entity){
-        if(!entity.isEnabled()) return;
-        if(entity.isTransparent()){
-            transparentEntityRenderer.addEntity(entity);
-        }else {
-            entityRenderer.addEntity(entity);
+    public void processEntities(HashMap<Material, List<Entity>> entities){
+        if(entities.isEmpty()) return;
+        if(entities.entrySet().iterator().next().getValue().getFirst().isTransparent()){
+            transparentEntityRenderer.setEntities(entities);
+        }else{
+            entityRenderer.setEntities(entities);
         }
     }
 
