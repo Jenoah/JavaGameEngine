@@ -109,6 +109,12 @@ public class ModelManager {
         return id;
     }
 
+    public static void unloadModel(int modelID){
+        GL30.glDeleteVertexArrays(modelID);
+        vaos.remove((Integer)modelID);
+        //TODO: Delete buffers / VBO of model
+    }
+
     public static void StoreIndicesBuffer(int[] indices){
         int vbo = GL15.glGenBuffers();
         vbos.add(vbo);

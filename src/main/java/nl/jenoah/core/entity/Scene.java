@@ -223,6 +223,7 @@ public class Scene {
         textBatch.remove(textObject);
         if(textBatch.isEmpty()){
             textObjects.remove(textObject.getFont());
+            ModelManager.unloadModel(textObject.getMesh());
         }
     }
 
