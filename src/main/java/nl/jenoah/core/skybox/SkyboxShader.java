@@ -3,7 +3,6 @@ package nl.jenoah.core.skybox;
 import nl.jenoah.core.Camera;
 import nl.jenoah.core.entity.SceneManager;
 import nl.jenoah.core.shaders.Shader;
-import nl.jenoah.core.utils.Constants;
 import nl.jenoah.core.utils.Transformation;
 import nl.jenoah.core.utils.Utils;
 import org.joml.Matrix4f;
@@ -23,7 +22,6 @@ public class SkyboxShader extends Shader {
 
     @Override
     public void createRequiredUniforms() throws Exception {
-        createUniform("gamma");
         createUniform("textureSampler");
         createUniform("projectionMatrix");
         createUniform("viewMatrix");
@@ -37,7 +35,6 @@ public class SkyboxShader extends Shader {
         viewMatrix.m32(0);
         Matrix4f projectionMatrix = window.getProjectionMatrix();
 
-        setUniform("gamma", Constants.GAMMA);
         setUniform("viewMatrix", viewMatrix);
         setUniform("projectionMatrix", projectionMatrix);
         setUniform("fogColor", SceneManager.fogColor);

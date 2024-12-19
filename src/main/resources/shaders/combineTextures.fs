@@ -1,4 +1,4 @@
-#version 150
+#version 330
 
 in vec2 textureCoords;
 
@@ -10,10 +10,7 @@ uniform float secondaryIntensity;
 
 void main(void){
     vec4 primaryColor = texture(primaryTexture, textureCoords);
-    vec4 secondaryColor = texture(secondaryTexture, textureCoords);
-
-    float kak = secondaryIntensity;
+    vec4 secondaryColor = texture(secondaryTexture, textureCoords) * secondaryIntensity;
 
     color = primaryColor + (secondaryColor * secondaryIntensity);
-    //color = (secondaryColor * secondaryIntensity);
 }

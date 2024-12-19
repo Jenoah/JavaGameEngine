@@ -49,7 +49,7 @@ uniform vec3 ambientColor;
 uniform vec3 viewPosition;
 uniform vec3 fogColor;
 uniform float specularPower;
-uniform float gamma;
+
 uniform Material material;
 uniform DirectionalLight directionalLight;
 uniform PointLight pointLights[MAXIMUM_POINT_LIGHTS];
@@ -172,6 +172,5 @@ void main() {
     }
 
     outColor.rgb = mix(vec4(fogColor, 1.0), outColor, fogFactor).rgb;
-    outColor.rgb = pow(outColor.rgb, vec3(1.0/gamma));
     outColor.a = diffuseMap.a;
 }

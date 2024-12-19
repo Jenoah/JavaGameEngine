@@ -4,9 +4,7 @@ import nl.jenoah.core.Camera;
 import nl.jenoah.core.WindowManager;
 import nl.jenoah.core.entity.Entity;
 import nl.jenoah.core.entity.Material;
-import nl.jenoah.core.entity.SceneManager;
-import nl.jenoah.core.utils.Constants;
-import nl.jenoah.core.utils.Transformation;
+import nl.jenoah.core.utils.Utils;
 import org.joml.Matrix4f;
 import org.joml.Vector2f;
 import org.joml.Vector3f;
@@ -18,11 +16,9 @@ import org.lwjgl.system.MemoryStack;
 import java.util.HashMap;
 import java.util.Map;
 
-import static org.lwjgl.opengl.GL11.glDepthMask;
-
 public class Shader {
     private final Map<String, Integer> uniforms;
-    private final int programID;
+    protected final int programID;
 
     private int vertexShaderID;
     private int fragmentShaderID;
@@ -47,16 +43,16 @@ public class Shader {
 
     }
 
+    public Shader init(String vertexShader, String fragmentShader) throws Exception {
+        createVertexShader(Utils.loadResource(vertexShader));
+        createFragmentShader(Utils.loadResource(fragmentShader));
+        link();
+        init();
+        return this;
+    }
+
     public void createRequiredUniforms() throws Exception {
-        createMaterialUniform("material");
-        createUniform("gamma");
-        createUniform("textureSampler");
-        createUniform("modelMatrix");
-        createUniform("viewMatrix");
-        createUniform("projectionMatrix");
-        createUniform("fogColor");
-        createUniform("fogDensity");
-        createUniform("fogGradient");
+
     }
 
     public void createVertexShader(String shaderCode) throws Exception{
@@ -86,20 +82,7 @@ public class Shader {
     public void render(Camera camera){}
 
     public void prepare(Entity entity, Camera camera){
-        glDepthMask(true);
 
-        Matrix4f modelMatrix = Transformation.getModelMatrix(entity);
-        Matrix4f viewMatrix = Transformation.getViewMatrix(camera);
-
-        Shader shader = entity.getModel().getMaterial().getShader();
-        shader.setUniform("gamma", Constants.GAMMA);
-        shader.setUniform("modelMatrix", modelMatrix);
-        shader.setUniform("textureSampler", 0);
-        shader.setUniform("viewMatrix", viewMatrix);
-        shader.setUniform("projectionMatrix", window.getProjectionMatrix());
-        shader.setUniform("fogColor", SceneManager.fogColor);
-        shader.setUniform("fogDensity", SceneManager.fogDensity);
-        shader.setUniform("fogGradient", SceneManager.fogGradient);
     }
 
     public void prepare(){
@@ -185,6 +168,10 @@ public class Shader {
 
     public void setUniform(String uniformName, int value){
         GL20.glUniform1i(uniforms.get(uniformName), value);
+    }
+
+    public void setUniform(int locationID, int value){
+        GL20.glUniform1i(locationID, value);
     }
 
     public void setUniform(String uniformName, float value){

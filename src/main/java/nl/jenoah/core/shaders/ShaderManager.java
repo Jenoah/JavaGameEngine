@@ -1,10 +1,8 @@
 package nl.jenoah.core.shaders;
 
-import nl.jenoah.core.ModelManager;
-
 public class ShaderManager {
 
-    BlinnPhongShader litShader;
+    SimpleLitShader litShader;
     TerrainShader terrainShader;
     UnlitShader unlitShader;
     BillboardShader billboardShader;
@@ -22,7 +20,7 @@ public class ShaderManager {
         return instance;
     }
 
-    public BlinnPhongShader getLitShader(){
+    public SimpleLitShader getLitShader(){
         return litShader;
     }
 
@@ -42,7 +40,7 @@ public class ShaderManager {
 
     public void init(){
         try {
-            litShader = new BlinnPhongShader();
+            litShader = new SimpleLitShader();
             litShader.init();
 
             unlitShader = new UnlitShader();

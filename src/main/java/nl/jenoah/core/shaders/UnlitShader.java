@@ -3,7 +3,6 @@ package nl.jenoah.core.shaders;
 import nl.jenoah.core.Camera;
 import nl.jenoah.core.entity.Entity;
 import nl.jenoah.core.entity.SceneManager;
-import nl.jenoah.core.utils.Constants;
 import nl.jenoah.core.utils.Transformation;
 import nl.jenoah.core.utils.Utils;
 import org.joml.Matrix4f;
@@ -25,7 +24,6 @@ public class UnlitShader extends Shader{
     @Override
     public void createRequiredUniforms() throws Exception {
         createMaterialUniform("material");
-        createUniform("gamma");
         createUniform("textureSampler");
         createUniform("modelMatrix");
         createUniform("viewMatrix");
@@ -43,7 +41,6 @@ public class UnlitShader extends Shader{
         Matrix4f viewMatrix = Transformation.getViewMatrix(camera);
 
         Shader shader = entity.getModel().getMaterial().getShader();
-        shader.setUniform("gamma", Constants.GAMMA);
         shader.setUniform("textureSampler", 0);
         shader.setUniform("modelMatrix", modelMatrix);
         shader.setUniform("viewMatrix", viewMatrix);

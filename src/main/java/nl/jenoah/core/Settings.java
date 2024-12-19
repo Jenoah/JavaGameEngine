@@ -6,6 +6,7 @@ public class Settings {
     private static boolean useAnisotropic = true;
     private static boolean useVSync = true;
     private static int MSAASamples = 8;
+    private static float gamma = 2.2f;
 
 
     public static boolean isUseAnisotropic() {
@@ -14,6 +15,10 @@ public class Settings {
 
     public static boolean isUseVSync() {
         return useVSync;
+    }
+
+    public static float getGamma() {
+        return gamma;
     }
 
     public static int getMSAASamples() {

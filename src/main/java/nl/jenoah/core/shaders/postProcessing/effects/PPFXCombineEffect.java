@@ -1,21 +1,19 @@
 package nl.jenoah.core.shaders.postProcessing.effects;
 
-import nl.jenoah.core.debugging.Debug;
 import nl.jenoah.core.rendering.ImageRenderer;
 import nl.jenoah.core.shaders.postProcessing.PPFXCombineShader;
-import nl.jenoah.core.shaders.postProcessing.PPFXContrastShader;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL13;
 
 public class PPFXCombineEffect {
-    private ImageRenderer renderer;
-    private PPFXCombineShader shader;
+    private final ImageRenderer renderer;
+    private final PPFXCombineShader shader;
 
     public PPFXCombineEffect(){
         try {
             shader = new PPFXCombineShader();
             shader.init();
-            shader.setIntensity(10);
+            shader.setIntensity(1);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
@@ -26,7 +24,7 @@ public class PPFXCombineEffect {
         try {
             shader = new PPFXCombineShader();
             shader.init();
-            shader.setIntensity(10);
+            shader.setIntensity(1);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
@@ -35,18 +33,16 @@ public class PPFXCombineEffect {
 
     public void render(int primaryTextureID, int secondaryTextureID){
         shader.bind();
+        shader.prepare();
 
         GL13.glActiveTexture(GL13.GL_TEXTURE0);
         GL11.glBindTexture(GL11.GL_TEXTURE_2D, primaryTextureID);
         GL13.glActiveTexture(GL13.GL_TEXTURE1);
         GL11.glBindTexture(GL11.GL_TEXTURE_2D, secondaryTextureID);
 
-        //Debug.Log("DO THING ABOVE IN THE PPFXCOMBINEEFFECT CLASS TO THE TRIPLANAR SHADER TEXTURE LOADING?");
+        shader.setPrimaryTextureID();
+        shader.setSecondaryTextureID();
 
-        shader.setPrimaryTextureID(0);
-        shader.setSecondaryTextureID(1);
-
-        shader.prepare();
         renderer.renderQuad();
 
         shader.unbind();

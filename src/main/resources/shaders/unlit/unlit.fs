@@ -13,7 +13,6 @@ struct Material {
 };
 
 uniform sampler2D textureSampler;
-uniform float gamma;
 uniform vec3 fogColor;
 uniform Material material;
 
@@ -24,6 +23,4 @@ void main() {
         outColor = material.ambient;
     }
 
-    outColor.rgb = mix(vec4(fogColor, 1.0), outColor, fogFactor).rgb;
-    outColor.rgb = pow(outColor.rgb, vec3(1.0/gamma));
-}
+    outColor.rgb = mix(vec4(fogColor, 1.0), outColor, fogFactor).rgb; }

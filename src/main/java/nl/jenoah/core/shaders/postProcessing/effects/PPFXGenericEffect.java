@@ -1,24 +1,33 @@
 package nl.jenoah.core.shaders.postProcessing.effects;
 
 import nl.jenoah.core.rendering.ImageRenderer;
-import nl.jenoah.core.shaders.postProcessing.PPFXBrightShader;
+import nl.jenoah.core.shaders.Shader;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL13;
 
-public class PPFXBrightEffect {
-    private ImageRenderer renderer;
-    private PPFXBrightShader shader;
-    private float threshold = 0.6f;
+public class PPFXGenericEffect {
 
-    public PPFXBrightEffect(int targetFBOWidth, int targetFBOHeight){
+    private final ImageRenderer renderer;
+    protected Shader shader;
+
+    public PPFXGenericEffect(int targetFBOWidth, int targetFBOHeight, Shader shader){
         try {
-            shader = new PPFXBrightShader();
+            this.shader = shader;
             shader.init();
-            shader.setThreshold(threshold);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
         renderer = new ImageRenderer(targetFBOWidth, targetFBOHeight);
+    }
+
+    public PPFXGenericEffect(Shader shader){
+        try {
+            this.shader = shader;
+            shader.init();
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+        renderer = new ImageRenderer();
     }
 
     public void render(int textureID){
@@ -33,11 +42,6 @@ public class PPFXBrightEffect {
         shader.unbind();
     }
 
-    public void setThreshold(float threshold){
-        this.threshold = threshold;
-        shader.setThreshold(threshold);
-    }
-
     public int getOutputTexture(){
         return renderer.getOutputTexture();
     }
@@ -46,4 +50,5 @@ public class PPFXBrightEffect {
         renderer.cleanUp();
         shader.cleanUp();
     }
+
 }

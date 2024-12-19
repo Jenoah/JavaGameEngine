@@ -2,12 +2,11 @@ package nl.jenoah.core.shaders;
 
 import nl.jenoah.core.Camera;
 import nl.jenoah.core.entity.Entity;
-import nl.jenoah.core.loaders.TextureLoader;
 import nl.jenoah.core.utils.Utils;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL13;
 
-public class TriplanarShader extends BlinnPhongShader{
+public class TriplanarShader extends SimpleLitShader {
 
     private int topTextureID, sideTextureID;
     private float blendFactor = 0.5f;
@@ -19,10 +18,6 @@ public class TriplanarShader extends BlinnPhongShader{
 
     public TriplanarShader() throws Exception {
         super();
-        int tempTextureID = TextureLoader.loadTexture("textures/blockPallete.png");
-        int tempTextureID2 = TextureLoader.loadTexture("textures/barn.png");
-
-        setTextureIDs(tempTextureID, tempTextureID2);
     }
 
     @Override
@@ -51,7 +46,6 @@ public class TriplanarShader extends BlinnPhongShader{
         GL11.glBindTexture(GL11.GL_TEXTURE_2D, topTextureID);
         GL13.glActiveTexture(GL13.GL_TEXTURE1);
         GL11.glBindTexture(GL11.GL_TEXTURE_2D, sideTextureID);
-
 
         setUniform("textureSampler", 0);
         setUniform("sideTexture", 1);

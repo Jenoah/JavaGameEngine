@@ -1,35 +1,47 @@
 package nl.jenoah.core.shaders;
 
 import nl.jenoah.core.Camera;
-import nl.jenoah.core.entity.Material;
+import nl.jenoah.core.entity.Entity;
+import nl.jenoah.core.entity.SceneManager;
 import nl.jenoah.core.lighting.DirectionalLight;
 import nl.jenoah.core.lighting.PointLight;
 import nl.jenoah.core.lighting.SpotLight;
 import nl.jenoah.core.utils.Constants;
+import nl.jenoah.core.utils.Transformation;
 import nl.jenoah.core.utils.Utils;
+import org.joml.Matrix4f;
 
-public class BlinnPhongShader extends Shader {
+import static org.lwjgl.opengl.GL11.glDepthMask;
+
+public class SimpleLitShader extends Shader {
 
     private PointLight[] pointLights = new PointLight[0];
     private SpotLight[] spotLights = new SpotLight[0];
     private DirectionalLight directionalLight;
 
-    public BlinnPhongShader() throws Exception {
+    public SimpleLitShader() throws Exception {
         super();
     }
 
     public void init() throws Exception {
-        createVertexShader(Utils.loadResource("/shaders/blingPhong_vertex.vs"));
-        createFragmentShader(Utils.loadResource("/shaders/blingPhong_fragment.fs"));
+        createVertexShader(Utils.loadResource("/shaders/lit/simpleLit/vertex.vs"));
+        createFragmentShader(Utils.loadResource("/shaders/lit/simpleLit/fragment.fs"));
         link();
         super.init();
-
-
     }
 
     @Override
     public void createRequiredUniforms() throws Exception {
         super.createRequiredUniforms();
+
+        createMaterialUniform("material");
+        createUniform("textureSampler");
+        createUniform("modelMatrix");
+        createUniform("viewMatrix");
+        createUniform("projectionMatrix");
+        createUniform("fogColor");
+        createUniform("fogDensity");
+        createUniform("fogGradient");
 
         createUniform("ambientColor");
         createUniform("specularPower");
@@ -37,6 +49,23 @@ public class BlinnPhongShader extends Shader {
         createDirectionalLightUniform("directionalLight");
         createPointLightArrayUniform("pointLights", 5);
         createSpotLightArrayUniform("spotLights", 5);
+    }
+
+    @Override
+    public void prepare(Entity entity, Camera camera){
+        glDepthMask(true);
+
+        Matrix4f modelMatrix = Transformation.getModelMatrix(entity);
+        Matrix4f viewMatrix = Transformation.getViewMatrix(camera);
+
+        Shader shader = entity.getModel().getMaterial().getShader();
+        shader.setUniform("modelMatrix", modelMatrix);
+        shader.setUniform("textureSampler", 0);
+        shader.setUniform("viewMatrix", viewMatrix);
+        shader.setUniform("projectionMatrix", window.getProjectionMatrix());
+        shader.setUniform("fogColor", SceneManager.fogColor);
+        shader.setUniform("fogDensity", SceneManager.fogDensity);
+        shader.setUniform("fogGradient", SceneManager.fogGradient);
     }
 
     public void setLights(DirectionalLight directionalLight, PointLight[] pointLights, SpotLight[] spotLights){

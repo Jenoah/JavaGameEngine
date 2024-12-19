@@ -6,7 +6,6 @@ public class ImageRenderer {
 
     private FrameBuffer fbo;
 
-
     public ImageRenderer(int width, int height) {
         this.fbo = new FrameBuffer(width, height, FrameBuffer.NONE);
     }
@@ -25,11 +24,9 @@ public class ImageRenderer {
         }
     }
 
-
     public int getOutputTexture() {
         return fbo.getColourTexture();
     }
-
 
     public void cleanUp() {
         if (fbo != null) {

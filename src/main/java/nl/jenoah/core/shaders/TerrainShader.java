@@ -5,7 +5,7 @@ import nl.jenoah.core.entity.Entity;
 import nl.jenoah.core.utils.Utils;
 import org.joml.Vector2f;
 
-public class TerrainShader extends BlinnPhongShader{
+public class TerrainShader extends SimpleLitShader {
     private Vector2f terrainHeight = new Vector2f(-1, 1);
 
     public TerrainShader() throws Exception {

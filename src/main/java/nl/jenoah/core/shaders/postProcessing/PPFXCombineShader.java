@@ -2,11 +2,10 @@ package nl.jenoah.core.shaders.postProcessing;
 
 import nl.jenoah.core.shaders.Shader;
 import nl.jenoah.core.utils.Utils;
+import org.lwjgl.opengl.GL30;
 
 public class PPFXCombineShader extends Shader {
     private float secondaryIntensity = 1;
-    private int primaryTextureID;
-    private int secondaryTextureID;
 
     public PPFXCombineShader() throws Exception {
         super();
@@ -30,18 +29,19 @@ public class PPFXCombineShader extends Shader {
         this.secondaryIntensity = secondaryIntensity;
     }
 
-    public void setPrimaryTextureID(int primaryTextureID){
-        this.primaryTextureID = primaryTextureID;
+    public void setPrimaryTextureID(){
+        int primaryTextureLocation = GL30.glGetUniformLocation(programID, "primaryTexture");
+        setUniform(primaryTextureLocation, 0);
     }
 
-    public void setSecondaryTextureID(int secondaryTextureID){
-        this.secondaryTextureID = secondaryTextureID;
+    public void setSecondaryTextureID(){
+        int secondaryTextureLocation = GL30.glGetUniformLocation(programID, "secondaryTexture");
+        setUniform(secondaryTextureLocation, 1);
     }
 
     @Override
     public void prepare() {
         this.setUniform("secondaryIntensity", secondaryIntensity);
-        this.setUniform("primaryTexture", primaryTextureID);
-        this.setUniform("secondaryTexture", secondaryTextureID);
+
     }
 }
