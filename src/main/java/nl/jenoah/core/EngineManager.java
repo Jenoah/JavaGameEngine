@@ -1,5 +1,6 @@
 package nl.jenoah.core;
 
+import nl.jenoah.core.debugging.Debug;
 import nl.jenoah.core.entity.SceneManager;
 import org.lwjgl.glfw.GLFW;
 import org.lwjgl.glfw.GLFWErrorCallback;
@@ -38,7 +39,7 @@ public class EngineManager {
         init(gameLogic);
         if(isRunning)
             return;
-        System.out.println("Starting Engine...");
+        Debug.Log("Starting Engine...");
         run();
     }
 
