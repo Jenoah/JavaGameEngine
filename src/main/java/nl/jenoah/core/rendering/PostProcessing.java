@@ -33,8 +33,6 @@ public class PostProcessing {
         quad = getQuad();
         WindowManager window = WindowManager.getInstance();
 
-        //Blurring
-        combineEffect = new PPFXCombineEffect(window.getWidth(), window.getHeight());
 
         try {
             //Blur (for Bloom)
@@ -44,6 +42,7 @@ public class PostProcessing {
             horizontalBlurShader.setTargetWidth(window.getWidth() / bloomSize);
             horizontalBlurEffectPass1 = new PPFXGenericEffect(window.getWidth() / bloomSize, window.getHeight() / bloomSize, horizontalBlurShader);
             verticalBlurEffectPass1 = new PPFXGenericEffect(window.getWidth() / bloomSize, window.getHeight() / bloomSize, verticalBlurShader);
+            combineEffect = new PPFXCombineEffect(window.getWidth(), window.getHeight());
 
             //Brightness detection (for Bloom)
             PPFXBrightShader brightShader = new PPFXBrightShader();

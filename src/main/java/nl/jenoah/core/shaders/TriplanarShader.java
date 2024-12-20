@@ -47,8 +47,9 @@ public class TriplanarShader extends SimpleLitShader {
         GL13.glActiveTexture(GL13.GL_TEXTURE1);
         GL11.glBindTexture(GL11.GL_TEXTURE_2D, sideTextureID);
 
-        setUniform("textureSampler", 0);
-        setUniform("sideTexture", 1);
+        setTexture("textureSampler", 0);
+        setTexture("sideTexture", 1);
+
         setUniform("blendFactor", blendFactor);
     }
 

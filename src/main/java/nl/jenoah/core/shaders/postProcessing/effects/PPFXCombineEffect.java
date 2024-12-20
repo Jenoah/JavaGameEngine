@@ -40,8 +40,8 @@ public class PPFXCombineEffect {
         GL13.glActiveTexture(GL13.GL_TEXTURE1);
         GL11.glBindTexture(GL11.GL_TEXTURE_2D, secondaryTextureID);
 
-        shader.setPrimaryTextureID();
-        shader.setSecondaryTextureID();
+        shader.setTexture("primaryTexture", 0);
+        shader.setTexture("secondaryTexture", 1);
 
         renderer.renderQuad();
 
