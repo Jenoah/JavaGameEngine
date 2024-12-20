@@ -5,6 +5,8 @@ import nl.jenoah.core.utils.Utils;
 
 public class PPFXCombineShader extends Shader {
 
+    private float secondaryIntensity = 1f;
+
     public PPFXCombineShader() throws Exception {
         super();
     }
@@ -24,6 +26,12 @@ public class PPFXCombineShader extends Shader {
     }
 
     public void setIntensity(float secondaryIntensity){
+        this.secondaryIntensity = secondaryIntensity;
+    }
+
+    @Override
+    public void prepare() {
+        super.prepare();
         this.setUniform("secondaryIntensity", secondaryIntensity);
     }
 }

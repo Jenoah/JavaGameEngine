@@ -50,6 +50,7 @@ public class RenderManager {
             regenerateFrameBuffer();
             window.setResize(false);
             window.updateProjectionMatrix();
+            PostProcessing.updateResolution();
         }
 
         //3D rendering

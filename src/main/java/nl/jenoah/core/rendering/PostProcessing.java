@@ -4,11 +4,9 @@ import nl.jenoah.core.WindowManager;
 import nl.jenoah.core.entity.Model;
 import nl.jenoah.core.loaders.PrimitiveLoader;
 import nl.jenoah.core.shaders.Shader;
-import nl.jenoah.core.shaders.postProcessing.PPFXBrightShader;
-import nl.jenoah.core.shaders.postProcessing.PPFXGammaCorrectShader;
-import nl.jenoah.core.shaders.postProcessing.PPFXHorizontalBlurShader;
-import nl.jenoah.core.shaders.postProcessing.PPFXVerticalBlurShader;
+import nl.jenoah.core.shaders.postProcessing.*;
 import nl.jenoah.core.shaders.postProcessing.effects.*;
+import org.joml.Vector2f;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL20;
 import org.lwjgl.opengl.GL30;
@@ -22,6 +20,7 @@ public class PostProcessing {
     private static PPFXGenericEffect contrastEffect;
     private static PPFXGenericEffect brightEffect;
     private static PPFXGenericEffect vignetteEffect;
+    private static PPFXGenericEffect fxaaEffect;
     private static PPFXGenericEffect outputEffect;
 
     private static PPFXCombineEffect combineEffect;
@@ -43,6 +42,7 @@ public class PostProcessing {
             horizontalBlurEffectPass1 = new PPFXGenericEffect(window.getWidth() / bloomSize, window.getHeight() / bloomSize, horizontalBlurShader);
             verticalBlurEffectPass1 = new PPFXGenericEffect(window.getWidth() / bloomSize, window.getHeight() / bloomSize, verticalBlurShader);
             combineEffect = new PPFXCombineEffect(window.getWidth(), window.getHeight());
+            combineEffect.setIntensity(bloomIntensity);
 
             //Brightness detection (for Bloom)
             PPFXBrightShader brightShader = new PPFXBrightShader();
@@ -56,13 +56,16 @@ public class PostProcessing {
             //Vignette
             vignetteEffect = new PPFXGenericEffect(window.getWidth(), window.getHeight(), new Shader().init("/shaders/postProcessing/ppfxGeneric.vs", "/shaders/postProcessing/ppfxVignette.fs"));
 
+            //Anti Aliasing
+            PPFXFxaaShader fxaaShader = new PPFXFxaaShader();
+            fxaaEffect = new PPFXGenericEffect(window.getWidth(), window.getHeight(), fxaaShader);
+            fxaaShader.setResolution(new Vector2f(window.getWidth(), window.getHeight()));
+
             //Render final
             outputEffect = new PPFXGenericEffect(new Shader().init("/shaders/postProcessing/ppfxGeneric.vs", "/shaders/postProcessing/ppfxGeneric.fs"));
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
-
-        combineEffect.setIntensity(bloomIntensity);
     }
 
     private static Model getQuad(){
@@ -90,8 +93,11 @@ public class PostProcessing {
         gammaCorrectEffect.render(contrastEffect.getOutputTexture());
         vignetteEffect.render(gammaCorrectEffect.getOutputTexture());
 
+        //Anti Aliasing
+        fxaaEffect.render(vignetteEffect.getOutputTexture());
+
         //Render to screen
-        outputEffect.render(vignetteEffect.getOutputTexture());
+        outputEffect.render(fxaaEffect.getOutputTexture());
 
         unbind();
     }
@@ -103,6 +109,8 @@ public class PostProcessing {
         contrastEffect.cleanUp();
         combineEffect.cleanUp();
         gammaCorrectEffect.cleanUp();
+        vignetteEffect.cleanUp();
+        fxaaEffect.cleanUp();
         outputEffect.cleanUp();
     }
 
@@ -116,5 +124,10 @@ public class PostProcessing {
         GL11.glEnable(GL11.GL_DEPTH_TEST);
         GL20.glDisableVertexAttribArray(0);
         GL30.glBindVertexArray(0);
+    }
+
+    public static void updateResolution(){
+        cleanUp();
+        init();
     }
 }
