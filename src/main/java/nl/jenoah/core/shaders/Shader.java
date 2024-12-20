@@ -2,6 +2,7 @@ package nl.jenoah.core.shaders;
 
 import nl.jenoah.core.Camera;
 import nl.jenoah.core.WindowManager;
+import nl.jenoah.core.debugging.Debug;
 import nl.jenoah.core.entity.Entity;
 import nl.jenoah.core.entity.Material;
 import nl.jenoah.core.utils.Utils;
@@ -39,8 +40,8 @@ public class Shader {
             throw new Exception("Shaders not initialized");
         }
 
+        Debug.Log("Initializing " + getClass().getSimpleName());
         createRequiredUniforms();
-
     }
 
     public Shader init(String vertexShader, String fragmentShader) throws Exception {
@@ -51,9 +52,7 @@ public class Shader {
         return this;
     }
 
-    public void createRequiredUniforms() throws Exception {
-
-    }
+    public void createRequiredUniforms() throws Exception { }
 
     public void createVertexShader(String shaderCode) throws Exception{
         vertexShaderID = createShader(shaderCode, GL20.GL_VERTEX_SHADER);

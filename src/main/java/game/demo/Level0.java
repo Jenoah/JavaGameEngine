@@ -136,13 +136,12 @@ public class Level0 extends Scene {
         //Shaders
         int grassTextureID = TextureLoader.loadTexture("textures/grass.jpg");
         int rockTextureID = TextureLoader.loadTexture("textures/rock.jpg");
-        ShaderManager.getInstance().getTriplanarShader().setTextureIDs(grassTextureID, rockTextureID);
-        ShaderManager.getInstance().getTriplanarShader().setBlendFactor(32);
+        ShaderManager.triplanarShader.setTextureIDs(grassTextureID, rockTextureID);
+        ShaderManager.triplanarShader.setBlendFactor(32);
 
-        ShaderManager.getInstance().getLitShader().setLights(getDirectionalLight(), getPointLights(), getSpotLights());
-        ShaderManager.getInstance().getTriplanarShader().setLights(getDirectionalLight(), getPointLights(), getSpotLights());
-
-
+        ShaderManager.litShader.setLights(getDirectionalLight(), getPointLights(), getSpotLights());
+        ShaderManager.triplanarShader.setLights(getDirectionalLight(), getPointLights(), getSpotLights());
+        //ShaderManager.pbrShader.setLights(getDirectionalLight(), getPointLights(), getSpotLights());
     }
 
     @Override
@@ -201,7 +200,7 @@ public class Level0 extends Scene {
 
             Entity chunkEntity = chunk.getChunkEntity();
             if(chunkEntity != null) {
-                chunkEntity.getModel().getMaterial().setShader(ShaderManager.getInstance().getTriplanarShader());
+                chunkEntity.getModel().getMaterial().setShader(ShaderManager.triplanarShader);
                 addEntity(chunk.getChunkEntity());
             }
         }

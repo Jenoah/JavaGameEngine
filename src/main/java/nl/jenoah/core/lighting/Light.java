@@ -1,6 +1,5 @@
 package nl.jenoah.core.lighting;
 
-import nl.jenoah.core.ModelManager;
 import nl.jenoah.core.entity.*;
 import nl.jenoah.core.loaders.PrimitiveLoader;
 import nl.jenoah.core.shaders.ShaderManager;
@@ -86,7 +85,7 @@ public class Light extends GameObject {
         if(proxy == null){
             Model lightProxyModel = new Model(PrimitiveLoader.getQuad(), "textures/lightDirection.png");
             Material proxyMaterial = lightProxyModel.getMaterial();
-            proxyMaterial.setShader(ShaderManager.getInstance().getUnlitShader());
+            proxyMaterial.setShader(ShaderManager.unlitShader);
             proxyMaterial.setAmbientColor(new Vector4f(color, 1));
             proxyMaterial.setReflectance(0);
             lightProxyModel.setDoubleSided(true);

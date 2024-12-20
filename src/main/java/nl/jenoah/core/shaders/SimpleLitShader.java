@@ -21,13 +21,10 @@ public class SimpleLitShader extends Shader {
 
     public SimpleLitShader() throws Exception {
         super();
-    }
-
-    public void init() throws Exception {
         createVertexShader(Utils.loadResource("/shaders/lit/simpleLit/vertex.vs"));
         createFragmentShader(Utils.loadResource("/shaders/lit/simpleLit/fragment.fs"));
+        //TODO: Make that the vertex- and fragment shaders do not get created and linked when this is called from an inheriting class
         link();
-        super.init();
     }
 
     @Override

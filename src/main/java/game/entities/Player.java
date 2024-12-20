@@ -30,7 +30,7 @@ public class Player extends GameObject {
         Model pointLightProxyModel = OBJLoader.loadOBJModel("/models/cube.obj");
         pointLightProxyModel.setTexture(null);
         Entity feet = new Entity(pointLightProxyModel, new Vector3f(0, -1f, 0), new Vector3f(0, 0, 0), .1f);
-        feet.getModel().setMaterial(new Material(ShaderManager.getInstance().getUnlitShader()));
+        feet.getModel().setMaterial(new Material(ShaderManager.unlitShader));
         feet.getModel().getMaterial().setAmbientColor(new Vector4f(1, .5f, 1, 1));
         feet.setParent(this);
     }

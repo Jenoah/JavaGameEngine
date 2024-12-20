@@ -12,13 +12,9 @@ import static org.lwjgl.opengl.GL11.glDepthMask;
 public class UnlitShader extends Shader{
     public UnlitShader() throws Exception {
         super();
-    }
-
-    public void init() throws Exception {
         createVertexShader(Utils.loadResource("/shaders/unlit/unlit.vs"));
         createFragmentShader(Utils.loadResource("/shaders/unlit/unlit.fs"));
         link();
-        super.init();
     }
 
     @Override

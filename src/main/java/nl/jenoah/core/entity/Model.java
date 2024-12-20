@@ -21,13 +21,13 @@ public class Model {
     public Model(int id, int vertexCount){
         this.id = id;
         this.vertexCount = vertexCount;
-        this.material = new Material(ShaderManager.getInstance().getLitShader());
+        this.material = new Material(ShaderManager.litShader);
     }
 
     public Model(int id, int vertexCount, Texture texture){
         this.id = id;
         this.vertexCount = vertexCount;
-        this.material = new Material(ShaderManager.getInstance().getLitShader(), texture);
+        this.material = new Material(ShaderManager.litShader, texture);
     }
 
     public Model(Model model, Texture texture){

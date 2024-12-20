@@ -10,13 +10,9 @@ import org.joml.Matrix4f;
 public class BillboardShader extends Shader{
     public BillboardShader() throws Exception {
         super();
-    }
-
-    public void init() throws Exception {
         createVertexShader(Utils.loadResource("/shaders/billboard/billboard.vs"));
         createFragmentShader(Utils.loadResource("/shaders/billboard/billboard.fs"));
         link();
-        super.init();
     }
 
     @Override

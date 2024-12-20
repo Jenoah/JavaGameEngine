@@ -18,15 +18,10 @@ public class TriplanarShader extends SimpleLitShader {
 
     public TriplanarShader() throws Exception {
         super();
-    }
-
-    @Override
-    public void init() throws Exception {
         createVertexShader(Utils.loadResource("/shaders/triplanar.vs"));
         createFragmentShader(Utils.loadResource("/shaders/triplanar.fs"));
         link();
-
-        createRequiredUniforms();
+        init();
     }
 
     @Override
