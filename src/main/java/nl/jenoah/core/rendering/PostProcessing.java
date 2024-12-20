@@ -21,6 +21,7 @@ public class PostProcessing {
     private static PPFXGenericEffect gammaCorrectEffect;
     private static PPFXGenericEffect contrastEffect;
     private static PPFXGenericEffect brightEffect;
+    private static PPFXGenericEffect vignetteEffect;
     private static PPFXGenericEffect outputEffect;
 
     private static PPFXCombineEffect combineEffect;
@@ -32,7 +33,6 @@ public class PostProcessing {
     public static void init(){
         quad = getQuad();
         WindowManager window = WindowManager.getInstance();
-
 
         try {
             //Blur (for Bloom)
@@ -52,6 +52,9 @@ public class PostProcessing {
             //Gamma and contrast adjustments
             gammaCorrectEffect = new PPFXGenericEffect(window.getWidth(), window.getHeight(), new PPFXGammaCorrectShader());
             contrastEffect = new PPFXGenericEffect(window.getWidth(), window.getHeight(), new Shader().init("/shaders/postProcessing/ppfxGeneric.vs", "/shaders/postProcessing/ppfxContrast.fs"));
+
+            //Vignette
+            vignetteEffect = new PPFXGenericEffect(window.getWidth(), window.getHeight(), new Shader().init("/shaders/postProcessing/ppfxGeneric.vs", "/shaders/postProcessing/ppfxVignette.fs"));
 
             //Render final
             outputEffect = new PPFXGenericEffect(new Shader().init("/shaders/postProcessing/ppfxGeneric.vs", "/shaders/postProcessing/ppfxGeneric.fs"));
@@ -85,9 +88,10 @@ public class PostProcessing {
         //Color adjustment
         contrastEffect.render(combineEffect.getOutputTexture());
         gammaCorrectEffect.render(contrastEffect.getOutputTexture());
+        vignetteEffect.render(gammaCorrectEffect.getOutputTexture());
 
         //Render to screen
-        outputEffect.render(gammaCorrectEffect.getOutputTexture());
+        outputEffect.render(vignetteEffect.getOutputTexture());
 
         unbind();
     }
