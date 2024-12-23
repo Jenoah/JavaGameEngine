@@ -6,7 +6,6 @@ import nl.jenoah.core.shaders.Shader;
 import nl.jenoah.core.entity.Entity;
 import nl.jenoah.core.entity.Model;
 import org.lwjgl.opengl.GL11;
-import org.lwjgl.opengl.GL13;
 import org.lwjgl.opengl.GL20;
 import org.lwjgl.opengl.GL30;
 
@@ -37,7 +36,7 @@ public class EntityRenderer implements IRenderer{
                 if(!e.isEnabled()) continue;
                 bind(e.getModel());
                 shader.prepare(e, camera);
-                GL11.glDrawElements(GL11.GL_TRIANGLES, e.getModel().getVertexCount(), GL11.GL_UNSIGNED_INT, 0);
+                GL11.glDrawElements(GL11.GL_TRIANGLES, e.getModel().getMesh().getVertexCount(), GL11.GL_UNSIGNED_INT, 0);
                 unbind();
             }
             shader.unbind();
@@ -51,20 +50,13 @@ public class EntityRenderer implements IRenderer{
         GL20.glEnableVertexAttribArray(0);
         GL20.glEnableVertexAttribArray(1);
         GL20.glEnableVertexAttribArray(2);
-        if(model.isDoubleSided()){
+        if(model.getMaterial().isDoubleSided()){
             GL11.glEnable(GL11.GL_BLEND);
             GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
             GL11.glDisable(GL11.GL_CULL_FACE);
         }else{
             GL11.glDisable(GL11.GL_BLEND);
             GL11.glEnable(GL11.GL_CULL_FACE);
-        }
-        model.getMaterial().getShader().setUniform("material", model.getMaterial());
-        if(model.getTexture() != null) {
-            GL13.glActiveTexture(GL13.GL_TEXTURE0);
-            GL11.glBindTexture(GL11.GL_TEXTURE_2D, model.getTexture().getId());
-        }else{
-            model.getMaterial().getShader().setUniform("material.hasTexture", 0);
         }
     }
 

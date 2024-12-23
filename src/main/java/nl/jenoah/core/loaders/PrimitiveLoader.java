@@ -36,7 +36,7 @@ public class PrimitiveLoader {
 
         textureScale = 1;
 
-        return PrimitiveLoader.loadModel(vertices, textureCoords, indices, normals);
+        return ModelManager.loadModel(vertices, textureCoords, indices, normals);
     }
 
     public static Model getQuad(float textureScale){
@@ -124,7 +124,7 @@ public class PrimitiveLoader {
         };
 
         // Define the indices for the cube's triangles
-        int[] indices = new int[]{
+        int[] triangles = new int[]{
                 // Front face
                 0, 1, 2,
                 0, 2, 3,
@@ -189,30 +189,6 @@ public class PrimitiveLoader {
                 0.0f, -1.0f, 0.0f
         };
 
-        return loadModel(vertices, textureCoords, indices, normals);
-    }
-
-
-    public static Model loadModel(float[] vertices, float[] textureCoords, int[] indices, float[] normals){
-        int id = ModelManager.createVAO();
-
-        ModelManager.StoreIndicesBuffer(indices);
-        ModelManager.storeDataInAttributeList(0, 3, vertices);
-        int textureCoordID = ModelManager.storeDataInAttributeList(1, 2, textureCoords);
-        ModelManager.storeDataInAttributeList(2, 3, normals);
-
-        ModelManager.unbind();
-        Model model = new Model(id, indices.length);
-        model.setTextureCoordinates(textureCoordID, textureCoords);
-        return model;
-    }
-
-    public static Model loadModel(float[] vertices){
-        int id = ModelManager.createVAO();
-
-        ModelManager.storeDataInAttributeList(0, 3, vertices);
-
-        ModelManager.unbind();
-        return new Model(id, vertices.length);
+        return ModelManager.loadModel(vertices, textureCoords, triangles, normals);
     }
 }

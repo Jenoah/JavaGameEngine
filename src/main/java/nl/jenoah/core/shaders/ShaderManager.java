@@ -7,14 +7,14 @@ public class ShaderManager {
     public final static BillboardShader billboardShader;
     public final static TerrainShader terrainShader;
     public final static TriplanarShader triplanarShader;
-    //public final static PBRShader pbrShader;
+    public final static PBRShader pbrShader;
 
     static {
         try {
             litShader = new SimpleLitShader();
             litShader.init();
-            //pbrShader = new PBRShader();
-            //pbrShader.init();
+            pbrShader = new PBRShader();
+            pbrShader.init();
             unlitShader = new UnlitShader();
             unlitShader.init();
             billboardShader = new BillboardShader();

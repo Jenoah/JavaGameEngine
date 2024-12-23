@@ -2,6 +2,7 @@ package nl.jenoah.core.gui;
 
 import nl.jenoah.core.ModelManager;
 import nl.jenoah.core.entity.Model;
+import org.joml.Vector2f;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL13;
 import org.lwjgl.opengl.GL20;
@@ -15,11 +16,11 @@ public class GuiRenderer {
     private final GuiShader shader;
 
     public GuiRenderer(){
-        float[] positions = {
-                -1f, -1f,
-                1f, -1f,
-                -1f, 1f,
-                1f, 1f,
+        Vector2f[] positions = {
+                new Vector2f(-1f, -1f),
+                new Vector2f(1f, -1f),
+                new Vector2f(-1f, 1f),
+                new Vector2f(1f, 1f)
         };
 
         quad = ModelManager.loadModel(positions);

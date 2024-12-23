@@ -8,7 +8,29 @@ import java.util.List;
 
 public class Conversion {
 
-    public static float[] v2ToFloatArray(List<Vector2f> vectors){
+    public static Vector3f[] floatArrayToVector3Array(float[] floatArray){
+        Vector3f[] vectors = new Vector3f[floatArray.length / 3];
+        for (int i = 0; i < vectors.length; i++) {
+            Vector3f vector = new Vector3f();
+            vector.x = floatArray[i * 3];
+            vector.y = floatArray[i * 3 + 1];
+            vector.z = floatArray[i * 3 + 2];
+            vectors[i] = vector;
+        }
+        return vectors;
+    }
+    public static Vector2f[] floatArrayToVector2Array(float[] floatArray){
+        Vector2f[] vectors = new Vector2f[floatArray.length / 2];
+        for (int i = 0; i < vectors.length; i++) {
+            Vector2f vector = new Vector2f();
+            vector.x = floatArray[i * 2];
+            vector.y = floatArray[i * 2 + 1];
+            vectors[i] = vector;
+        }
+        return vectors;
+    }
+
+    public static float[] V2toFloatArray(List<Vector2f> vectors){
         float[] vectorsStripped = new float[vectors.size() * 2];
         for (int i = 0; i < vectors.size(); i++) {
             vectorsStripped[i * 2] = vectors.get(i).x;
@@ -17,8 +39,7 @@ public class Conversion {
 
         return vectorsStripped;
     }
-
-    public static float[] v2ToFloatArray(Vector2f[] vectors){
+    public static float[] toFloatArray(Vector2f[] vectors){
         float[] vectorsStripped = new float[vectors.length * 2];
         for (int i = 0; i < vectors.length; i++) {
             vectorsStripped[i * 2] = vectors[i].x;
@@ -28,7 +49,7 @@ public class Conversion {
         return vectorsStripped;
     }
 
-    public static float[] v3ToFloatArray(List<Vector3f> vectors){
+    public static float[] V3toFloatArray(List<Vector3f> vectors){
         float[] vectorsStripped = new float[vectors.size() * 3];
         int i = 0;
         for(Vector3f vector : vectors){
@@ -40,8 +61,7 @@ public class Conversion {
 
         return vectorsStripped;
     }
-
-    public static float[] v3ToFloatArray(Vector3f[] vectors){
+    public static float[] toFloatArray(Vector3f[] vectors){
         float[] vectorsStripped = new float[vectors.length * 3];
         for (int i = 0; i < vectors.length; i++) {
             vectorsStripped[i * 3] = vectors[i].x;

@@ -69,7 +69,8 @@ public class Level0 extends Scene {
         addEntity(monkeyEntity);
 
         Model groundBlock = PrimitiveLoader.getCube();
-        groundBlock.setTexture(new Texture("textures/rock.jpg"), 8f);
+        groundBlock.getMaterial().setAlbedoTexture(new Texture("textures/rock.jpg"));
+        groundBlock.getMaterial().setReflectance(8);
         Entity groundBlockEntity = new Entity(groundBlock, new Vector3f(0, 2.5f, -10), new Vector3f(0f), new Vector3f(10, 5, 12));
         addEntity(groundBlockEntity);
 
@@ -141,7 +142,7 @@ public class Level0 extends Scene {
 
         ShaderManager.litShader.setLights(getDirectionalLight(), getPointLights(), getSpotLights());
         ShaderManager.triplanarShader.setLights(getDirectionalLight(), getPointLights(), getSpotLights());
-        //ShaderManager.pbrShader.setLights(getDirectionalLight(), getPointLights(), getSpotLights());
+        ShaderManager.pbrShader.setLights(getDirectionalLight(), getPointLights(), getSpotLights());
     }
 
     @Override

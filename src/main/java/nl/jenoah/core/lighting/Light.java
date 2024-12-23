@@ -88,7 +88,7 @@ public class Light extends GameObject {
             proxyMaterial.setShader(ShaderManager.unlitShader);
             proxyMaterial.setAmbientColor(new Vector4f(color, 1));
             proxyMaterial.setReflectance(0);
-            lightProxyModel.setDoubleSided(true);
+            lightProxyModel.getMaterial().setDoubleSided(true);
             Entity proxy = new Entity(lightProxyModel, new Vector3f(0), new Vector3f(0, 90, 0), 1, true);
             proxy.setParent(this);
         }

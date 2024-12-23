@@ -7,7 +7,6 @@ import nl.jenoah.core.entity.Entity;
 import nl.jenoah.core.entity.Model;
 import nl.jenoah.core.utils.Calculus;
 import nl.jenoah.core.utils.Constants;
-import nl.jenoah.core.utils.Conversion;
 import org.joml.Vector2f;
 import org.joml.Vector3f;
 import org.joml.Vector3i;
@@ -20,7 +19,6 @@ public class MarchingChunk {
     List<Vector3f> vertices = new ArrayList<>();
     List<Integer> triangles = new ArrayList<>();
     Vector3f[] normals;
-    Vector2f[] uvs;
 
     Entity chunkEntity;
 
@@ -37,7 +35,6 @@ public class MarchingChunk {
         UpdateChunk();
         if(!vertices.isEmpty()) {
             normals = calculateNormals();
-            uvs = ModelManager.generateUVs(vertices, triangles, normals);
             isReady = true;
             //publishChunk();
         }
@@ -54,12 +51,10 @@ public class MarchingChunk {
     }
 
     public void publishChunk(){
-        float[] vertexArray = Conversion.v3ToFloatArray(vertices);
-        float[] uvArray = Conversion.v2ToFloatArray(uvs);
         int[] triangleArray = triangles.stream().mapToInt(i->i).toArray();
-        float[] normalsArray = Conversion.v3ToFloatArray(normals);
 
-        Model chunkModel = ModelManager.loadModel(vertexArray, uvArray, normalsArray, triangleArray);
+        Model chunkModel = ModelManager.loadModel(vertices.toArray(new Vector3f[0]), null, triangleArray, normals);
+        chunkModel.getMesh().generateUVs();
         chunkEntity = new Entity(chunkModel, chunkPosition.toVector3(), new Vector3f(), 1);
     }
 

@@ -212,7 +212,7 @@ public class Scene {
     public void addText(GUIText textObject){
         FontType font = textObject.getFont();
         TextMeshData data = font.loadText(textObject);
-        int id = ModelManager.loadModelID(data.getVertexPositions(), data.getTextureCoords());
+        int id = ModelManager.loadModelID(data.getVertexPositions(), data.getTextureCoords(), 2);
         textObject.setMeshInfo(id, data.getVertexCount());
         List<GUIText> textBatch = textObjects.computeIfAbsent(font, k -> new ArrayList<GUIText>());
         textBatch.add(textObject);

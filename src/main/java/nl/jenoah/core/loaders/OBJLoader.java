@@ -4,7 +4,6 @@ import nl.jenoah.core.ModelManager;
 import nl.jenoah.core.entity.Model;
 import nl.jenoah.core.entity.Texture;
 import nl.jenoah.core.rendering.Face;
-import nl.jenoah.core.utils.Conversion;
 import nl.jenoah.core.utils.Utils;
 import org.joml.Vector2f;
 import org.joml.Vector3f;
@@ -20,7 +19,7 @@ public class OBJLoader {
         List<Vector3f> vertices = new ArrayList<>();
         List<Vector3f> normals = new ArrayList<>();
         List<Vector2f> textures = new ArrayList<>();
-        List<Integer> indices = new ArrayList<>();
+        List<Integer> triangles = new ArrayList<>();
         List<Face> faces = new ArrayList<>();
 
         List<Vector3f> finalVertices = new ArrayList<>();
@@ -100,12 +99,12 @@ public class OBJLoader {
         int[] indicesArray = finalIndices.stream().mapToInt((Integer v) -> v).toArray();
 
 
-        return ModelManager.loadModel(Conversion.v3ToFloatArray(finalVertices), Conversion.v2ToFloatArray(finalTextures), Conversion.v3ToFloatArray(finalNormals), indicesArray);
+        return ModelManager.loadModel(finalVertices.toArray(new Vector3f[0]), finalTextures.toArray(new Vector2f[0]), indicesArray, finalNormals.toArray(new Vector3f[0]));
     }
 
     public static Model loadOBJModel(String fileName, Texture texturePath) {
         Model model = loadOBJModel(fileName);
-        model.setTexture(texturePath);
+        model.getMaterial().setAlbedoTexture(texturePath);
 
         return model;
     }

@@ -4,52 +4,53 @@ import nl.jenoah.core.Camera;
 import nl.jenoah.core.ModelManager;
 import nl.jenoah.core.entity.Model;
 import nl.jenoah.core.loaders.TextureLoader;
+import org.joml.Vector3f;
 import org.lwjgl.opengl.*;
 
 public class SkyboxRenderer {
     private static final float SIZE = 500f;
-    private static final float[] VERTICES = {
-            -SIZE,  SIZE, -SIZE,
-            -SIZE, -SIZE, -SIZE,
-            SIZE, -SIZE, -SIZE,
-            SIZE, -SIZE, -SIZE,
-            SIZE,  SIZE, -SIZE,
-            -SIZE,  SIZE, -SIZE,
+    private static final Vector3f[] VERTICES = {
+            new Vector3f(-SIZE,  SIZE, -SIZE),
+            new Vector3f(-SIZE, -SIZE, -SIZE),
+            new Vector3f(SIZE, -SIZE, -SIZE),
+            new Vector3f(SIZE, -SIZE, -SIZE),
+            new Vector3f(SIZE,  SIZE, -SIZE),
+            new Vector3f(-SIZE,  SIZE, -SIZE),
 
-            -SIZE, -SIZE,  SIZE,
-            -SIZE, -SIZE, -SIZE,
-            -SIZE,  SIZE, -SIZE,
-            -SIZE,  SIZE, -SIZE,
-            -SIZE,  SIZE,  SIZE,
-            -SIZE, -SIZE,  SIZE,
+            new Vector3f(-SIZE, -SIZE,  SIZE),
+            new Vector3f( -SIZE, -SIZE, -SIZE),
+            new Vector3f(-SIZE,  SIZE, -SIZE),
+            new Vector3f(-SIZE,  SIZE, -SIZE),
+            new Vector3f(-SIZE,  SIZE,  SIZE),
+            new Vector3f(-SIZE, -SIZE,  SIZE),
 
-            SIZE, -SIZE, -SIZE,
-            SIZE, -SIZE,  SIZE,
-            SIZE,  SIZE,  SIZE,
-            SIZE,  SIZE,  SIZE,
-            SIZE,  SIZE, -SIZE,
-            SIZE, -SIZE, -SIZE,
+            new Vector3f(SIZE, -SIZE, -SIZE),
+            new Vector3f(SIZE, -SIZE,  SIZE),
+            new Vector3f(SIZE,  SIZE,  SIZE),
+            new Vector3f(SIZE,  SIZE,  SIZE),
+            new Vector3f(SIZE,  SIZE, -SIZE),
+            new Vector3f(SIZE, -SIZE, -SIZE),
 
-            -SIZE, -SIZE,  SIZE,
-            -SIZE,  SIZE,  SIZE,
-            SIZE,  SIZE,  SIZE,
-            SIZE,  SIZE,  SIZE,
-            SIZE, -SIZE,  SIZE,
-            -SIZE, -SIZE,  SIZE,
+            new Vector3f(-SIZE, -SIZE,  SIZE),
+            new Vector3f(-SIZE,  SIZE,  SIZE),
+            new Vector3f(SIZE,  SIZE,  SIZE),
+            new Vector3f(SIZE,  SIZE,  SIZE),
+            new Vector3f(SIZE, -SIZE,  SIZE),
+            new Vector3f(-SIZE, -SIZE,  SIZE),
 
-            -SIZE,  SIZE, -SIZE,
-            SIZE,  SIZE, -SIZE,
-            SIZE,  SIZE,  SIZE,
-            SIZE,  SIZE,  SIZE,
-            -SIZE,  SIZE,  SIZE,
-            -SIZE,  SIZE, -SIZE,
+            new Vector3f(-SIZE,  SIZE, -SIZE),
+            new Vector3f(SIZE,  SIZE, -SIZE),
+            new Vector3f(SIZE,  SIZE,  SIZE),
+            new Vector3f(SIZE,  SIZE,  SIZE),
+            new Vector3f(-SIZE,  SIZE,  SIZE),
+            new Vector3f(-SIZE,  SIZE, -SIZE),
 
-            -SIZE, -SIZE, -SIZE,
-            -SIZE, -SIZE,  SIZE,
-            SIZE, -SIZE, -SIZE,
-            SIZE, -SIZE, -SIZE,
-            -SIZE, -SIZE,  SIZE,
-            SIZE, -SIZE,  SIZE
+            new Vector3f(-SIZE, -SIZE, -SIZE),
+            new Vector3f(-SIZE, -SIZE,  SIZE),
+            new Vector3f(SIZE, -SIZE, -SIZE),
+            new Vector3f(SIZE, -SIZE, -SIZE),
+            new Vector3f(-SIZE, -SIZE,  SIZE),
+            new Vector3f(SIZE, -SIZE,  SIZE)
     };
 
     private final Model cube;
@@ -57,7 +58,7 @@ public class SkyboxRenderer {
     private final SkyboxShader shader;
 
     public SkyboxRenderer(String[] textureFiles){
-        cube = ModelManager.loadModel(VERTICES, 3);
+        cube = ModelManager.loadModel(VERTICES);
         textureID = TextureLoader.loadCubeMapTexture(textureFiles);
 
         try {
@@ -75,7 +76,7 @@ public class SkyboxRenderer {
         GL20.glEnableVertexAttribArray(0);
         GL13.glActiveTexture(GL13.GL_TEXTURE0);
         GL11.glBindTexture(GL13.GL_TEXTURE_CUBE_MAP, textureID);
-        GL11.glDrawArrays(GL11.GL_TRIANGLES, 0, cube.getVertexCount());
+        GL11.glDrawArrays(GL11.GL_TRIANGLES, 0, cube.getMesh().getVertexCount());
         GL20.glDisableVertexAttribArray(0);
         GL30.glBindVertexArray(0);
         endRendering();

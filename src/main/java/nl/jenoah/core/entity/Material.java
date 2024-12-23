@@ -6,93 +6,113 @@ import org.joml.Vector4f;
 
 public class Material {
 
-    private Vector4f ambientColor;
-    private Vector4f diffuseColor;
-    private Vector4f specularColor;
+    private Vector4f ambientColor = Constants.DEFAULT_COLOR;
+    private Vector4f diffuseColor = Constants.DEFAULT_COLOR;
+    private Vector4f specularColor = Constants.DEFAULT_COLOR;
 
     private float reflectance = 32;
-    private Texture texture;
+    private Texture albedoTexture = null;
+    private Texture normalMap = null;
+
+    private boolean isDoubleSided = false;
 
     private Shader shader;
 
     public Material(Shader shader){
-        this.ambientColor = Constants.DEFAULT_COLOR;
-        this.diffuseColor = Constants.DEFAULT_COLOR;
-        this.specularColor = Constants.DEFAULT_COLOR;
-        this.texture = null;
         this.shader = shader;
     }
 
-    public Material(Shader shader, Vector4f color, float reflectance){
-        this(shader, color, color, color, reflectance, null);
+    public Material(Material material){
+        this.shader = material.getShader();
+        this.ambientColor = material.getAmbientColor();
+        this.diffuseColor = material.getDiffuseColor();
+        this.specularColor = material.getSpecularColor();
+        this.reflectance = material.getReflectance();
+        this.albedoTexture = material.getAlbedoTexture();
+        this.normalMap = material.getNormalMap();
+        this.isDoubleSided = material.isDoubleSided();
     }
 
-    public Material(Shader shader, Vector4f color, float reflectance, Texture texture){
-        this(shader, color, color, color, reflectance, texture);
+    public Material(Shader shader, Texture albedoTexture){
+        this(shader);
+        this.setAlbedoTexture(albedoTexture);
     }
 
-    public Material(Shader shader, Texture texture){
-        this(shader, Constants.DEFAULT_COLOR, Constants.DEFAULT_COLOR, Constants.DEFAULT_COLOR, 0, texture);
-    }
-
-    public Material(Shader shader, Vector4f ambientColor, Vector4f diffuseColor, Vector4f specularColor, float reflectance, Texture texture) {
-        this.shader = shader;
-        this.ambientColor = ambientColor;
-        this.diffuseColor = diffuseColor;
-        this.specularColor = specularColor;
-        this.reflectance = reflectance;
-        this.texture = texture;
-    }
-
-    public Vector4f getAmbientColor() {
-        return ambientColor;
-    }
+//      Setters
 
     public void setAmbientColor(Vector4f ambientColor) {
         this.ambientColor = ambientColor;
-    }
-
-    public Vector4f getDiffuseColor() {
-        return diffuseColor;
     }
 
     public void setDiffuseColor(Vector4f diffuseColor) {
         this.diffuseColor = diffuseColor;
     }
 
-    public Vector4f getSpecularColor() {
-        return specularColor;
-    }
-
     public void setSpecularColor(Vector4f specularColor) {
         this.specularColor = specularColor;
-    }
-
-    public float getReflectance() {
-        return reflectance;
     }
 
     public void setReflectance(float reflectance) {
         this.reflectance = reflectance;
     }
 
-    public Texture getTexture() {
-        return texture;
+    public void setAlbedoTexture(Texture texture) {
+        this.albedoTexture = texture;
     }
 
-    public void setTexture(Texture texture) {
-        this.texture = texture;
-    }
-
-    public boolean hasTexture(){
-        return texture != null;
-    }
-
-    public Shader getShader(){
-        return shader;
+    public void setNormalMap(Texture texture) {
+        this.normalMap = texture;
     }
 
     public void setShader(Shader shader){
         this.shader = shader;
+    }
+
+    public void setDoubleSided(boolean isDoubleSided){
+        this.isDoubleSided = isDoubleSided;
+    }
+
+//    Getters
+
+    public final Vector4f getAmbientColor() {
+        return ambientColor;
+    }
+
+    public final Vector4f getDiffuseColor() {
+        return diffuseColor;
+    }
+
+    public final Vector4f getSpecularColor() {
+        return specularColor;
+    }
+
+    public final float getReflectance() {
+        return reflectance;
+    }
+
+    public final Texture getAlbedoTexture() {
+        return albedoTexture;
+    }
+
+    public final Texture getNormalMap() {
+        return normalMap;
+    }
+
+    public final Shader getShader(){
+        return shader;
+    }
+
+    public final boolean isDoubleSided(){
+        return isDoubleSided;
+    }
+
+//    Has Getters
+
+    public final boolean hasAlbedoTexture(){
+        return albedoTexture != null;
+    }
+
+    public final boolean hasNormalMap(){
+        return normalMap != null;
     }
 }

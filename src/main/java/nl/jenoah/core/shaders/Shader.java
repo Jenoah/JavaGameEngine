@@ -186,7 +186,7 @@ public class Shader {
         setUniform(uniformName + ".ambient", material.getAmbientColor());
         setUniform(uniformName + ".diffuse", material.getDiffuseColor());
         setUniform(uniformName + ".specular", material.getSpecularColor());
-        setUniform(uniformName + ".hasTexture", material.hasTexture() ? 1 : 0);
+        setUniform(uniformName + ".hasTexture", material.hasAlbedoTexture() ? 1 : 0);
         setUniform(uniformName + ".reflectance", material.getReflectance());
     }
 }

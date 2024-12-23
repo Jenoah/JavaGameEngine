@@ -1,8 +1,8 @@
 package nl.jenoah.core.rendering;
 
+import nl.jenoah.core.ModelManager;
 import nl.jenoah.core.WindowManager;
 import nl.jenoah.core.entity.Model;
-import nl.jenoah.core.loaders.PrimitiveLoader;
 import nl.jenoah.core.shaders.Shader;
 import nl.jenoah.core.shaders.postProcessing.*;
 import nl.jenoah.core.shaders.postProcessing.effects.*;
@@ -76,7 +76,7 @@ public class PostProcessing {
                 1, -1, 0.0f  // Bottom-left
         };
 
-        return PrimitiveLoader.loadModel(vertices);
+        return ModelManager.loadModel(vertices);
     }
 
     public static void render(int colourTexture){
