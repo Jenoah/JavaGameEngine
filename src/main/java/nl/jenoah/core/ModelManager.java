@@ -1,8 +1,11 @@
 package nl.jenoah.core;
 
+import nl.jenoah.core.debugging.Debug;
 import nl.jenoah.core.entity.Mesh;
 import nl.jenoah.core.entity.Model;
 import nl.jenoah.core.loaders.*;
+import nl.jenoah.core.loaders.OBJLoader.OBJObject;
+import nl.jenoah.core.utils.Conversion;
 import org.joml.Vector2f;
 import org.joml.Vector3f;
 import java.util.HashMap;
@@ -14,6 +17,18 @@ public class ModelManager {
         Mesh mesh = new Mesh(vertices, uvs, indices, normals);
         meshes.put(mesh.getVaoID(), mesh);
         return new Model(mesh);
+    }
+
+    public static Model loadModel(OBJObject objObject){
+        Mesh mesh = new Mesh(objObject.getVertices().toArray(new Vector3f[0]), objObject.getTextures().toArray(new Vector2f[0]), Conversion.ToIntArray(objObject.getTriangles()), objObject.getNormals().toArray(new Vector3f[0]));
+        meshes.put(mesh.getVaoID(), mesh);
+        Model model = new Model(mesh);
+
+        objObject.getObjModels().forEach(objModel -> {
+            model.AddMaterial(objModel.getIndices(), objModel.getMaterial());
+        });
+
+        return model;
     }
     public static Model loadModel(Vector2f[] vertices){
         Mesh mesh = new Mesh(vertices);
