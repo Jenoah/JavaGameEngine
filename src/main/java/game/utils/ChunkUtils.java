@@ -20,7 +20,7 @@ public class ChunkUtils {
     private static final float erosionFrequency = .5f;
     private static final float peakAndValleyFrequency = 0.5f;
 
-    public static float SampleHeight(int x, int z){
+    public static float SampleHeight(float x, float z){
         //INTERESTING ARTICLE: https://www.redblobgames.com/maps/terrain-from-noise/
         final int noiseSeed = SimplexNoise.RANDOMSEED;
 

@@ -209,4 +209,30 @@ public class MarchingChunk {
         float heightSample = ChunkUtils.SampleHeight(chunkPosition.x + x, chunkPosition.z + z) - chunkPosition.y;
         return y - heightSample;
     }
+
+    public Vector3f getNormalAt(float x, float z) {
+        x = Math.max(1, Math.min(x, Constants.CHUNK_SIZE - 1));
+        z = Math.max(1, Math.min(z, Constants.CHUNK_SIZE - 1));
+
+        // Sample 4-connected neighbors
+        float right = getHeightAt(x + 1, z);
+        float left = getHeightAt(x - 1, z);
+        float up = getHeightAt(x, z + 1);
+        float down = getHeightAt(x, z - 1);
+
+        // Sobel operator for better quality
+        Vector3f tangentX = new Vector3f(
+                2.0f,
+                (right - left),
+                0.0f
+        );
+
+        Vector3f tangentZ = new Vector3f(
+                0.0f,
+                (up - down),
+                2.0f
+        );
+
+        return Calculus.cross(tangentZ, tangentX).normalize();
+    }
 }

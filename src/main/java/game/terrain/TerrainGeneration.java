@@ -7,11 +7,9 @@ import nl.jenoah.core.entity.Entity;
 import nl.jenoah.core.entity.Model;
 import nl.jenoah.core.entity.SceneManager;
 import nl.jenoah.core.loaders.PrimitiveLoader;
-import nl.jenoah.core.utils.Calculus;
-import nl.jenoah.core.utils.Constants;
-import nl.jenoah.core.utils.FastNoise;
-import nl.jenoah.core.utils.Utils;
+import nl.jenoah.core.utils.*;
 import org.joml.Math;
+import org.joml.Quaternionf;
 import org.joml.Vector3f;
 
 import java.util.ArrayDeque;
@@ -178,9 +176,16 @@ public class TerrainGeneration extends Thread{
                 float spawnChance = Utils.fastNoise.GetNoise(noiseLocationX, noiseLocationZ) + 1f / 2f;
 
                 if(spawnChance > surfaceFeatureDensity){
-                    float spawnHeight = chunk.getHeightAt(noiseLocationX - chunk.chunkPosition.x, noiseLocationZ - chunk.chunkPosition.z);
+                    float sampleLocationX = noiseLocationX - chunk.chunkPosition.x;
+                    float sampleLocationZ = noiseLocationZ - chunk.chunkPosition.z;
+                    float spawnHeight = chunk.getHeightAt(sampleLocationX, sampleLocationZ);
                     float rotationY = (spawnChance - surfaceFeatureDensity) * 360f / (1f - surfaceFeatureDensity);
-                    Entity surfaceFeatureInstance = new Entity(this.surfaceFeatureEntity, new Vector3f(localPositionX, spawnHeight, localPositionZ), new Vector3f(0, rotationY ,0), 1);
+
+                    Quaternionf normalUp = new Quaternionf().rotationTo(new Vector3f(0, 1, 0), chunk.getNormalAt(sampleLocationX, sampleLocationZ));
+                    normalUp.rotateY(rotationY);
+
+                    Entity surfaceFeatureInstance = new Entity(this.surfaceFeatureEntity, new Vector3f(localPositionX, spawnHeight, localPositionZ), normalUp, 1);
+
                     surfaceFeatureInstance.setParent(chunk.chunkEntity);
                 }
             }
