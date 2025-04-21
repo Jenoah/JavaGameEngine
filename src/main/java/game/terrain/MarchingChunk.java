@@ -3,21 +3,25 @@ package game.terrain;
 import game.utils.ChunkCoord;
 import game.utils.ChunkUtils;
 import nl.jenoah.core.ModelManager;
+import nl.jenoah.core.debugging.Debug;
 import nl.jenoah.core.entity.Entity;
 import nl.jenoah.core.entity.Model;
 import nl.jenoah.core.utils.Calculus;
 import nl.jenoah.core.utils.Constants;
-import org.joml.Vector2f;
+import nl.jenoah.core.utils.Conversion;
 import org.joml.Vector3f;
 import org.joml.Vector3i;
 
 import java.util.ArrayList;
 import java.util.List;
 
+import static org.joml.Math.lerp;
+
 public class MarchingChunk {
 
     List<Vector3f> vertices = new ArrayList<>();
     List<Integer> triangles = new ArrayList<>();
+    float[] terrainHeights;
     Vector3f[] normals;
 
     Entity chunkEntity;
@@ -28,6 +32,7 @@ public class MarchingChunk {
 
     public MarchingChunk(ChunkCoord chunkPosition){
         this.chunkPosition = chunkPosition;
+        this.terrainHeights = new float[(Constants.CHUNK_SIZE + 1) * (Constants.CHUNK_SIZE + 1)];
         init();
     }
 
@@ -44,6 +49,7 @@ public class MarchingChunk {
         for (int x = 0; x < Constants.CHUNK_SIZE; x++) {
             for (int y = 0; y < Constants.CHUNK_SIZE; y++) {
                 for (int z = 0; z < Constants.CHUNK_SIZE; z++) {
+                    terrainHeights[x * (Constants.CHUNK_SIZE + 1) + z] = ChunkUtils.SampleHeight(chunkPosition.x + x, chunkPosition.z + z) + ChunkUtils.terrainSurfaceHeight;
                     MarchCube(new Vector3i(x, y, z));
                 }
             }
@@ -99,18 +105,7 @@ public class MarchingChunk {
 
                 if (ChunkUtils.smoothTerrain)
                 {
-                    float vertex1Sample = voxelCorners[Constants.edgeIndexes[indice][0]];
-                    float vertex2Sample = voxelCorners[Constants.edgeIndexes[indice][1]];
-
-                    float difference = vertex2Sample - vertex1Sample;
-                    if (difference == 0f)
-                    {
-                        difference = ChunkUtils.terrainSurfaceHeight;
-                    }
-                    else
-                    {
-                        difference = (ChunkUtils.terrainSurfaceHeight - vertex1Sample) / difference;
-                    }
+                    float difference = getVertexDifference(voxelCorners, indice);
 
                     vertexPosition = Calculus.addVectors(vertex1, Calculus.multiplyVector(Calculus.subtractVectors(vertex2, vertex1), difference));
                     triangles.add(VertForIndex(vertexPosition));
@@ -124,6 +119,47 @@ public class MarchingChunk {
                 edgeIndex++;
             }
         }
+    }
+
+    public float getHeightAt(float x, float z) {
+        // Use floor() and ceil() with grid alignment
+        int x0 = (int)x;
+        int z0 = (int)z;
+        int x1 = x0 + 1;
+        int z1 = z0 + 1;
+
+        // Clamp using (CHUNK_SIZE + 1) for grid points
+        x0 = Math.max(0, Math.min(x0, Constants.CHUNK_SIZE));
+        x1 = Math.max(0, Math.min(x1, Constants.CHUNK_SIZE));
+        z0 = Math.max(0, Math.min(z0, Constants.CHUNK_SIZE));
+        z1 = Math.max(0, Math.min(z1, Constants.CHUNK_SIZE));
+
+        float sx = x - x0;
+        float sz = z - z0;
+
+        // Use (CHUNK_SIZE + 1) for grid point alignment
+        float h00 = terrainHeights[x0 * (Constants.CHUNK_SIZE + 1) + z0];
+        float h10 = terrainHeights[x1 * (Constants.CHUNK_SIZE + 1) + z0];
+        float h01 = terrainHeights[x0 * (Constants.CHUNK_SIZE + 1) + z1];
+        float h11 = terrainHeights[x1 * (Constants.CHUNK_SIZE + 1) + z1];
+
+        return lerp(lerp(h00, h10, sx), lerp(h01, h11, sx), sz);
+    }
+
+    private static float getVertexDifference(float[] voxelCorners, int index) {
+        float vertex1Sample = voxelCorners[Constants.edgeIndexes[index][0]];
+        float vertex2Sample = voxelCorners[Constants.edgeIndexes[index][1]];
+
+        float difference = vertex2Sample - vertex1Sample;
+        if (difference == 0f)
+        {
+            difference = ChunkUtils.terrainSurfaceHeight;
+        }
+        else
+        {
+            difference = (ChunkUtils.terrainSurfaceHeight - vertex1Sample) / difference;
+        }
+        return difference;
     }
 
     private Vector3f[] calculateNormals() {

@@ -4,8 +4,13 @@ import game.utils.ChunkCoord;
 import game.utils.ChunkUtils;
 import nl.jenoah.core.debugging.Debug;
 import nl.jenoah.core.entity.Entity;
+import nl.jenoah.core.entity.Model;
+import nl.jenoah.core.entity.SceneManager;
+import nl.jenoah.core.loaders.PrimitiveLoader;
 import nl.jenoah.core.utils.Calculus;
 import nl.jenoah.core.utils.Constants;
+import nl.jenoah.core.utils.FastNoise;
+import nl.jenoah.core.utils.Utils;
 import org.joml.Math;
 import org.joml.Vector3f;
 
@@ -30,6 +35,10 @@ public class TerrainGeneration extends Thread{
     private boolean isRunning = false;
     public static long waitTime = 300;
     private Vector3f playerPosition = new Vector3f(0);
+
+    private float surfaceFeatureDensity = .4f;
+    private int surfaceFeatureSamples = 16;
+    private Entity surfaceFeatureEntity = null;
 
     public TerrainGeneration(int renderDistance){
         this.renderDistance = renderDistance;
@@ -59,6 +68,10 @@ public class TerrainGeneration extends Thread{
                 isRunning = false;
             }
         }
+    }
+
+    public void setSurfaceFeature(Entity surfaceFeatureEntity){
+        this.surfaceFeatureEntity = surfaceFeatureEntity;
     }
 
     public void end(){
@@ -141,5 +154,36 @@ public class TerrainGeneration extends Thread{
 
     public void requeueChunk(MarchingChunk chunk){
         marchingChunkRequeue.add(chunk);
+    }
+
+    public void setSurfaceFeatureDensity(float surfaceFeatureDensity){
+        this.surfaceFeatureDensity = surfaceFeatureDensity;
+    }
+
+    public void setSurfaceFeatureSamples(int surfaceFeatureSamples){
+        this.surfaceFeatureSamples = surfaceFeatureSamples;
+    }
+
+    public void addSurfaceFeatures(MarchingChunk chunk){
+        if(surfaceFeatureEntity == null) return;
+        float stepSize = (float)Constants.CHUNK_SIZE / surfaceFeatureSamples;
+        for (int x = 0; x < surfaceFeatureSamples; x++) {
+            for (int z = 0; z < surfaceFeatureSamples; z++) {
+
+                float localPositionX = (float) x * stepSize;
+                float localPositionZ = (float) z * stepSize;
+
+                float noiseLocationX = chunk.chunkPosition.x + localPositionX;
+                float noiseLocationZ = chunk.chunkPosition.z + localPositionZ;
+                float spawnChance = Utils.fastNoise.GetNoise(noiseLocationX, noiseLocationZ) + 1f / 2f;
+
+                if(spawnChance > surfaceFeatureDensity){
+                    float spawnHeight = chunk.getHeightAt(noiseLocationX - chunk.chunkPosition.x, noiseLocationZ - chunk.chunkPosition.z);
+                    float rotationY = (spawnChance - surfaceFeatureDensity) * 360f / (1f - surfaceFeatureDensity);
+                    Entity surfaceFeatureInstance = new Entity(this.surfaceFeatureEntity, new Vector3f(localPositionX, spawnHeight, localPositionZ), new Vector3f(0, rotationY ,0), 1);
+                    surfaceFeatureInstance.setParent(chunk.chunkEntity);
+                }
+            }
+        }
     }
 }
