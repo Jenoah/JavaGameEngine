@@ -14,11 +14,14 @@ import org.lwjgl.opengl.GL30;
 import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 public class Mesh {
     private Vector3f[] vertices;
     private Vector3f[] normals;
+    private Vector3f[] tangents;
+    private Vector3f[] bitangents;
     private Vector2f[] uvs;
     private int[] triangles;
     private int dimension = 3;
@@ -26,9 +29,20 @@ public class Mesh {
     private final List<Integer> vbos = new ArrayList<>();
 
     private int vaoID = -1;
-    private int vertexVBOID, normalVBOID, triangleVBOID, uvVBOID = -1;
+    private int vertexVBOID, normalVBOID, tangentsVBOID, bitangentsVBOID, triangleVBOID, uvVBOID = -1;
 
     private int vertexCount = -1;
+
+    private boolean isVisible = true;
+
+
+    public Mesh(Mesh mesh){
+        float[] verticesStripped = Conversion.toFloatArray(mesh.vertices);
+        float[] uvFloatArray = mesh.uvs != null ? Conversion.toFloatArray(mesh.uvs) : null;
+        float[] normalFloatArray = mesh.normals != null ? Conversion.toFloatArray(mesh.normals) : null;
+
+        load(verticesStripped, uvFloatArray, mesh.triangles, normalFloatArray);
+    }
 
     public Mesh(Vector3f[] vertices){
         this.vertices = vertices;
@@ -66,6 +80,18 @@ public class Mesh {
 
         load(verticesStripped, uvFloatArray, triangles, null);
     }
+
+    public Mesh(Vector3f[] vertices, Vector3f[] normals, int[] triangles){
+        this.vertices = vertices;
+        this.normals = normals;
+        this.triangles = triangles;
+
+        float[] verticesStripped = Conversion.toFloatArray(vertices);
+        float[] normalsFloatArray = Conversion.toFloatArray(normals);
+
+        load(verticesStripped, normalsFloatArray, triangles, null);
+    }
+
     public Mesh(Vector3f[] vertices, Vector2f[] uvs, int[] triangles, Vector3f[] normals){
         float[] verticesStripped = Conversion.toFloatArray(vertices);
         float[] uvFloatArray = uvs != null ? Conversion.toFloatArray(uvs) : null;
@@ -101,6 +127,13 @@ public class Mesh {
             vertexCount = vertexFloatArray.length;
         }
 
+        if(uvFloatArray != null){
+            uvVBOID = storeDataInAttributeList(1, 2, uvFloatArray);
+            if(this.uvs == null){
+                this.uvs = Conversion.floatArrayToVector2Array(uvFloatArray);
+            }
+        }
+
         if(normals != null) {
             normalVBOID = storeDataInAttributeList(2, 3, normals);
             if(this.normals == null){
@@ -108,11 +141,13 @@ public class Mesh {
             }
         }
 
-        if(uvFloatArray != null){
-            uvVBOID = storeDataInAttributeList(1, 2, uvFloatArray);
-            if(this.uvs == null){
-                this.uvs = Conversion.floatArrayToVector2Array(uvFloatArray);
-            }
+
+        if(uvs != null && uvs.length > 0 && triangles != null && vertices != null){
+            calculateTangents();
+            float[] tangentFloatArray = Conversion.toFloatArray(tangents);
+            float[] bitangentFloatArray = Conversion.toFloatArray(bitangents);
+            tangentsVBOID = storeDataInAttributeList(3, 3, tangentFloatArray);
+            bitangentsVBOID = storeDataInAttributeList(4, 3, bitangentFloatArray);
         }
 
         unbind();
@@ -164,45 +199,69 @@ public class Mesh {
             normals[vertexIndexC] = triangleNormal;
         }
     }
+
     //INCOMPLETE FUNCTION OF calculateTangents
-    private static void calculateTangents(List<Vector3f> vertices, int[] triangles, Vector2f textureCoords) {
-        int triangleCount = triangles.length / 3;
+    private void calculateTangents() {
+        int triangleCount = this.triangles.length / 3;
+        this.tangents = new Vector3f[this.triangles.length];
+        this.bitangents = new Vector3f[this.triangles.length];
 
         for (int i = 0; i < triangleCount; i++) {
             int normalTriangleIndex = i * 3;
-            int vertexIndexA = triangles[normalTriangleIndex];
-            int vertexIndexB = triangles[normalTriangleIndex + 1];
-            int vertexIndexC = triangles[normalTriangleIndex + 2];
 
-            Vector3f delta1 = Calculus.subtractVectors(vertices.get(vertexIndexB), vertices.get(vertexIndexA));
-            Vector3f delta2 = Calculus.subtractVectors(vertices.get(vertexIndexC), vertices.get(vertexIndexA));
+            Vector3f vertex1 = this.vertices[this.triangles[normalTriangleIndex]];
+            Vector3f vertex2 = this.vertices[this.triangles[normalTriangleIndex + 1]];
+            Vector3f vertex3 = this.vertices[this.triangles[normalTriangleIndex + 2]];
+
+            Vector2f uv1 = this.uvs[this.triangles[normalTriangleIndex]];
+            Vector2f uv2 = this.uvs[this.triangles[normalTriangleIndex + 1]];
+            Vector2f uv3 = this.uvs[this.triangles[normalTriangleIndex + 2]];
+
+            Vector3f edge1 = Calculus.subtractVectors(vertex2, vertex1);
+            Vector3f edge2 = Calculus.subtractVectors(vertex3, vertex1);
+
+            Vector2f deltaUV1 = Calculus.subtractVectors(uv2, uv1);
+            Vector2f deltaUV2 = Calculus.subtractVectors(uv3, uv1);
+
+            float f = 1.0f / (deltaUV1.x * deltaUV2.y - deltaUV2.x * deltaUV1.y);
+
+            Vector3f tangent = new Vector3f();
+            tangent.x = f * (deltaUV2.y * edge1.x - deltaUV1.y * edge2.x);
+            tangent.y = f * (deltaUV2.y * edge1.y - deltaUV1.y * edge2.y);
+            tangent.z = f * (deltaUV2.y * edge1.z - deltaUV1.y * edge2.z);
+            this.tangents[normalTriangleIndex] = tangent;
+            this.tangents[normalTriangleIndex + 1] = tangent;
+            this.tangents[normalTriangleIndex + 2] = tangent;
+
+            Vector3f bitangent = new Vector3f();
+            bitangent.x = f * (-deltaUV2.x * edge1.x + deltaUV1.x * edge2.x);
+            bitangent.y = f * (-deltaUV2.x * edge1.y + deltaUV1.x * edge2.y);
+            bitangent.z = f * (-deltaUV2.x * edge1.z + deltaUV1.x * edge2.z);
+            this.bitangents[normalTriangleIndex] = bitangent;
+            this.bitangents[normalTriangleIndex + 1] = bitangent;
+            this.bitangents[normalTriangleIndex + 2] = bitangent;
         }
     }
     public void generateUVs(){
-        uvs = new Vector2f[triangles.length];
+        uvs = new Vector2f[vertices.length];
+
         for (int i = 0; i < triangles.length - 2; i += 3) {
-            Vector3f norm = new Vector3f(normals[i]);
+            Vector3f norm = new Vector3f(normals[triangles[i]]); // This may also need fixing, see below
 
             float dotX = Math.abs(norm.dot(new Vector3f(1, 0, 0)));
             float dotY = Math.abs(norm.dot(new Vector3f(0, 1, 0)));
             float dotZ = Math.abs(norm.dot(new Vector3f(0, 0, 1)));
 
-            if (dotX > dotY && dotX > dotZ) {
-                for (int j = 0; j < 3; j++) {
-                    int triangleIndex = triangles[i + j];
+            for (int j = 0; j < 3; j++) {
+                int triangleIndex = triangles[i + j];
+                if (triangleIndex < 0 || triangleIndex >= vertices.length) continue; // Safety check
+
+                if (dotX > dotY && dotX > dotZ) {
                     uvs[triangleIndex] = new Vector2f(vertices[triangleIndex].z, vertices[triangleIndex].y);
-                }
-            } else {
-                if (dotY > dotX && dotY > dotZ) {
-                    for (int j = 0; j < 3; j++) {
-                        int triangleIndex = triangles[i + j];
-                        uvs[triangleIndex] = new Vector2f(vertices[triangleIndex].x, vertices[triangleIndex].z);
-                    }
+                } else if (dotY > dotX && dotY > dotZ) {
+                    uvs[triangleIndex] = new Vector2f(vertices[triangleIndex].x, vertices[triangleIndex].z);
                 } else {
-                    for (int j = 0; j < 3; j++) {
-                        int triangleIndex = triangles[i + j];
-                        uvs[triangleIndex] = new Vector2f(vertices[triangleIndex].x, vertices[triangleIndex].y);
-                    }
+                    uvs[triangleIndex] = new Vector2f(vertices[triangleIndex].x, vertices[triangleIndex].y);
                 }
             }
         }
@@ -283,6 +342,13 @@ public class Mesh {
         return vertices;
     }
 
+    public boolean isVisible() {
+        return isVisible;
+    }
+
+    public void setVisible(boolean visible) {
+        isVisible = visible;
+    }
 
     public void cleanUp(){
         GL30.glDeleteVertexArrays(vaoID);

@@ -13,9 +13,7 @@ public class Face {
         this.textureCoordinateIndices = textureCoordinateIndices;
     }
 
-    public int[] getVertices() {
-        return this.vertexIndices;
-    }
+    public int[] getVertexIndices() { return this.vertexIndices; }
 
     public int[] getTextureCoords() {
         return this.textureCoordinateIndices;

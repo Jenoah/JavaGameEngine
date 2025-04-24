@@ -4,6 +4,8 @@ import game.entities.Player;
 import nl.jenoah.core.ModelManager;
 import nl.jenoah.core.MouseInput;
 import nl.jenoah.core.WindowManager;
+import nl.jenoah.core.components.Component;
+import nl.jenoah.core.components.RenderComponent;
 import nl.jenoah.core.debugging.Debug;
 import nl.jenoah.core.fonts.fontMeshCreator.FontType;
 import nl.jenoah.core.fonts.fontMeshCreator.GUIText;
@@ -12,13 +14,15 @@ import nl.jenoah.core.gui.GuiObject;
 import nl.jenoah.core.lighting.DirectionalLight;
 import nl.jenoah.core.lighting.PointLight;
 import nl.jenoah.core.lighting.SpotLight;
+import nl.jenoah.core.rendering.MeshMaterialSet;
 import org.joml.Vector3f;
 
 import java.util.*;
 
 public class Scene {
-    private final HashMap<Material, List<Entity>> transparentEntities;
-    private final HashMap<Material, List<Entity>> solidEntities;
+    //private final HashMap<Material, List<Entity>> transparentEntities;
+    //private final HashMap<Material, List<Entity>> solidEntities;
+    private final List<RenderComponent> renderComponents;
     private final List<GameObject> gameObjects;
     private final List<GuiObject> guiObjects;
     private final Map<FontType, List<GUIText>> textObjects;
@@ -38,9 +42,10 @@ public class Scene {
 
     protected String levelName = "Undefined Scene";
 
-    public Scene(){
-        this.transparentEntities = new HashMap<>();
-        this.solidEntities = new HashMap<>();
+    public Scene() {
+        //this.transparentEntities = new HashMap<>();
+        //this.solidEntities = new HashMap<>();
+        this.renderComponents = new ArrayList<>();
         this.gameObjects = new ArrayList<>();
         this.guiObjects = new ArrayList<>();
         this.windowManager = WindowManager.getInstance();
@@ -50,91 +55,67 @@ public class Scene {
         init();
     }
 
-    public void init() { }
+    public void init() {
+    }
 
-    public void postStart(){ }
+    public void postStart() {
+//        for(GameObject gameObject: gameObjects){
+//            gameObject.initiate();
+//        }
+    }
 
-    public void update(MouseInput mouseInput){
-        for(GameObject gameObject: gameObjects){
+    public void update(MouseInput mouseInput) {
+        for (GameObject gameObject : gameObjects) {
             gameObject.update(mouseInput);
         }
     }
 
-    public void handleInput(){
+    public void handleInput() {
         //Debug.Log("" + mouseInput.getMousePositionInPixels());
     }
 
-    public void cleanUp(){
+    public void cleanUp() {
         ModelManager.cleanUp();
     }
 
-    public HashMap<Material, List<Entity>> getTransparentEntities() {
-        return transparentEntities;
-    }
+//    public HashMap<Material, List<Entity>> getTransparentEntities() {
+//        return transparentEntities;
+//    }
+//
+//    public HashMap<Material, List<Entity>> getSolidEntities() {
+//        return solidEntities;
+//    }
 
-    public HashMap<Material, List<Entity>> getSolidEntities() {
-        return solidEntities;
-    }
-
-    public void addEntity(Entity entity){
+    public void addEntity(GameObject entity) {
         if (entity == null)/* || transparentEntities.values().contains(entity) || solidEntities.containsValue(entity))*/ {
             return;
         }
 
-        if (entity.isTransparent()) {
-            addToEntityList(transparentEntities, entity);
-        } else {
-            //addToEntityList(solidEntities, entity);
-            Material mat = entity.getModel().getMaterial();
-
-            if(solidEntities.containsKey(mat)){
-                solidEntities.get(mat).add(entity);
-            }else{
-                solidEntities.put(mat, new ArrayList<>(){{add(entity);}});
-            }
-        }
-
-
         if (entity.getChildren() != null) {
             for (GameObject child : entity.getChildren()) {
-                if (child instanceof Entity) {
-                    addEntity((Entity) child);
-                    addGameObject(child);
-                    Debug.Log("Adding " + child);
-                }
+                addGameObject(child);
             }
         }
 
         addGameObject(entity);
+        if (!entity.getComponents().isEmpty()) entity.getComponents().forEach(Component::initiate);
     }
 
-    private void addToEntityList(HashMap<Material, List<Entity>> entityList, Entity entity){
-        Material mat = entity.getModel().getMaterial();
 
-        if(entityList.containsKey(mat)){
-            entityList.get(mat).add(entity);
-        }else{
-            entityList.put(mat, new ArrayList<>(){{add(entity);}});
-        }
-    }
-
-    public void addGameObject(GameObject gameObject){
-        if(!gameObjects.contains(gameObject)){
+    public void addGameObject(GameObject gameObject) {
+        if (!gameObjects.contains(gameObject)) {
             gameObjects.add(gameObject);
 
             if (gameObject.getChildren() != null) {
                 for (GameObject child : gameObject.getChildren()) {
-                    if (child instanceof Entity) {
-                        addEntity((Entity) child);
-                        addGameObject(child);
-                    }
+                    addGameObject(child);
                 }
             }
         }
     }
 
-    public void addGUI(GuiObject guiObject){
-        if(!guiObjects.contains(guiObject)){
+    public void addGUI(GuiObject guiObject) {
+        if (!guiObjects.contains(guiObject)) {
             guiObjects.add(guiObject);
 
             if (guiObject.getChildren() != null) {
@@ -147,7 +128,7 @@ public class Scene {
         }
     }
 
-    public List<GuiObject> getGuiObjects(){
+    public List<GuiObject> getGuiObjects() {
         return guiObjects;
     }
 
@@ -159,7 +140,7 @@ public class Scene {
         this.ambientLight = ambientLight;
     }
 
-    public void setAmbientLight(float r, float g, float b){
+    public void setAmbientLight(float r, float g, float b) {
         this.ambientLight = new Vector3f(r, g, b);
     }
 
@@ -171,7 +152,7 @@ public class Scene {
         this.pointLights = pointLights;
     }
 
-    public void addPointLight(PointLight pointLight){
+    public void addPointLight(PointLight pointLight) {
         List<PointLight> pointLightList = new ArrayList<>(Arrays.stream(pointLights).toList());
         pointLightList.add(pointLight);
 
@@ -186,7 +167,7 @@ public class Scene {
         this.spotLights = spotLights;
     }
 
-    public void addSpotLight(SpotLight spotLight){
+    public void addSpotLight(SpotLight spotLight) {
         List<SpotLight> spotLightList = new ArrayList<>(Arrays.stream(spotLights).toList());
         spotLightList.add(spotLight);
 
@@ -201,15 +182,15 @@ public class Scene {
         this.directionalLight = directionalLight;
     }
 
-    public String getLevelName(){
+    public String getLevelName() {
         return levelName;
     }
 
-    public Player getPlayer(){
+    public Player getPlayer() {
         return player;
     }
 
-    public void addText(GUIText textObject){
+    public void addText(GUIText textObject) {
         FontType font = textObject.getFont();
         TextMeshData data = font.loadText(textObject);
         int id = ModelManager.loadModelID(data.getVertexPositions(), data.getTextureCoords(), 2);
@@ -218,10 +199,10 @@ public class Scene {
         textBatch.add(textObject);
     }
 
-    public void removeText(GUIText textObject){
+    public void removeText(GUIText textObject) {
         List<GUIText> textBatch = textObjects.get(textObject.getFont());
         textBatch.remove(textObject);
-        if(textBatch.isEmpty()){
+        if (textBatch.isEmpty()) {
             textObjects.remove(textObject.getFont());
             ModelManager.unloadModel(textObject.getMesh());
         }
@@ -251,7 +232,7 @@ public class Scene {
         this.fogDensity = fogDensity;
     }
 
-    public void setFogGradient(float fogGradient){
+    public void setFogGradient(float fogGradient) {
         this.fogGradient = fogGradient;
     }
 }

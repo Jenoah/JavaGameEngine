@@ -2,8 +2,11 @@ package game.demo;
 
 import game.terrain.MarchingChunk;
 import game.terrain.TerrainGeneration;
+import game.utils.ChunkCoord;
 import nl.jenoah.core.EngineManager;
 import nl.jenoah.core.MouseInput;
+import nl.jenoah.core.components.RenderComponent;
+import nl.jenoah.core.debugging.Debug;
 import nl.jenoah.core.entity.*;
 import nl.jenoah.core.fonts.fontMeshCreator.FontType;
 import nl.jenoah.core.fonts.fontMeshCreator.GUIText;
@@ -11,9 +14,10 @@ import nl.jenoah.core.gui.GuiObject;
 import nl.jenoah.core.lighting.DirectionalLight;
 import nl.jenoah.core.lighting.PointLight;
 import nl.jenoah.core.lighting.SpotLight;
-import nl.jenoah.core.loaders.OBJLoader;
+import nl.jenoah.core.loaders.OBJLoader.OBJLoader;
 import nl.jenoah.core.loaders.PrimitiveLoader;
 import nl.jenoah.core.loaders.TextureLoader;
+import nl.jenoah.core.rendering.MeshMaterialSet;
 import nl.jenoah.core.shaders.ShaderManager;
 import nl.jenoah.core.utils.Calculus;
 import nl.jenoah.core.utils.Conversion;
@@ -26,12 +30,14 @@ import org.joml.Vector4f;
 import org.lwjgl.glfw.GLFW;
 
 import java.io.File;
+import java.util.List;
 import java.util.Queue;
+import java.util.Random;
 
 public class Level0 extends Scene {
 
-    private Entity proxyEntity;
-    private Entity monkeyEntity;
+    private GameObject proxyEntity;
+    private GameObject monkeyEntity;
 
     //Labels
     private GUIText fpsLabel;
@@ -47,7 +53,11 @@ public class Level0 extends Scene {
     @Override public void init() {
         super.init();
         levelName = "Level 0";
+
         terrainGeneration = new TerrainGeneration(renderDistance);
+        terrainGeneration.setSurfaceFeatureDensity(0.7f);
+        terrainGeneration.setSurfaceFeatureSamples(8);
+
         Utils.setNoiseSeed(123);
         player.setPosition(0, 6.5f, 0);
 
@@ -57,27 +67,42 @@ public class Level0 extends Scene {
 
         //Textures
         Texture blockPaletteTexture = new Texture(TextureLoader.loadTexture("textures/blockPallete.png"));
-        Texture barnTexture = new Texture(TextureLoader.loadTexture("textures/barn.png"));
 
         //Models
-        Model barnModel = OBJLoader.loadOBJModel("/models/barn.obj", barnTexture);
-        Entity barn = new Entity(barnModel, new Vector3f(0, 5f, -10f), new Vector3f(0, 0, 0), 1f);
+        List<MeshMaterialSet> barnMeshMaterialSets = OBJLoader.loadOBJModel("/models/barn.obj");
+        GameObject barn = new GameObject().setPosition(new Vector3f(0, 5f, -10f));
+        barn.addComponent(new RenderComponent(barnMeshMaterialSets));
         addEntity(barn);
 
-        Model monkModel = OBJLoader.loadOBJModel("/models/monk.obj", blockPaletteTexture);
-        monkeyEntity = new Entity(monkModel, new Vector3f(0, 6.5f, -10f), new Vector3f(0, 0, 0), 1);
+        List<MeshMaterialSet> monkMeshMaterialSets = OBJLoader.loadOBJModel("/models/monk.obj", blockPaletteTexture);
+        monkeyEntity = new GameObject().setPosition(new Vector3f(0, 6.5f, -10f));
+        monkeyEntity.addComponent(new RenderComponent(monkMeshMaterialSets));
         addEntity(monkeyEntity);
 
         Model groundBlock = PrimitiveLoader.getCube();
-        groundBlock.getMaterial().setAlbedoTexture(new Texture("textures/rock.jpg"));
-        groundBlock.getMaterial().setReflectance(8);
-        Entity groundBlockEntity = new Entity(groundBlock, new Vector3f(0, 2.5f, -10), new Vector3f(0f), new Vector3f(10, 5, 12));
+        groundBlock.getMaterial().setAlbedoTexture(new Texture("textures/rock/rock_albedo.jpg"));
+        groundBlock.getMaterial().setNormalMap(new Texture("textures/rock/rock_normal.jpg"));
+        groundBlock.getMaterial().setReflectance(256);
+        GameObject groundBlockEntity = new GameObject().setPosition(new Vector3f(0, 2.5f, -10)).setScale(new Vector3f(10, 5, 12));
+        groundBlockEntity.addComponent(new RenderComponent(groundBlock.getMesh(), groundBlock.getMaterial()));
         addEntity(groundBlockEntity);
 
-        Billboard lightProxy = new Billboard(PrimitiveLoader.getQuad(), new Texture("textures/Prozac.jpeg", false, false), .1f);
-        lightProxy.setPosition(new Vector3f(0, 6f ,-7));
+        GameObject lightProxy = new GameObject().setPosition(new Vector3f(0, 6f, -7f)).setScale(0.1f);
+        Material billboardMaterial = new Material(ShaderManager.billboardShader);
+        billboardMaterial.setAlbedoTexture(new Texture("textures/Prozac.jpeg", false, false));
         proxyEntity = lightProxy;
+        lightProxy.addComponent(new RenderComponent(PrimitiveLoader.getQuad().getMesh(), billboardMaterial));
         addEntity(lightProxy);
+
+        List<MeshMaterialSet> treeMeshMaterialSet = OBJLoader.loadOBJModel("/models/birch.obj");
+        treeMeshMaterialSet.forEach((meshMaterialSet -> {
+            meshMaterialSet.mesh.generateUVs();
+        }));
+        GameObject tree = new GameObject().setPosition(5, 5f, -2);
+        tree.addComponent(new RenderComponent(treeMeshMaterialSet));
+        addEntity(tree);
+
+        terrainGeneration.setSurfaceFeature(tree);
 
         //Lighting
         //Directional Light
@@ -136,7 +161,7 @@ public class Level0 extends Scene {
 
         //Shaders
         int grassTextureID = TextureLoader.loadTexture("textures/grass.jpg");
-        int rockTextureID = TextureLoader.loadTexture("textures/rock.jpg");
+        int rockTextureID = TextureLoader.loadTexture("textures/rock/rock_albedo.jpg");
         ShaderManager.triplanarShader.setTextureIDs(grassTextureID, rockTextureID);
         ShaderManager.triplanarShader.setBlendFactor(32);
 
@@ -198,10 +223,12 @@ public class Level0 extends Scene {
             }
 
             chunk.publishChunk();
+            if(!ChunkCoord.compareToVector(chunk.chunkPosition, new Vector3f(0, 0, -10))) terrainGeneration.addSurfaceFeatures(chunk);
 
-            Entity chunkEntity = chunk.getChunkEntity();
+            GameObject chunkEntity = chunk.getChunkEntity();
             if(chunkEntity != null) {
-                chunkEntity.getModel().getMaterial().setShader(ShaderManager.triplanarShader);
+                chunkEntity.getComponent(RenderComponent.class).getMeshMaterialSets().getFirst().material.setShader(ShaderManager.triplanarShader);
+
                 addEntity(chunk.getChunkEntity());
             }
         }

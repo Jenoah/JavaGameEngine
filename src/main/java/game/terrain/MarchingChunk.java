@@ -3,12 +3,11 @@ package game.terrain;
 import game.utils.ChunkCoord;
 import game.utils.ChunkUtils;
 import nl.jenoah.core.ModelManager;
-import nl.jenoah.core.debugging.Debug;
-import nl.jenoah.core.entity.Entity;
+import nl.jenoah.core.components.RenderComponent;
+import nl.jenoah.core.entity.GameObject;
 import nl.jenoah.core.entity.Model;
 import nl.jenoah.core.utils.Calculus;
 import nl.jenoah.core.utils.Constants;
-import nl.jenoah.core.utils.Conversion;
 import org.joml.Vector3f;
 import org.joml.Vector3i;
 
@@ -24,7 +23,7 @@ public class MarchingChunk {
     float[] terrainHeights;
     Vector3f[] normals;
 
-    Entity chunkEntity;
+    GameObject chunkEntity;
 
     public ChunkCoord chunkPosition;
     public boolean isReady = false;
@@ -61,7 +60,9 @@ public class MarchingChunk {
 
         Model chunkModel = ModelManager.loadModel(vertices.toArray(new Vector3f[0]), null, triangleArray, normals);
         chunkModel.getMesh().generateUVs();
-        chunkEntity = new Entity(chunkModel, chunkPosition.toVector3(), new Vector3f(), 1);
+        chunkEntity = new GameObject().setPosition(chunkPosition.toVector3());
+        chunkEntity.addComponent(new RenderComponent(chunkModel.getMesh(), chunkModel.getMaterial()));
+
     }
 
     private void MarchCube(Vector3i voxelPosition)
@@ -200,7 +201,7 @@ public class MarchingChunk {
         return vertices.size() - 1;
     }
 
-    public Entity getChunkEntity(){
+    public GameObject getChunkEntity(){
         return chunkEntity;
     }
 

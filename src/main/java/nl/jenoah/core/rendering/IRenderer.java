@@ -1,7 +1,7 @@
 package nl.jenoah.core.rendering;
 
 import nl.jenoah.core.Camera;
-import nl.jenoah.core.entity.Entity;
+import nl.jenoah.core.entity.GameObject;
 import nl.jenoah.core.entity.Model;
 
 public interface IRenderer<T>{
@@ -10,11 +10,11 @@ public interface IRenderer<T>{
 
     public void render(Camera camera);
 
-    abstract void bind(Model model);
+    abstract void bind(MeshMaterialSet meshMaterialSet);
 
     public void unbind();
 
-    public void prepare(Entity entity, Camera camera);
+    public void prepare(GameObject entity, Camera camera);
 
     public void cleanUp();
 

@@ -1,10 +1,11 @@
 package nl.jenoah.core.rendering;
 
+import nl.jenoah.core.components.RenderComponent;
 import nl.jenoah.core.entity.Material;
+import nl.jenoah.core.entity.Mesh;
 import nl.jenoah.core.fonts.fontRendering.FontRenderer;
 import nl.jenoah.core.gui.GuiRenderer;
 import nl.jenoah.core.WindowManager;
-import nl.jenoah.core.entity.Entity;
 import nl.jenoah.core.entity.Scene;
 import nl.jenoah.core.skybox.SkyboxRenderer;
 import org.lwjgl.opengl.GL11;
@@ -16,8 +17,7 @@ import static org.lwjgl.opengl.GL11.glViewport;
 
 public class RenderManager {
     private final WindowManager window;
-    private EntityRenderer entityRenderer;
-    private EntityRenderer transparentEntityRenderer;
+    private ComponentRenderer componentRenderer;
     private GuiRenderer guiRenderer;
     private FontRenderer fontRenderer;
     private FrameBuffer frameBuffer;
@@ -28,15 +28,12 @@ public class RenderManager {
     }
 
     public void init() throws Exception {
-        entityRenderer = new EntityRenderer();
-        transparentEntityRenderer = new EntityRenderer();
+        componentRenderer = new ComponentRenderer();
 
         guiRenderer = new GuiRenderer();
         fontRenderer = new FontRenderer();
         skyboxRenderer = new SkyboxRenderer(new String[]{"textures/skyboxes/clouds1/right.png", "textures/skyboxes/clouds1/left.png", "textures/skyboxes/clouds1/top.png", "textures/skyboxes/clouds1/bottom.png", "textures/skyboxes/clouds1/back.png", "textures/skyboxes/clouds1/front.png"});
-
-        entityRenderer.init();
-        transparentEntityRenderer.init();
+        componentRenderer.init();
 
         regenerateFrameBuffer();
         PostProcessing.init();
@@ -58,9 +55,10 @@ public class RenderManager {
         clear();
 
         //Rendering of scene
-        entityRenderer.render(currentScene.getPlayer().getCamera());
+        //entityRenderer.render(currentScene.getPlayer().getCamera());
+        componentRenderer.render(currentScene.getPlayer().getCamera());
         skyboxRenderer.render(currentScene.getPlayer().getCamera());
-        transparentEntityRenderer.render(currentScene.getPlayer().getCamera());
+        //transparentEntityRenderer.render(currentScene.getPlayer().getCamera());
         frameBuffer.unbindFrameBuffer();
 
         //Post Processing
@@ -73,13 +71,18 @@ public class RenderManager {
         fontRenderer.render(currentScene.getTextObjects());
     }
 
-    public void processEntities(HashMap<Material, List<Entity>> entities){
-        if(entities.isEmpty()) return;
-        if(entities.entrySet().iterator().next().getValue().getFirst().isTransparent()){
-            transparentEntityRenderer.setEntities(entities);
-        }else{
-            entityRenderer.setEntities(entities);
-        }
+//    public void processEntities(HashMap<Material, List<Entity>> entities){
+//        if(entities.isEmpty()) return;
+//        if(entities.entrySet().iterator().next().getValue().getFirst().isTransparent()){
+//            transparentEntityRenderer.setEntities(entities);
+//        }else{
+//            entityRenderer.setEntities(entities);
+//        }
+//    }
+
+    public void processRenderObjects(HashMap<Material, List<Mesh>> renderObjects){
+        if(renderObjects.isEmpty()) return;
+        //entityRenderer.setRenderObjects(renderObjects);
     }
 
     public void clear(){
@@ -88,8 +91,7 @@ public class RenderManager {
 
     public void cleanUp(){
         PostProcessing.cleanUp();
-        entityRenderer.cleanUp();
-        transparentEntityRenderer.cleanUp();
+        componentRenderer.cleanUp();
         frameBuffer.cleanUp();
         guiRenderer.cleanUp();
         fontRenderer.cleanUp();
@@ -98,5 +100,9 @@ public class RenderManager {
 
     private void regenerateFrameBuffer(){
         frameBuffer = new FrameBuffer(window.getWidth(), window.getHeight(), FrameBuffer.DEPTH_RENDER_BUFFER);
+    }
+
+    public void queueRender(RenderComponent renderComponent){
+        componentRenderer.queue(renderComponent);
     }
 }

@@ -40,36 +40,44 @@ public class Material {
 
 //      Setters
 
-    public void setAmbientColor(Vector4f ambientColor) {
+    public Material setAmbientColor(Vector4f ambientColor) {
         this.ambientColor = ambientColor;
+        return this;
     }
 
-    public void setDiffuseColor(Vector4f diffuseColor) {
+    public Material setDiffuseColor(Vector4f diffuseColor) {
         this.diffuseColor = diffuseColor;
+        return this;
     }
 
-    public void setSpecularColor(Vector4f specularColor) {
+    public Material setSpecularColor(Vector4f specularColor) {
         this.specularColor = specularColor;
+        return this;
     }
 
-    public void setReflectance(float reflectance) {
+    public Material setReflectance(float reflectance) {
         this.reflectance = reflectance;
+        return this;
     }
 
-    public void setAlbedoTexture(Texture texture) {
+    public Material setAlbedoTexture(Texture texture) {
         this.albedoTexture = texture;
+        return this;
     }
 
-    public void setNormalMap(Texture texture) {
+    public Material setNormalMap(Texture texture) {
         this.normalMap = texture;
+        return this;
     }
 
-    public void setShader(Shader shader){
+    public Material setShader(Shader shader){
         this.shader = shader;
+        return this;
     }
 
-    public void setDoubleSided(boolean isDoubleSided){
+    public Material setDoubleSided(boolean isDoubleSided){
         this.isDoubleSided = isDoubleSided;
+        return this;
     }
 
 //    Getters

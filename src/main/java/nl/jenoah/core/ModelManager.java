@@ -1,14 +1,20 @@
 package nl.jenoah.core;
 
 import nl.jenoah.core.debugging.Debug;
+import nl.jenoah.core.entity.Material;
 import nl.jenoah.core.entity.Mesh;
 import nl.jenoah.core.entity.Model;
 import nl.jenoah.core.loaders.*;
 import nl.jenoah.core.loaders.OBJLoader.OBJObject;
+import nl.jenoah.core.rendering.MeshMaterialSet;
 import nl.jenoah.core.utils.Conversion;
 import org.joml.Vector2f;
 import org.joml.Vector3f;
+
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 
 public class ModelManager {
     private static final HashMap<Integer, Mesh> meshes = new HashMap<>();
@@ -19,16 +25,22 @@ public class ModelManager {
         return new Model(mesh);
     }
 
-    public static Model loadModel(OBJObject objObject){
-        Mesh mesh = new Mesh(objObject.getVertices().toArray(new Vector3f[0]), objObject.getTextures().toArray(new Vector2f[0]), Conversion.ToIntArray(objObject.getTriangles()), objObject.getNormals().toArray(new Vector3f[0]));
-        meshes.put(mesh.getVaoID(), mesh);
-        Model model = new Model(mesh);
+    public static List<MeshMaterialSet> loadModel(OBJObject objObject){
+        List<MeshMaterialSet> meshMaterialSets = new ArrayList<>();
 
-        objObject.getObjModels().forEach(objModel -> {
-            model.AddMaterial(objModel.getIndices(), objModel.getMaterial());
-        });
+        objObject.getObjModels().forEach((objModel -> {
+            if(objModel.getVertices().length == 0) return;
+            Vector3f[] modelVertices = objModel.getVertices();
+            Vector2f[] modelUVs = objModel.getTextures();
+            int[] modelIndices = objModel.getIndices();
+            Vector3f[] modelNormals = objModel.getNormals();
 
-        return model;
+            Mesh modelMesh = new Mesh(modelVertices, modelUVs, modelIndices, modelNormals);
+            meshes.put(modelMesh.getVaoID(), modelMesh);
+            meshMaterialSets.add(new MeshMaterialSet(modelMesh, objModel.getMaterial()));
+        }));
+
+        return meshMaterialSets;
     }
     public static Model loadModel(Vector2f[] vertices){
         Mesh mesh = new Mesh(vertices);

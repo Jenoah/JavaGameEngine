@@ -1,5 +1,6 @@
 package nl.jenoah.core.lighting;
 
+import nl.jenoah.core.components.RenderComponent;
 import nl.jenoah.core.entity.*;
 import nl.jenoah.core.loaders.PrimitiveLoader;
 import nl.jenoah.core.shaders.ShaderManager;
@@ -13,7 +14,7 @@ public class Light extends GameObject {
     protected float constant;
     protected float linear;
     protected float exponent;
-    protected Entity proxy;
+    protected GameObject proxy;
 
     public Light(Vector3f color, Vector3f position, float intensity, float constant, float linear, float exponent) {
         this.color = color;
@@ -83,13 +84,14 @@ public class Light extends GameObject {
 
     public void showProxy(){
         if(proxy == null){
-            Model lightProxyModel = new Model(PrimitiveLoader.getQuad(), "textures/lightDirection.png");
-            Material proxyMaterial = lightProxyModel.getMaterial();
-            proxyMaterial.setShader(ShaderManager.unlitShader);
+            Material proxyMaterial = new Material(ShaderManager.unlitShader);
             proxyMaterial.setAmbientColor(new Vector4f(color, 1));
             proxyMaterial.setReflectance(0);
-            lightProxyModel.getMaterial().setDoubleSided(true);
-            Entity proxy = new Entity(lightProxyModel, new Vector3f(0), new Vector3f(0, 90, 0), 1, true);
+            proxyMaterial.setAlbedoTexture(new Texture("textures/lightDirection.png"));
+            proxyMaterial.setDoubleSided(true);
+            GameObject proxy = new GameObject().setRotation(new Vector3f(0f, 90f, 0f));
+            proxy.addComponent(new RenderComponent(PrimitiveLoader.getQuad().getMesh(), proxyMaterial));
+            //lightProxyModel, new Vector3f(0), new Vector3f(0, 90, 0), 1, true);
             proxy.setParent(this);
         }
     }

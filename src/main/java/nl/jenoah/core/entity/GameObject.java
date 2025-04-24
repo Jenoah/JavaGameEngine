@@ -1,6 +1,8 @@
 package nl.jenoah.core.entity;
 
 import nl.jenoah.core.MouseInput;
+import nl.jenoah.core.components.Component;
+import nl.jenoah.core.debugging.Debug;
 import nl.jenoah.core.utils.Calculus;
 import org.joml.*;
 import org.joml.Math;
@@ -15,9 +17,18 @@ public class GameObject {
 
     private List<GameObject> children;
     private GameObject parent;
+    protected boolean isEnabled = true;
+
+    private final List<Component> components = new ArrayList<>();
 
     public GameObject() {
         this.children = new ArrayList<>();
+    }
+
+    public void initiate(){
+        for (Component component : components){
+            component.initiate();
+        }
     }
 
     public Vector3f getPosition() {
@@ -29,23 +40,27 @@ public class GameObject {
     }
 
     public Vector3f getLocalPosition(){
-        return  localPosition;
+        return localPosition;
     }
 
-    public void setPosition(Vector3f position) {
+    public GameObject setPosition(Vector3f position) {
         this.localPosition = position;
+        return this;
     }
 
-    public void setPosition(float x, float y) {
+    public GameObject setPosition(float x, float y) {
         this.localPosition = new Vector3f(x, y, 0);
+        return this;
     }
 
-    public void setPosition(float x, float y, float z) {
+    public GameObject setPosition(float x, float y, float z) {
         this.localPosition = new Vector3f(x, y, z);
+        return this;
     }
 
-    public void addPosition(Vector3f position){
+    public GameObject addPosition(Vector3f position){
         this.localPosition = Calculus.addVectors(this.localPosition, position);
+        return this;
     }
 
     public Quaternionf getRotation() {
@@ -84,18 +99,20 @@ public class GameObject {
         return  localRotation;
     }
 
-    public void setRotation(Quaternionf rotation){
+    public GameObject setRotation(Quaternionf rotation){
         this.localRotation = rotation;
+        return this;
     }
 
-    public void setRotation(Vector3f rotation) {
+    public GameObject setRotation(Vector3f rotation) {
         rotation.x = (float) Math.toRadians(rotation.x);
         rotation.y = (float) Math.toRadians(rotation.y);
         rotation.z = (float) Math.toRadians(rotation.z);
         this.localRotation = new Quaternionf().rotateXYZ(rotation.x, rotation.y, rotation.z).normalize();
+        return this;
     }
 
-    public void addRotation(Vector3f rotation){
+    public GameObject addRotation(Vector3f rotation){
         rotation.x = (float) Math.toRadians(rotation.x);
         rotation.y = (float) Math.toRadians(rotation.y);
         rotation.z = (float) Math.toRadians(rotation.z);
@@ -107,10 +124,12 @@ public class GameObject {
         );
 
         localRotation.mul(additionalRotation).normalize();
+        return this;
     }
 
-    public void addRotation(Quaternionf rotation){
+    public GameObject addRotation(Quaternionf rotation){
         localRotation.mul(rotation).normalize();
+        return this;
     }
 
     public void lookAt(Vector3f target){
@@ -133,22 +152,31 @@ public class GameObject {
         return scale;
     }
 
-    public void setScale(float scale) {
+    public GameObject setScale(float scale) {
         this.scale = new Vector3f(scale);
+        return this;
     }
 
-    public void setScale(float x, float y, float z) {
+    public GameObject setScale(Vector3f scale) {
+        this.scale = scale;
+        return this;
+    }
+
+    public GameObject setScale(float x, float y, float z) {
         this.scale = new Vector3f(x, y, z);
+        return this;
     }
 
-    public void setScale(float x, float y) {
+    public GameObject setScale(float x, float y) {
         this.scale = new Vector3f(x, y, 0);
+        return this;
     }
 
-    public void addChild(GameObject child){
+    public GameObject addChild(GameObject child){
         if(!children.contains(child)) {
             children.add(child);
         }
+        return this;
     }
 
     public GameObject getChild(int childIndex){
@@ -159,7 +187,7 @@ public class GameObject {
         return children;
     }
 
-    public void setParent(GameObject parent){
+    public GameObject setParent(GameObject parent){
         if(this.parent != null){
             this.parent.children.remove(this);
         }
@@ -168,6 +196,7 @@ public class GameObject {
         if(parent != null && !parent.children.contains(this)){
             parent.addChild(this);
         }
+        return this;
     }
 
     public GameObject getParent(){
@@ -175,9 +204,47 @@ public class GameObject {
     }
 
     public void update(MouseInput mouseInput){
+        if(!isEnabled || components.isEmpty()) return;
+        for(Component component : components){ component.update(); }
+    }
+
+    public boolean isEnabled() {
+        if(parent != null){
+            return isEnabled && parent.isEnabled();
+        }
+        return isEnabled;
+    }
+
+    public GameObject setEnabled(boolean enabled) {
+        isEnabled = enabled;
+        return this;
+    }
+
+    public List<Component> getComponents(){
+        return components;
+    }
+
+    public <C extends Component> C getComponent(Class<C> component){
+        for (Component c : components) {
+            if (c.getClass() == component)
+                return (C) c;
+        }
+
+        return null;
+    }
+
+    public Component addComponent(Component component){
+        if(this.components.contains(component)){
+            Debug.Log("GameObject already contains component of type " + component.getClass().getSimpleName());
+            return null;
+        }
+
+        component.setRoot(this);
+        this.components.add(component);
+        return component;
     }
 
     public String ToString(){
-        return this.getClass().getName();
+        return this.getClass().getSimpleName();
     }
 }
