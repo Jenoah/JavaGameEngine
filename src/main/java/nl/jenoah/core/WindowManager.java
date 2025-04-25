@@ -1,16 +1,27 @@
 package nl.jenoah.core;
 
 import nl.jenoah.core.debugging.Debug;
+import nl.jenoah.core.entity.Texture;
+import nl.jenoah.core.loaders.TextureLoader;
 import nl.jenoah.core.utils.Constants;
 import org.joml.Matrix4f;
 import org.lwjgl.glfw.GLFW;
 import org.lwjgl.glfw.GLFWErrorCallback;
+import org.lwjgl.glfw.GLFWImage;
 import org.lwjgl.glfw.GLFWVidMode;
 import org.lwjgl.opengl.GL;
 import org.lwjgl.opengl.GL11;
+import org.lwjgl.stb.STBImage;
+import org.lwjgl.system.MemoryStack;
 import org.lwjgl.system.MemoryUtil;
 
+import java.nio.ByteBuffer;
+import java.nio.IntBuffer;
+
+import static org.lwjgl.glfw.GLFW.glfwSetWindowIcon;
 import static org.lwjgl.opengl.GL11.*;
+import static org.lwjgl.stb.STBImage.stbi_set_flip_vertically_on_load;
+import static org.lwjgl.system.MemoryUtil.memAllocInt;
 
 public class WindowManager {
     private final String title;
@@ -51,12 +62,12 @@ public class WindowManager {
             throw new IllegalStateException("Unable to initialize GLFW");
 
         GLFW.glfwDefaultWindowHints();
-        GLFW.glfwWindowHint(GLFW.GLFW_VISIBLE, GL11.GL_FALSE);
-        GLFW.glfwWindowHint(GLFW.GLFW_RESIZABLE, GL11.GL_TRUE);
+        GLFW.glfwWindowHint(GLFW.GLFW_VISIBLE, GL_FALSE);
+        GLFW.glfwWindowHint(GLFW.GLFW_RESIZABLE, GL_TRUE);
         GLFW.glfwWindowHint(GLFW.GLFW_CONTEXT_VERSION_MAJOR, 3);
         GLFW.glfwWindowHint(GLFW.GLFW_CONTEXT_VERSION_MINOR, 2);
         GLFW.glfwWindowHint(GLFW.GLFW_OPENGL_PROFILE, GLFW.GLFW_OPENGL_CORE_PROFILE);
-        GLFW.glfwWindowHint(GLFW.GLFW_OPENGL_FORWARD_COMPAT, GL11.GL_TRUE);
+        GLFW.glfwWindowHint(GLFW.GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
 
         boolean maximized = false;
         if(width == 0 || height == 0){
@@ -144,6 +155,28 @@ public class WindowManager {
         GLFW.glfwSetWindowTitle(window, title);
     }
 
+    public void setWindowIcon(String path){
+        String osName = System.getProperty("os.name");
+        if (osName.toLowerCase().contains("mac")) return;
+
+        IntBuffer w = memAllocInt(1);
+        IntBuffer h = memAllocInt(1);
+        IntBuffer comp = memAllocInt(1);
+
+        try (GLFWImage.Buffer icons = GLFWImage.malloc(1)) {
+
+            ByteBuffer pixels16 = STBImage.stbi_load(path, w, h, comp, 4);
+            icons
+                    .position(0)
+                    .width(w.get(0))
+                    .height(h.get(0))
+                    .pixels(pixels16);
+
+            icons.position(0);
+            glfwSetWindowIcon(window, icons);
+        }
+    }
+
     public long getWindow() {
         return window;
     }
@@ -158,7 +191,7 @@ public class WindowManager {
 
     //RENDERING
     public void setClearColor(float r, float g, float b, float a){
-        GL11.glClearColor(r,g,b,a);
+        glClearColor(r,g,b,a);
     }
 
     public Matrix4f getProjectionMatrix() {

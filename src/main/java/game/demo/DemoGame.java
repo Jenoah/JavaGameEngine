@@ -29,6 +29,7 @@ public class DemoGame implements ILogic {
         Scene level = new Level0();
 
         window.setClearColor(0, 0, 0, 0);
+        window.setWindowIcon("textures/window_icon.png");
 
         sceneManager.addScene(level);
         sceneManager.setCurrentScene(0);
@@ -44,8 +45,8 @@ public class DemoGame implements ILogic {
 
         sceneManager.getCurrentScene().update(mouseInput);
 
-        renderer.processEntities(sceneManager.getCurrentScene().getSolidEntities());
-        renderer.processEntities(sceneManager.getCurrentScene().getTransparentEntities());
+        //renderer.processEntities(sceneManager.getCurrentScene().getSolidEntities());
+        //renderer.processEntities(sceneManager.getCurrentScene().getTransparentEntities());
     }
 
     @Override
