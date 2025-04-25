@@ -223,7 +223,7 @@ public class Level0 extends Scene {
             }
 
             chunk.publishChunk();
-            if(!ChunkCoord.compareToVector(chunk.chunkPosition, new Vector3f(0, 0, -10))) terrainGeneration.addSurfaceFeatures(chunk);
+            if(!ChunkCoord.compareToVector(chunk.chunkPosition, new Vector3f(0, 0, -10)) && !ChunkCoord.compareToVector(chunk.chunkPosition, new Vector3f(-1, 0, -10))) terrainGeneration.addSurfaceFeatures(chunk);
 
             GameObject chunkEntity = chunk.getChunkEntity();
             if(chunkEntity != null) {
