@@ -14,7 +14,6 @@ public class OBJModel {
     private ArrayList<Face> faces = new ArrayList<>();
     private int[] indices = new int[0];
     private Material material;
-    private String name = "Undefined name";
 
     private Vector3f[] vertices;
     private Vector3f[] normals;
@@ -51,10 +50,6 @@ public class OBJModel {
         this.material = material;
     }
 
-    public OBJModel(String name) {
-        this.name = name;
-    }
-
     public ArrayList<Face> getFaces() {
         return faces;
     }
@@ -81,14 +76,6 @@ public class OBJModel {
 
     public void setMaterial(Material material) {
         this.material = material;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
     }
 
     public Vector3f[] getVertices(){

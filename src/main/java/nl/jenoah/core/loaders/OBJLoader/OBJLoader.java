@@ -3,20 +3,17 @@ package nl.jenoah.core.loaders.OBJLoader;
 import nl.jenoah.core.ModelManager;
 import nl.jenoah.core.debugging.Debug;
 import nl.jenoah.core.entity.Material;
-import nl.jenoah.core.entity.Model;
 import nl.jenoah.core.entity.Texture;
 import nl.jenoah.core.loaders.TextureLoader;
 import nl.jenoah.core.rendering.Face;
 import nl.jenoah.core.rendering.MeshMaterialSet;
 import nl.jenoah.core.shaders.ShaderManager;
 import nl.jenoah.core.utils.Utils;
+
 import org.joml.Vector2f;
 import org.joml.Vector3f;
 import org.joml.Vector4f;
 
-import java.io.File;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
 
@@ -41,24 +38,21 @@ public class OBJLoader {
             switch (tokens[0]) {
                 case "o":
                     objName = tokens[1];
-                    currentModel = new OBJModel(objName);
+                    currentModel = new OBJModel();
                     currentModel.setMaterial(new Material(ShaderManager.pbrShader));
                     objObject.addObjModel(currentModel);
-                    Debug.Log("OBJ Object name: " + currentModel.getName());
                     break;
                 case "mtllib":
-                    Debug.Log("MTL filename: " + mtlFolder + tokens[1]);
                     mtlInfo = loadMTL(mtlFolder + tokens[1]);
                     break;
                 case "usemtl":
-                    currentModel = new OBJModel(objName + " - " + tokens[1]);
+                    currentModel = new OBJModel();
                     if(mtlInfo.containsKey(tokens[1])){
                         currentModel.setMaterial(mtlInfo.get(tokens[1]));
                     }else{
                         currentModel.setMaterial(new Material(ShaderManager.pbrShader));
                     }
                     objObject.addObjModel(currentModel);
-                    Debug.Log("Using MTL " + tokens[1]);
                     break;
                 case "v":
                     vertices.add(new Vector3f(
@@ -82,8 +76,7 @@ public class OBJLoader {
                     break;
                 case "f":
                     if (currentModel == null) {
-                        // If no object/material has been defined yet, create a default one
-                        currentModel = new OBJModel("default");
+                        currentModel = new OBJModel();
                         currentModel.setMaterial(new Material(ShaderManager.pbrShader));
                         objObject.addObjModel(currentModel);
                     }
@@ -126,7 +119,7 @@ public class OBJLoader {
 
         // If still no model was created, create a default one
         if (objObject.getObjModels().isEmpty()) {
-            currentModel = new OBJModel("default");
+            currentModel = new OBJModel();
             currentModel.setMaterial(new Material(ShaderManager.pbrShader));
             objObject.addObjModel(currentModel);
         }
@@ -165,13 +158,10 @@ public class OBJLoader {
             model.setIndices(finalIndices);
         }
 
-        //objObject.cleanUp();
-
         return ModelManager.loadModel(objObject);
     }
 
     public static List<MeshMaterialSet> loadOBJModel(String fileName, Texture texturePath) {
-        Debug.Log("Loading OBJ " + fileName);
         List<MeshMaterialSet> meshMaterialSets = loadOBJModel(fileName);
         meshMaterialSets.forEach((meshMaterialSet -> {
             meshMaterialSet.material.setAlbedoTexture(texturePath);
