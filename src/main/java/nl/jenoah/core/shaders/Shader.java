@@ -3,8 +3,8 @@ package nl.jenoah.core.shaders;
 import nl.jenoah.core.Camera;
 import nl.jenoah.core.WindowManager;
 import nl.jenoah.core.debugging.Debug;
-import nl.jenoah.core.entity.Entity;
 import nl.jenoah.core.entity.Material;
+import nl.jenoah.core.rendering.MeshMaterialSet;
 import nl.jenoah.core.utils.Utils;
 import org.joml.Matrix4f;
 import org.joml.Vector2f;
@@ -85,12 +85,9 @@ public class Shader {
 
     public void render(Camera camera){}
 
-    public void prepare(Entity entity, Camera camera){
+    public void prepare(MeshMaterialSet meshMaterialSet, Camera camera) {}
 
-    }
-
-    public void prepare(){
-    }
+    public void prepare(){}
 
     public void link() throws Exception{
         GL20.glLinkProgram(programID);
@@ -139,7 +136,7 @@ public class Shader {
     }
 
     public void createMaterialUniform(String uniformName) throws Exception{
-        createUniform(uniformName + ".ambient");
+        //createUniform(uniformName + ".ambient");
         createUniform(uniformName + ".diffuse");
         createUniform(uniformName + ".specular");
         createUniform(uniformName + ".hasTexture");
@@ -183,7 +180,7 @@ public class Shader {
     }
 
     public void setUniform(String uniformName, Material material){
-        setUniform(uniformName + ".ambient", material.getAmbientColor());
+        //setUniform(uniformName + ".ambient", material.getAmbientColor());
         setUniform(uniformName + ".diffuse", material.getDiffuseColor());
         setUniform(uniformName + ".specular", material.getSpecularColor());
         setUniform(uniformName + ".hasTexture", material.hasAlbedoTexture() ? 1 : 0);

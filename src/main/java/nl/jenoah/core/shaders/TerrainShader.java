@@ -1,7 +1,7 @@
 package nl.jenoah.core.shaders;
 
 import nl.jenoah.core.Camera;
-import nl.jenoah.core.entity.Entity;
+import nl.jenoah.core.rendering.MeshMaterialSet;
 import nl.jenoah.core.utils.Utils;
 import org.joml.Vector2f;
 
@@ -23,8 +23,8 @@ public class TerrainShader extends Shader {
     }
 
     @Override
-    public void prepare(Entity entity, Camera camera) {
-        super.prepare(entity, camera);
+    public void prepare(MeshMaterialSet meshMaterialSet, Camera camera) {
+        super.prepare(meshMaterialSet, camera);
         setUniform("terrainHeight", terrainHeight);
     }
 

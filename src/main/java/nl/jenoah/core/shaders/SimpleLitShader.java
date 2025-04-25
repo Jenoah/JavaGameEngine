@@ -1,18 +1,15 @@
 package nl.jenoah.core.shaders;
 
 import nl.jenoah.core.Camera;
-import nl.jenoah.core.entity.Entity;
-import nl.jenoah.core.entity.Material;
 import nl.jenoah.core.entity.SceneManager;
 import nl.jenoah.core.lighting.DirectionalLight;
 import nl.jenoah.core.lighting.PointLight;
 import nl.jenoah.core.lighting.SpotLight;
+import nl.jenoah.core.rendering.MeshMaterialSet;
 import nl.jenoah.core.utils.Constants;
 import nl.jenoah.core.utils.Transformation;
 import nl.jenoah.core.utils.Utils;
 import org.joml.Matrix4f;
-import org.lwjgl.opengl.GL11;
-import org.lwjgl.opengl.GL13;
 
 import static org.lwjgl.opengl.GL11.glDepthMask;
 
@@ -35,7 +32,6 @@ public class SimpleLitShader extends Shader {
         super.createRequiredUniforms();
 
         createMaterialUniform("material");
-        createUniform("textureSampler");
         createUniform("modelMatrix");
         createUniform("viewMatrix");
         createUniform("projectionMatrix");
@@ -52,15 +48,14 @@ public class SimpleLitShader extends Shader {
     }
 
     @Override
-    public void prepare(Entity entity, Camera camera){
+    public void prepare(MeshMaterialSet meshMaterialSet, Camera camera) {
         glDepthMask(true);
 
-        Matrix4f modelMatrix = Transformation.getModelMatrix(entity);
+        Matrix4f modelMatrix = Transformation.getModelMatrix(meshMaterialSet.getRoot());
         Matrix4f viewMatrix = Transformation.getViewMatrix(camera);
 
-        Material mat = entity.getModel().getMaterial();
-        Shader shader = mat.getShader();
-        shader.setUniform("material", mat);
+        Shader shader = meshMaterialSet.material.getShader();
+        shader.setUniform("material", meshMaterialSet.material);
         shader.setUniform("modelMatrix", modelMatrix);
         //shader.setUniform("textureSampler", 0);
         shader.setUniform("viewMatrix", viewMatrix);
@@ -69,11 +64,12 @@ public class SimpleLitShader extends Shader {
         shader.setUniform("fogDensity", SceneManager.fogDensity);
         shader.setUniform("fogGradient", SceneManager.fogGradient);
 
+        /*
         if(mat.getAlbedoTexture() != null){
             GL13.glActiveTexture(GL13.GL_TEXTURE0);
             GL11.glBindTexture(GL11.GL_TEXTURE_2D, mat.getAlbedoTexture().getId());
             shader.setTexture("textureSampler", 0);
-        }
+        }*/
     }
 
     public void setLights(DirectionalLight directionalLight, PointLight[] pointLights, SpotLight[] spotLights){

@@ -1,7 +1,5 @@
 package nl.jenoah.core.shaders.postProcessing;
 
-import nl.jenoah.core.Camera;
-import nl.jenoah.core.entity.Entity;
 import nl.jenoah.core.shaders.Shader;
 import nl.jenoah.core.utils.Utils;
 

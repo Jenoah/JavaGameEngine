@@ -1,9 +1,8 @@
 package nl.jenoah.core.shaders;
 
 import nl.jenoah.core.Camera;
-import nl.jenoah.core.entity.Entity;
-import nl.jenoah.core.entity.Material;
 import nl.jenoah.core.entity.SceneManager;
+import nl.jenoah.core.rendering.MeshMaterialSet;
 import nl.jenoah.core.utils.Transformation;
 import nl.jenoah.core.utils.Utils;
 import org.joml.Matrix4f;
@@ -33,16 +32,14 @@ public class UnlitShader extends Shader{
     }
 
     @Override
-    public void prepare(Entity entity, Camera camera) {
+    public void prepare(MeshMaterialSet meshMaterialSet, Camera camera) {
         glDepthMask(true);
 
-        Matrix4f modelMatrix = Transformation.getModelMatrix(entity);
+        Matrix4f modelMatrix = Transformation.getModelMatrix(meshMaterialSet.getRoot());
         Matrix4f viewMatrix = Transformation.getViewMatrix(camera);
 
-        Material mat = entity.getModel().getMaterial();
-
-        Shader shader = mat.getShader();
-        shader.setUniform("material", mat);
+        Shader shader = meshMaterialSet.material.getShader();
+        shader.setUniform("material", meshMaterialSet.material);
         shader.setUniform("modelMatrix", modelMatrix);
         shader.setUniform("viewMatrix", viewMatrix);
         shader.setUniform("projectionMatrix", window.getProjectionMatrix());
@@ -50,9 +47,9 @@ public class UnlitShader extends Shader{
         shader.setUniform("fogDensity", SceneManager.fogDensity);
         shader.setUniform("fogGradient", SceneManager.fogGradient);
 
-        if(mat.getAlbedoTexture() != null){
+        if(meshMaterialSet.material.getAlbedoTexture() != null){
             GL13.glActiveTexture(GL13.GL_TEXTURE0);
-            GL11.glBindTexture(GL11.GL_TEXTURE_2D, mat.getAlbedoTexture().getId());
+            GL11.glBindTexture(GL11.GL_TEXTURE_2D, meshMaterialSet.material.getAlbedoTexture().getId());
             shader.setTexture("textureSampler", 0);
         }
     }

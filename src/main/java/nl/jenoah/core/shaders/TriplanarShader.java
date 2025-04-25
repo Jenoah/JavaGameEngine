@@ -1,7 +1,7 @@
 package nl.jenoah.core.shaders;
 
 import nl.jenoah.core.Camera;
-import nl.jenoah.core.entity.Entity;
+import nl.jenoah.core.rendering.MeshMaterialSet;
 import nl.jenoah.core.utils.Utils;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL13;
@@ -28,21 +28,22 @@ public class TriplanarShader extends SimpleLitShader {
     public void createRequiredUniforms() throws Exception {
         super.createRequiredUniforms();
 
-        //createUniform("topTexture");
+        createUniform("topTexture");
+        //createUniform("textureSampler");
         createUniform("sideTexture");
         createUniform("blendFactor");
     }
 
     @Override
-    public void prepare(Entity entity, Camera camera) {
-        super.prepare(entity, camera);
+    public void prepare(MeshMaterialSet meshMaterialSet, Camera camera) {
+        super.prepare(meshMaterialSet, camera);
 
         GL13.glActiveTexture(GL13.GL_TEXTURE0);
         GL11.glBindTexture(GL11.GL_TEXTURE_2D, topTextureID);
         GL13.glActiveTexture(GL13.GL_TEXTURE1);
         GL11.glBindTexture(GL11.GL_TEXTURE_2D, sideTextureID);
 
-        setTexture("textureSampler", 0);
+        setTexture("topTexture", 0);
         setTexture("sideTexture", 1);
 
         setUniform("blendFactor", blendFactor);

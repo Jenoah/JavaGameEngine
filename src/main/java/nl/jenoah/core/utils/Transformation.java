@@ -1,7 +1,6 @@
 package nl.jenoah.core.utils;
 
 import nl.jenoah.core.Camera;
-import nl.jenoah.core.entity.Entity;
 import nl.jenoah.core.entity.GameObject;
 import org.joml.Matrix4f;
 import org.joml.Quaternionf;

@@ -1,9 +1,8 @@
 package nl.jenoah.core.shaders;
 
 import nl.jenoah.core.Camera;
-import nl.jenoah.core.entity.Entity;
-import nl.jenoah.core.entity.Material;
 import nl.jenoah.core.entity.SceneManager;
+import nl.jenoah.core.rendering.MeshMaterialSet;
 import nl.jenoah.core.utils.Transformation;
 import nl.jenoah.core.utils.Utils;
 import org.joml.Matrix4f;
@@ -30,15 +29,14 @@ public class PBRShader extends SimpleLitShader{
     }
 
     @Override
-    public void prepare(Entity entity, Camera camera) {
+    public void prepare(MeshMaterialSet meshMaterialSet, Camera camera) {
         glDepthMask(true);
 
-        Matrix4f modelMatrix = Transformation.getModelMatrix(entity);
+        Matrix4f modelMatrix = Transformation.getModelMatrix(meshMaterialSet.getRoot());
         Matrix4f viewMatrix = Transformation.getViewMatrix(camera);
 
-        Material mat = entity.getModel().getMaterial();
-        Shader shader = mat.getShader();
-        shader.setUniform("material", mat);
+        Shader shader = meshMaterialSet.material.getShader();
+        shader.setUniform("material", meshMaterialSet.material);
         shader.setUniform("modelMatrix", modelMatrix);
         //shader.setUniform("textureSampler", 0);
         shader.setUniform("viewMatrix", viewMatrix);
@@ -48,27 +46,21 @@ public class PBRShader extends SimpleLitShader{
         shader.setUniform("fogGradient", SceneManager.fogGradient);
 
 
-        if(mat.hasAlbedoTexture()) {
+        if(meshMaterialSet.material.hasAlbedoTexture()) {
             GL13.glActiveTexture(GL13.GL_TEXTURE0);
-            GL11.glBindTexture(GL11.GL_TEXTURE_2D, mat.getAlbedoTexture().getId());
+            GL11.glBindTexture(GL11.GL_TEXTURE_2D, meshMaterialSet.material.getAlbedoTexture().getId());
             shader.setTexture("albedoMap", 0);
             shader.setUniform("hasAlbedoMap", 1);
         }else{
-            shader.setUniform("hasAlbedoMap", false);
+            shader.setUniform("hasAlbedoMap", 0);
         }
-        if(mat.hasNormalMap()) {
+        if(meshMaterialSet.material.hasNormalMap()) {
             GL13.glActiveTexture(GL13.GL_TEXTURE1);
-            GL11.glBindTexture(GL11.GL_TEXTURE_2D, mat.getNormalMap().getId());
+            GL11.glBindTexture(GL11.GL_TEXTURE_2D, meshMaterialSet.material.getNormalMap().getId());
             shader.setTexture("normalMap", 1);
-            shader.setUniform("hasNormalMap", true);
+            shader.setUniform("hasNormalMap", 1);
         }else{
-            shader.setUniform("hasNormalMap", false);
-        }
-
-        if(mat.getAlbedoTexture() != null){
-            GL13.glActiveTexture(GL13.GL_TEXTURE2);
-            GL11.glBindTexture(GL11.GL_TEXTURE_2D, mat.getAlbedoTexture().getId());
-            shader.setTexture("textureSampler", 2);
+            shader.setUniform("hasNormalMap", 0);
         }
     }
 }

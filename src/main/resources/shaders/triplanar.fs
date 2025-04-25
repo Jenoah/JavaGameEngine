@@ -10,7 +10,6 @@ in float fogFactor;
 out vec4 outColor;
 
 struct Material {
-    vec4 ambient;
     vec4 diffuse;
     vec4 specular;
     int hasTexture;
@@ -44,7 +43,7 @@ struct SpotLight{
     float outerCutOff;
 };
 
-uniform sampler2D textureSampler;
+uniform sampler2D topTexture;
 uniform sampler2D sideTexture;
 uniform vec3 ambientColor;
 uniform vec3 viewPosition;
@@ -149,10 +148,10 @@ void main() {
     fragNormal = normalize(vertexNormal);
     viewDirection = normalize(viewPosition - fragPosition);
     vec4 sideTex = texture(sideTexture, texCoords);
-    vec4 topTex = texture(textureSampler, texCoords);
+    vec4 topTex = texture(topTexture, texCoords);
 
     diffuseMap = mix(sideTex, topTex, pow(dot(fragNormal, vec3(0,1,0)), blendFactor));
-    diffuseMap *= material.ambient;
+    diffuseMap *= material.diffuse;
 
     ambient = vec3(0.3) * ambientColor;
     diffuse = vec3(1.0) * diffuseMap.rgb;
@@ -169,7 +168,6 @@ void main() {
             outColor += calculateSpotLight(spotLights[i]);
         }
     }
-
 
     outColor.rgb = mix(vec4(fogColor, 1.0), outColor, fogFactor).rgb;
     outColor.a = diffuseMap.a;
