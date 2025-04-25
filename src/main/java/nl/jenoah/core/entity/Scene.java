@@ -5,7 +5,6 @@ import nl.jenoah.core.ModelManager;
 import nl.jenoah.core.MouseInput;
 import nl.jenoah.core.WindowManager;
 import nl.jenoah.core.components.Component;
-import nl.jenoah.core.components.RenderComponent;
 import nl.jenoah.core.fonts.fontMeshCreator.FontType;
 import nl.jenoah.core.fonts.fontMeshCreator.GUIText;
 import nl.jenoah.core.fonts.fontMeshCreator.TextMeshData;
@@ -180,6 +179,19 @@ public class Scene {
         textObject.setMeshInfo(id, data.getVertexCount());
         List<GUIText> textBatch = textObjects.computeIfAbsent(font, k -> new ArrayList<GUIText>());
         textBatch.add(textObject);
+    }
+
+    public void updateText(GUIText textObject){
+        ModelManager.unloadModel(textObject.getMesh());
+        FontType font = textObject.getFont();
+        TextMeshData data = font.loadText(textObject);
+        int id = ModelManager.loadModelID(data.getVertexPositions(), data.getTextureCoords(), 2);
+        textObject.setMeshInfo(id, data.getVertexCount());
+
+        if(!textObjects.get(textObject.getFont()).contains(textObject)){
+            List<GUIText> textBatch = textObjects.computeIfAbsent(font, k -> new ArrayList<GUIText>());
+            textBatch.add(textObject);
+        }
     }
 
     public void removeText(GUIText textObject) {

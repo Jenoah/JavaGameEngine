@@ -1,18 +1,14 @@
 package nl.jenoah.core;
 
-import nl.jenoah.core.debugging.Debug;
-import nl.jenoah.core.entity.Material;
 import nl.jenoah.core.entity.Mesh;
 import nl.jenoah.core.entity.Model;
 import nl.jenoah.core.loaders.*;
 import nl.jenoah.core.loaders.OBJLoader.OBJObject;
 import nl.jenoah.core.rendering.MeshMaterialSet;
-import nl.jenoah.core.utils.Conversion;
 import org.joml.Vector2f;
 import org.joml.Vector3f;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 
@@ -71,11 +67,13 @@ public class ModelManager {
 
     public static void unloadModel(int modelID){
         meshes.get(modelID).cleanUp();
+        meshes.remove(modelID);
     }
 
     public static void cleanUp(){
         for(Mesh mesh: meshes.values()){
             mesh.cleanUp();
+            meshes.remove(mesh.getVaoID());
         }
         TextureLoader.cleanUp();
     }

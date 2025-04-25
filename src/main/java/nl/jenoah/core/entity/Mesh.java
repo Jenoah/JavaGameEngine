@@ -412,6 +412,14 @@ public class Mesh {
 
     public void cleanUp(){
         GL30.glDeleteVertexArrays(vaoID);
+
+        vertices = null;
+        uvs = null;
+        normals = null;
+        tangents = null;
+        bitangents = null;
+        triangles = null;
+
         for(int vbo: vbos){
             GL30.glDeleteBuffers(vbo);
         }
