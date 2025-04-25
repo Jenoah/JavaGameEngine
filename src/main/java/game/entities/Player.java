@@ -1,8 +1,9 @@
 package game.entities;
 
 import nl.jenoah.core.*;
+import nl.jenoah.core.components.RenderComponent;
 import nl.jenoah.core.entity.*;
-import nl.jenoah.core.loaders.OBJLoader;
+import nl.jenoah.core.loaders.PrimitiveLoader;
 import nl.jenoah.core.shaders.ShaderManager;
 import nl.jenoah.core.utils.Constants;
 import org.joml.Quaternionf;
@@ -16,7 +17,7 @@ public class Player extends GameObject {
     private final Camera camera;
     private final WindowManager windowManager;
 
-    private Vector3f moveDelta;
+    private final Vector3f moveDelta;
     private float pitch = 0;
     private float yaw = 0;
     private float moveSpeed = Constants.CAMERA_MOVE_SPEED;
@@ -27,11 +28,12 @@ public class Player extends GameObject {
         this.camera.setParent(this);
         moveDelta = new Vector3f(0, 0, 0);
 
-        Model pointLightProxyModel = OBJLoader.loadOBJModel("/models/cube.obj");
+        //Model pointLightProxyModel = OBJLoader.loadOBJModel("/models/cube.obj");
         //pointLightProxyModel.getMaterial().setAlbedoTexture(null);
-        Entity feet = new Entity(pointLightProxyModel, new Vector3f(0, -1f, 0), new Vector3f(0, 0, 0), .1f);
-        feet.getModel().setMaterial(new Material(ShaderManager.unlitShader));
-        feet.getModel().getMaterial().setAmbientColor(new Vector4f(1, .5f, 1, 1));
+        GameObject feet = new GameObject().setPosition(new Vector3f(0, -1f, 0)).setScale(0.1f);
+        Material feetMaterial = new Material(ShaderManager.unlitShader).setAmbientColor(new Vector4f(1, .5f, 1, 1));
+        feet.addComponent(new RenderComponent(PrimitiveLoader.getCube().getMesh(), feetMaterial));
+
         feet.setParent(this);
     }
 

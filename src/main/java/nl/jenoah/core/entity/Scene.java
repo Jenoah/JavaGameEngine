@@ -6,7 +6,6 @@ import nl.jenoah.core.MouseInput;
 import nl.jenoah.core.WindowManager;
 import nl.jenoah.core.components.Component;
 import nl.jenoah.core.components.RenderComponent;
-import nl.jenoah.core.debugging.Debug;
 import nl.jenoah.core.fonts.fontMeshCreator.FontType;
 import nl.jenoah.core.fonts.fontMeshCreator.GUIText;
 import nl.jenoah.core.fonts.fontMeshCreator.TextMeshData;
@@ -14,15 +13,11 @@ import nl.jenoah.core.gui.GuiObject;
 import nl.jenoah.core.lighting.DirectionalLight;
 import nl.jenoah.core.lighting.PointLight;
 import nl.jenoah.core.lighting.SpotLight;
-import nl.jenoah.core.rendering.MeshMaterialSet;
 import org.joml.Vector3f;
 
 import java.util.*;
 
 public class Scene {
-    //private final HashMap<Material, List<Entity>> transparentEntities;
-    //private final HashMap<Material, List<Entity>> solidEntities;
-    private final List<RenderComponent> renderComponents;
     private final List<GameObject> gameObjects;
     private final List<GuiObject> guiObjects;
     private final Map<FontType, List<GUIText>> textObjects;
@@ -43,9 +38,6 @@ public class Scene {
     protected String levelName = "Undefined Scene";
 
     public Scene() {
-        //this.transparentEntities = new HashMap<>();
-        //this.solidEntities = new HashMap<>();
-        this.renderComponents = new ArrayList<>();
         this.gameObjects = new ArrayList<>();
         this.guiObjects = new ArrayList<>();
         this.windowManager = WindowManager.getInstance();
@@ -71,23 +63,14 @@ public class Scene {
     }
 
     public void handleInput() {
-        //Debug.Log("" + mouseInput.getMousePositionInPixels());
     }
 
     public void cleanUp() {
         ModelManager.cleanUp();
     }
 
-//    public HashMap<Material, List<Entity>> getTransparentEntities() {
-//        return transparentEntities;
-//    }
-//
-//    public HashMap<Material, List<Entity>> getSolidEntities() {
-//        return solidEntities;
-//    }
-
     public void addEntity(GameObject entity) {
-        if (entity == null)/* || transparentEntities.values().contains(entity) || solidEntities.containsValue(entity))*/ {
+        if (entity == null) {
             return;
         }
 
