@@ -19,6 +19,7 @@ public class TextureLoader {
     private static boolean flipTexture = true;
     private static boolean pointFilter = false;
     private static boolean repeatTexture = true;
+    private static boolean isNormalMap = false;
 
     public static int loadTexture(String fileName){
         ByteBuffer imageBuffer;
@@ -48,15 +49,17 @@ public class TextureLoader {
         GL11.glBindTexture(GL11.GL_TEXTURE_2D, id);
         GL11.glPixelStorei(GL11.GL_UNPACK_ALIGNMENT, 1);
 
-        int format = GL30.GL_SRGB_ALPHA;
+        int format;
         if (comp.get() == 3) {
             if ((width & 3) != 0) {
                 GL11.glPixelStorei(GL11.GL_UNPACK_ALIGNMENT, 2 - (width & 1));
             }
+            format = isNormalMap ? GL11.GL_RGB8 : GL21.GL_SRGB8;
             alphaFormat = GL11.GL_RGB;
         } else {
             GL11.glEnable(GL11.GL_BLEND);
             GL11.glBlendFunc(GL11.GL_ONE, GL11.GL_ONE_MINUS_SRC_ALPHA);
+            format = isNormalMap ? GL11.GL_RGBA8 : GL21.GL_SRGB8_ALPHA8;
 
             alphaFormat = GL11.GL_RGBA;
         }
@@ -95,6 +98,10 @@ public class TextureLoader {
         STBImage.stbi_image_free(imageBuffer);
 
         textures.add(id);
+        TextureLoader.flipTexture = true;
+        TextureLoader.pointFilter = false;
+        TextureLoader.repeatTexture = true;
+        TextureLoader.isNormalMap = false;
         return id;
     }
 
@@ -114,6 +121,14 @@ public class TextureLoader {
         TextureLoader.pointFilter = pointFilter;
         TextureLoader.repeatTexture = repeatTexture;
         TextureLoader.flipTexture = flipTexture;
+        return loadTexture(fileName);
+    }
+
+    public static int loadTexture(String fileName, boolean pointFilter, boolean flipTexture, boolean repeatTexture, boolean isNormalMap){
+        TextureLoader.pointFilter = pointFilter;
+        TextureLoader.repeatTexture = repeatTexture;
+        TextureLoader.flipTexture = flipTexture;
+        TextureLoader.isNormalMap = isNormalMap;
         return loadTexture(fileName);
     }
 

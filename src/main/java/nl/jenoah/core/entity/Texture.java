@@ -25,4 +25,8 @@ public class Texture {
     public Texture(String texturePath, boolean pointFilter, boolean flipped){
         this.id = TextureLoader.loadTexture(texturePath, pointFilter, flipped);
     }
+
+    public Texture(String texturePath, boolean pointFilter, boolean flipped, boolean repeat, boolean isNormalMap){
+        this.id = TextureLoader.loadTexture(texturePath, pointFilter, flipped, repeat, isNormalMap);
+    }
 }

@@ -23,10 +23,11 @@ void main(){
     vec4 worldPosition = modelMatrix * vec4(position, 1.0);
     vec4 cameraObjectPosition = viewMatrix * worldPosition;
 
-    vec3 T = normalize(vec3(modelMatrix * vec4(tangents, 0.0)));
-    vec3 B = normalize(vec3(modelMatrix * vec4(bitangents, 0.0)));
-    vec3 N = normalize(vec3(modelMatrix * vec4(normal, 0.0)));
-    TBN = mat3(T,B,N);
+    mat3 normalMatrix = transpose(inverse(mat3(modelMatrix)));
+    vec3 T = normalize(normalMatrix * tangents);
+    vec3 N = normalize(normalMatrix * normal);
+    vec3 B = normalize(cross(N, T));
+    TBN = mat3(T, B, N);
 
     gl_Position = projectionMatrix * cameraObjectPosition;
 

@@ -48,6 +48,10 @@ public class ComponentRenderer implements IRenderer{
         GL20.glEnableVertexAttribArray(0);
         GL20.glEnableVertexAttribArray(1);
         GL20.glEnableVertexAttribArray(2);
+        if(meshMaterialSet.mesh.hasTangents()){
+            GL20.glEnableVertexAttribArray(3);
+            GL20.glEnableVertexAttribArray(4);
+        }
         if(meshMaterialSet.material.isDoubleSided()){
             GL11.glEnable(GL11.GL_BLEND);
             GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);

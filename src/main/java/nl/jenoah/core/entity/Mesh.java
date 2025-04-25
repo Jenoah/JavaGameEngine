@@ -14,7 +14,6 @@ import org.lwjgl.opengl.GL30;
 import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 public class Mesh {
@@ -29,7 +28,7 @@ public class Mesh {
     private final List<Integer> vbos = new ArrayList<>();
 
     private int vaoID = -1;
-    private int vertexVBOID, normalVBOID, tangentsVBOID, bitangentsVBOID, triangleVBOID, uvVBOID = -1;
+    private int vertexVBOID = -1, normalVBOID = -1, tangentsVBOID = -1, bitangentsVBOID = -1, triangleVBOID = -1, uvVBOID = -1;
 
     private int vertexCount = -1;
 
@@ -144,10 +143,7 @@ public class Mesh {
 
         if(uvs != null && uvs.length > 0 && triangles != null && vertices != null){
             calculateTangents();
-            float[] tangentFloatArray = Conversion.toFloatArray(tangents);
-            float[] bitangentFloatArray = Conversion.toFloatArray(bitangents);
-            tangentsVBOID = storeDataInAttributeList(3, 3, tangentFloatArray);
-            bitangentsVBOID = storeDataInAttributeList(4, 3, bitangentFloatArray);
+            Debug.Log("TangentID for VAO " + vaoID + " is " + tangentsVBOID);
         }
 
         unbind();
@@ -178,12 +174,14 @@ public class Mesh {
 
 //    Recalculate
 
-    public void calculateNormals(){
-        normals = new Vector3f[vertices.length];
-
+    public Mesh calculateNormals(){
         int triangleCount = triangles.length / 3;
+        normals = new Vector3f[vertices.length];
+        for (int i = 0; i < normals.length; i++) {
+            normals[i] = new Vector3f(0, 0, 0);
+        }
 
-        for(int i = 0; i < triangleCount; i++){
+        for (int i = 0; i < triangleCount; i++) {
             int normalTriangleIndex = i * 3;
             int vertexIndexA = triangles[normalTriangleIndex];
             int vertexIndexB = triangles[normalTriangleIndex + 1];
@@ -191,57 +189,119 @@ public class Mesh {
 
             Vector3f CB = Calculus.subtractVectors(vertices[vertexIndexB], vertices[vertexIndexA]);
             Vector3f CA = Calculus.subtractVectors(vertices[vertexIndexC], vertices[vertexIndexA]);
-
             Vector3f triangleNormal = CB.cross(CA).normalize();
 
-            normals[vertexIndexA] = triangleNormal;
-            normals[vertexIndexB] = triangleNormal;
-            normals[vertexIndexC] = triangleNormal;
+            normals[vertexIndexA].add(triangleNormal);
+            normals[vertexIndexB].add(triangleNormal);
+            normals[vertexIndexC].add(triangleNormal);
         }
+
+        for (Vector3f normal : normals) {
+            normal.normalize();
+        }
+
+        return this;
     }
 
-    //INCOMPLETE FUNCTION OF calculateTangents
-    private void calculateTangents() {
-        int triangleCount = this.triangles.length / 3;
-        this.tangents = new Vector3f[this.triangles.length];
-        this.bitangents = new Vector3f[this.triangles.length];
+    public Mesh calculateTangents() {
+        // Initialize tangent and bitangent arrays
+        Vector3f[] tangents = new Vector3f[vertices.length];
+        Vector3f[] bitangents = new Vector3f[vertices.length];
+        for (int i = 0; i < vertices.length; i++) {
+            tangents[i] = new Vector3f(0, 0, 0);
+            bitangents[i] = new Vector3f(0, 0, 0);
+        }
+
+        int triangleCount = triangles.length / 3;
 
         for (int i = 0; i < triangleCount; i++) {
-            int normalTriangleIndex = i * 3;
+            int i0 = triangles[i * 3];
+            int i1 = triangles[i * 3 + 1];
+            int i2 = triangles[i * 3 + 2];
 
-            Vector3f vertex1 = this.vertices[this.triangles[normalTriangleIndex]];
-            Vector3f vertex2 = this.vertices[this.triangles[normalTriangleIndex + 1]];
-            Vector3f vertex3 = this.vertices[this.triangles[normalTriangleIndex + 2]];
+            Vector3f v0 = vertices[i0];
+            Vector3f v1 = vertices[i1];
+            Vector3f v2 = vertices[i2];
 
-            Vector2f uv1 = this.uvs[this.triangles[normalTriangleIndex]];
-            Vector2f uv2 = this.uvs[this.triangles[normalTriangleIndex + 1]];
-            Vector2f uv3 = this.uvs[this.triangles[normalTriangleIndex + 2]];
+            Vector2f uv0 = uvs[i0];
+            Vector2f uv1 = uvs[i1];
+            Vector2f uv2 = uvs[i2];
 
-            Vector3f edge1 = Calculus.subtractVectors(vertex2, vertex1);
-            Vector3f edge2 = Calculus.subtractVectors(vertex3, vertex1);
+            Vector3f deltaPos1 = Calculus.subtractVectors(v1, v0);
+            Vector3f deltaPos2 = Calculus.subtractVectors(v2, v0);
 
-            Vector2f deltaUV1 = Calculus.subtractVectors(uv2, uv1);
-            Vector2f deltaUV2 = Calculus.subtractVectors(uv3, uv1);
+            Vector2f deltaUV1 = Calculus.subtractVectors(uv1, uv0);
+            Vector2f deltaUV2 = Calculus.subtractVectors(uv2, uv0);
 
-            float f = 1.0f / (deltaUV1.x * deltaUV2.y - deltaUV2.x * deltaUV1.y);
+            float r = (deltaUV1.x * deltaUV2.y - deltaUV1.y * deltaUV2.x);
+            if (r == 0.0f) r = 1.0f; // Prevent division by zero
 
-            Vector3f tangent = new Vector3f();
-            tangent.x = f * (deltaUV2.y * edge1.x - deltaUV1.y * edge2.x);
-            tangent.y = f * (deltaUV2.y * edge1.y - deltaUV1.y * edge2.y);
-            tangent.z = f * (deltaUV2.y * edge1.z - deltaUV1.y * edge2.z);
-            this.tangents[normalTriangleIndex] = tangent;
-            this.tangents[normalTriangleIndex + 1] = tangent;
-            this.tangents[normalTriangleIndex + 2] = tangent;
+            float f = 1.0f / r;
 
-            Vector3f bitangent = new Vector3f();
-            bitangent.x = f * (-deltaUV2.x * edge1.x + deltaUV1.x * edge2.x);
-            bitangent.y = f * (-deltaUV2.x * edge1.y + deltaUV1.x * edge2.y);
-            bitangent.z = f * (-deltaUV2.x * edge1.z + deltaUV1.x * edge2.z);
-            this.bitangents[normalTriangleIndex] = bitangent;
-            this.bitangents[normalTriangleIndex + 1] = bitangent;
-            this.bitangents[normalTriangleIndex + 2] = bitangent;
+            Vector3f tangent = new Vector3f(
+                    f * (deltaUV2.y * deltaPos1.x - deltaUV1.y * deltaPos2.x),
+                    f * (deltaUV2.y * deltaPos1.y - deltaUV1.y * deltaPos2.y),
+                    f * (deltaUV2.y * deltaPos1.z - deltaUV1.y * deltaPos2.z)
+            );
+
+            Vector3f bitangent = new Vector3f(
+                    f * (-deltaUV2.x * deltaPos1.x + deltaUV1.x * deltaPos2.x),
+                    f * (-deltaUV2.x * deltaPos1.y + deltaUV1.x * deltaPos2.y),
+                    f * (-deltaUV2.x * deltaPos1.z + deltaUV1.x * deltaPos2.z)
+            );
+
+            tangents[i0] = tangents[i0].add(tangent);
+            tangents[i1] = tangents[i1].add(tangent);
+            tangents[i2] = tangents[i2].add(tangent);
+
+            bitangents[i0] = bitangents[i0].add(bitangent);
+            bitangents[i1] = bitangents[i1].add(bitangent);
+            bitangents[i2] = bitangents[i2].add(bitangent);
         }
+
+        // Normalize tangents and bitangents
+        for (int i = 0; i < vertices.length; i++) {
+            tangents[i] = tangents[i].normalize();
+            bitangents[i] = bitangents[i].normalize();
+        }
+
+        // Store or return as needed
+        this.tangents = tangents;
+        this.bitangents = bitangents;
+
+        float[] tangentFloatArray = Conversion.toFloatArray(tangents);
+        float[] bitangentFloatArray = Conversion.toFloatArray(bitangents);
+
+// Tangents
+        if (tangentsVBOID == -1) {
+            GL30.glBindVertexArray(vaoID);
+            tangentsVBOID = storeDataInAttributeList(3, 3, tangentFloatArray);
+            unbind();
+        } else {
+            GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, tangentsVBOID);
+            FloatBuffer buffer = Utils.storeDataInFloatBuffer(tangentFloatArray);
+            GL15.glBufferData(GL15.GL_ARRAY_BUFFER, buffer, GL15.GL_STATIC_DRAW);
+            GL20.glVertexAttribPointer(3, 3, GL11.GL_FLOAT, false, 0, 0); // location 3, size 3
+            GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, 0);
+        }
+
+// Bitangents
+        if (bitangentsVBOID == -1) {
+            GL30.glBindVertexArray(vaoID);
+            bitangentsVBOID = storeDataInAttributeList(4, 3, bitangentFloatArray); // location 4
+            unbind();
+        } else {
+            GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, bitangentsVBOID);
+            FloatBuffer buffer = Utils.storeDataInFloatBuffer(bitangentFloatArray);
+            GL15.glBufferData(GL15.GL_ARRAY_BUFFER, buffer, GL15.GL_STATIC_DRAW);
+            GL20.glVertexAttribPointer(4, 3, GL11.GL_FLOAT, false, 0, 0); // location 4, size 3
+            GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, 0);
+        }
+
+
+        return this;
     }
+
     public void generateUVs(){
         uvs = new Vector2f[vertices.length];
 
@@ -355,5 +415,9 @@ public class Mesh {
         for(int vbo: vbos){
             GL30.glDeleteBuffers(vbo);
         }
+    }
+
+    public boolean hasTangents(){
+        return tangentsVBOID != -1 && bitangentsVBOID != -1;
     }
 }

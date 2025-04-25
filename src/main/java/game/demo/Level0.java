@@ -6,7 +6,6 @@ import game.utils.ChunkCoord;
 import nl.jenoah.core.EngineManager;
 import nl.jenoah.core.MouseInput;
 import nl.jenoah.core.components.RenderComponent;
-import nl.jenoah.core.debugging.Debug;
 import nl.jenoah.core.entity.*;
 import nl.jenoah.core.fonts.fontMeshCreator.FontType;
 import nl.jenoah.core.fonts.fontMeshCreator.GUIText;
@@ -32,7 +31,6 @@ import org.lwjgl.glfw.GLFW;
 import java.io.File;
 import java.util.List;
 import java.util.Queue;
-import java.util.Random;
 
 public class Level0 extends Scene {
 
@@ -79,12 +77,13 @@ public class Level0 extends Scene {
         monkeyEntity.addComponent(new RenderComponent(monkMeshMaterialSets));
         addEntity(monkeyEntity);
 
-        Model groundBlock = PrimitiveLoader.getCube();
-        groundBlock.getMaterial().setAlbedoTexture(new Texture("textures/rock/rock_albedo.jpg"));
-        groundBlock.getMaterial().setNormalMap(new Texture("textures/rock/rock_normal.jpg"));
-        groundBlock.getMaterial().setReflectance(256);
-        GameObject groundBlockEntity = new GameObject().setPosition(new Vector3f(0, 2.5f, -10)).setScale(new Vector3f(10, 5, 12));
-        groundBlockEntity.addComponent(new RenderComponent(groundBlock.getMesh(), groundBlock.getMaterial()));
+
+        MeshMaterialSet groundBlock = new MeshMaterialSet(PrimitiveLoader.getCube().getMesh().calculateNormals());
+        groundBlock.material.setAlbedoTexture(new Texture("textures/rock/rock_albedo.jpg"));
+        groundBlock.material.setNormalMap(new Texture("textures/rock/rock_normal.jpg", false, false, true, true));
+        groundBlock.material.setReflectance(64);
+        GameObject groundBlockEntity = new GameObject().setPosition(new Vector3f(0, 2.5f, -10)).setScale(new Vector3f(10, 5, 15));
+        groundBlockEntity.addComponent(new RenderComponent(groundBlock.mesh, groundBlock.material));
         addEntity(groundBlockEntity);
 
         GameObject lightProxy = new GameObject().setPosition(new Vector3f(0, 6f, -7f)).setScale(0.1f);
@@ -95,9 +94,7 @@ public class Level0 extends Scene {
         addEntity(lightProxy);
 
         List<MeshMaterialSet> treeMeshMaterialSet = OBJLoader.loadOBJModel("/models/birch.obj");
-        treeMeshMaterialSet.forEach((meshMaterialSet -> {
-            meshMaterialSet.mesh.generateUVs();
-        }));
+        treeMeshMaterialSet.forEach((meshMaterialSet -> meshMaterialSet.mesh.generateUVs()));
         GameObject tree = new GameObject().setPosition(5, 5f, -2);
         tree.addComponent(new RenderComponent(treeMeshMaterialSet));
         addEntity(tree);
@@ -117,7 +114,7 @@ public class Level0 extends Scene {
         //Point light
         Vector3f pointLightPosition = new Vector3f(0);
         Vector3f pointLightColor = new Vector3f(1f, 0f, 1f);
-        PointLight pointLight = new PointLight(pointLightColor, pointLightPosition, .8f, 5f);
+        PointLight pointLight = new PointLight(pointLightColor, pointLightPosition, 5f, 1f);
 
         pointLight.setParent(proxyEntity);
 
