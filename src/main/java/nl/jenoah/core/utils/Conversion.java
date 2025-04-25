@@ -72,6 +72,10 @@ public class Conversion {
         return vectorsStripped;
     }
 
+    public static int[] ToIntArray(List<Integer> integerArray){
+        return integerArray.stream().mapToInt(i->i).toArray();
+    }
+
     public static float angleTo360degrees(float angle) {
         // Convert radians to degrees
         angle = (float) Math.toDegrees(angle);
