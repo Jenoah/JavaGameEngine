@@ -1,6 +1,6 @@
 # Blender 4.1.1
 # www.blender.org
-mtllib birch_.mtl
+mtllib birch.mtl
 o BirchTree_1_Cube
 v 0.083171 0.179484 -0.020679
 v 0.177805 0.171532 -0.108394
