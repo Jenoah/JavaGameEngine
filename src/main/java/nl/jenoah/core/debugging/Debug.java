@@ -14,4 +14,15 @@ public class Debug {
 
         System.out.println("\u001B[35m" + "[Log] " + "\u001B[90m" + className + ":" + lineNumber + " \u001B[0m" + message);
     }
+
+    public static void LogError(String message){
+        StackTraceElement[] stackTrace = Thread.currentThread().getStackTrace();
+
+        StackTraceElement caller = stackTrace[2];
+
+        String className = caller.getClassName();
+        int lineNumber = caller.getLineNumber();
+
+        System.out.println("\u001B[35m" + "[Log] " + "\u001B[90m" + className + ":" + lineNumber + " \u001B[31m" + message);
+    }
 }
