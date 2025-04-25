@@ -2,19 +2,16 @@ package game.terrain;
 
 import game.utils.ChunkCoord;
 import game.utils.ChunkUtils;
+import nl.jenoah.core.components.RenderComponent;
 import nl.jenoah.core.debugging.Debug;
-import nl.jenoah.core.entity.Entity;
-import nl.jenoah.core.entity.Model;
-import nl.jenoah.core.entity.SceneManager;
-import nl.jenoah.core.loaders.PrimitiveLoader;
+import nl.jenoah.core.entity.GameObject;
+import nl.jenoah.core.rendering.MeshMaterialSet;
 import nl.jenoah.core.utils.*;
 import org.joml.Math;
 import org.joml.Quaternionf;
 import org.joml.Vector3f;
 
-import java.util.ArrayDeque;
-import java.util.HashMap;
-import java.util.Queue;
+import java.util.*;
 
 public class TerrainGeneration extends Thread{
     private HashMap<ChunkCoord, MarchingChunk> chunks = new HashMap<ChunkCoord, MarchingChunk>();
@@ -36,7 +33,7 @@ public class TerrainGeneration extends Thread{
 
     private float surfaceFeatureDensity = .4f;
     private int surfaceFeatureSamples = 16;
-    private Entity surfaceFeatureEntity = null;
+    private GameObject surfaceFeatureEntity = null;
 
     public TerrainGeneration(int renderDistance){
         this.renderDistance = renderDistance;
@@ -68,7 +65,7 @@ public class TerrainGeneration extends Thread{
         }
     }
 
-    public void setSurfaceFeature(Entity surfaceFeatureEntity){
+    public void setSurfaceFeature(GameObject surfaceFeatureEntity){
         this.surfaceFeatureEntity = surfaceFeatureEntity;
     }
 
@@ -100,7 +97,7 @@ public class TerrainGeneration extends Thread{
                     } else {
                         MarchingChunk chunk = chunks.get(chunkCoord);
                         if(chunk == null || !chunk.isReady) continue;
-                        Entity chunkEntity = chunks.get(chunkCoord).getChunkEntity();
+                        GameObject chunkEntity = chunks.get(chunkCoord).getChunkEntity();
                         if(chunkEntity != null) chunkEntity.setEnabled(true);
                     }
 
@@ -112,7 +109,7 @@ public class TerrainGeneration extends Thread{
         while(!previousRenderQueue.isEmpty()){
             ChunkCoord chunkCoord = previousRenderQueue.poll();
             if(!activeChunks.contains(chunkCoord)){
-                Entity chunkEntity = chunks.get(chunkCoord).getChunkEntity();
+                GameObject chunkEntity = chunks.get(chunkCoord).getChunkEntity();
                 if(chunkEntity != null) chunkEntity.setEnabled(false);
             }
         }
@@ -164,7 +161,16 @@ public class TerrainGeneration extends Thread{
 
     public void addSurfaceFeatures(MarchingChunk chunk){
         if(surfaceFeatureEntity == null) return;
-        float stepSize = (float)Constants.CHUNK_SIZE / surfaceFeatureSamples;
+
+        // Get the original mesh/material sets to copy from
+        List<MeshMaterialSet> originalMeshMaterialSets = surfaceFeatureEntity
+                .getComponent(RenderComponent.class)
+                .getMeshMaterialSets();
+
+        float stepSize = (float) Constants.CHUNK_SIZE / surfaceFeatureSamples;
+
+        List<MeshMaterialSet> tempMeshMaterialSets = new ArrayList<>(originalMeshMaterialSets.size());
+
         for (int x = 0; x < surfaceFeatureSamples; x++) {
             for (int z = 0; z < surfaceFeatureSamples; z++) {
 
@@ -173,7 +179,7 @@ public class TerrainGeneration extends Thread{
 
                 float noiseLocationX = chunk.chunkPosition.x + localPositionX;
                 float noiseLocationZ = chunk.chunkPosition.z + localPositionZ;
-                float spawnChance = Utils.fastNoise.GetNoise(noiseLocationX, noiseLocationZ) + 1f / 2f;
+                float spawnChance = Utils.fastNoise.GetNoise(noiseLocationX, noiseLocationZ) + 1f / 2f; //TODO: ADD BRACKETS TO FIX THIS FORMULA ;)
 
                 if(spawnChance > surfaceFeatureDensity){
                     float sampleLocationX = noiseLocationX - chunk.chunkPosition.x;
@@ -181,10 +187,18 @@ public class TerrainGeneration extends Thread{
                     float spawnHeight = chunk.getHeightAt(sampleLocationX, sampleLocationZ);
                     float rotationY = (spawnChance - surfaceFeatureDensity) * 360f / (1f - surfaceFeatureDensity);
 
-                    Quaternionf normalUp = new Quaternionf().rotationTo(new Vector3f(0, 1, 0), chunk.getNormalAt(sampleLocationX, sampleLocationZ));
+                    Quaternionf normalUp = new Quaternionf().rotationTo(Constants.VECTOR3_UP, chunk.getNormalAt(sampleLocationX, sampleLocationZ));
                     normalUp.rotateY(rotationY);
 
-                    Entity surfaceFeatureInstance = new Entity(this.surfaceFeatureEntity, new Vector3f(localPositionX, spawnHeight, localPositionZ), normalUp, 1);
+                    GameObject surfaceFeatureInstance = new GameObject().setPosition(new Vector3f(localPositionX, spawnHeight, localPositionZ)).setRotation(normalUp);
+                    tempMeshMaterialSets.clear();
+                    for (MeshMaterialSet meshMaterialSet : originalMeshMaterialSets) {
+                        tempMeshMaterialSets.add(new MeshMaterialSet(meshMaterialSet.mesh, meshMaterialSet.material));
+                    }
+                    RenderComponent renderComponent = new RenderComponent(new ArrayList<>(tempMeshMaterialSets));
+
+                    surfaceFeatureInstance.addComponent(renderComponent);
+                    renderComponent.initiate();
 
                     surfaceFeatureInstance.setParent(chunk.chunkEntity);
                 }
