@@ -30,6 +30,7 @@ public class ComponentRenderer implements IRenderer{
             renderObjectShader.bind();
             renderObjectShader.render(camera);
             meshMaterialSetList.forEach(meshMaterialSet -> {
+                if(!meshMaterialSet.getRoot().isEnabled()) return;
                 bind(meshMaterialSet);
                 renderObjectShader.prepare(meshMaterialSet, camera);
 
@@ -91,5 +92,9 @@ public class ComponentRenderer implements IRenderer{
                 sortedRenderObjects.get(meshMaterialSet.material.getShader()).add(meshMaterialSet);
             }
         });
+    }
+
+    public void dequeue(RenderComponent renderComponent){
+        //TODO: Make dequeue function for render component
     }
 }

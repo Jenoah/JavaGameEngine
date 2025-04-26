@@ -73,7 +73,6 @@ public class ModelManager {
     public static void cleanUp(){
         for(Mesh mesh: meshes.values()){
             mesh.cleanUp();
-            meshes.remove(mesh.getVaoID());
         }
         TextureLoader.cleanUp();
     }

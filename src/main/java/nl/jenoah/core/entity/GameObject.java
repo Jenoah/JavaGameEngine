@@ -217,6 +217,20 @@ public class GameObject {
 
     public GameObject setEnabled(boolean enabled) {
         isEnabled = enabled;
+        if(!isEnabled) onDisable();
+        if(isEnabled) onEnable();
+        return this;
+    }
+
+    protected GameObject onDisable(){
+        components.forEach((Component::disable));
+        children.forEach((GameObject::onDisable));
+        return this;
+    }
+
+    protected GameObject onEnable(){
+        components.forEach((Component::enable));
+        children.forEach((GameObject::onEnable));
         return this;
     }
 

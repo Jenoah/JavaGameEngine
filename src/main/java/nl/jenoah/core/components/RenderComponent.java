@@ -1,21 +1,16 @@
 package nl.jenoah.core.components;
 
-import game.demo.DemoGame;
 import game.demo.DemoLauncher;
-import game.myGame.Launcher;
-import nl.jenoah.core.debugging.Debug;
 import nl.jenoah.core.entity.*;
 import nl.jenoah.core.rendering.MeshMaterialSet;
 import nl.jenoah.core.shaders.ShaderManager;
-import nl.jenoah.core.utils.Utils;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Random;
 
 public class RenderComponent extends Component{
 
-    private List<MeshMaterialSet> meshMaterialSets = new ArrayList<>();
+    private final List<MeshMaterialSet> meshMaterialSets = new ArrayList<>();
 
     public RenderComponent(Mesh mesh){
         addMesh(mesh);
@@ -74,7 +69,7 @@ public class RenderComponent extends Component{
         DemoLauncher.getGame().getRenderer().queueRender(this);
     }
 
-    public RenderComponent clone(){
-        return new RenderComponent(this.meshMaterialSets);
+    private void dequeueRender(){
+        DemoLauncher.getGame().getRenderer().dequeueRender(this);
     }
 }

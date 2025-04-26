@@ -143,7 +143,6 @@ public class Mesh {
 
         if(uvs != null && uvs.length > 0 && triangles != null && vertices != null){
             calculateTangents();
-            Debug.Log("TangentID for VAO " + vaoID + " is " + tangentsVBOID);
         }
 
         unbind();

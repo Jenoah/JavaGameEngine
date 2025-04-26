@@ -105,4 +105,8 @@ public class RenderManager {
     public void queueRender(RenderComponent renderComponent){
         componentRenderer.queue(renderComponent);
     }
+
+    public void dequeueRender(RenderComponent renderComponent){
+        componentRenderer.dequeue(renderComponent);
+    }
 }

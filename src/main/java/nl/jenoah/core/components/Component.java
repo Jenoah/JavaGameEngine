@@ -27,4 +27,16 @@ public class Component {
     public Component clone() {
         return new Component().setRoot(this.getRoot());
     }
+
+    public void enable(){
+        isEnabled = true;
+    }
+
+    public void disable(){
+        isEnabled = false;
+    }
+
+    public final boolean getEnabled(){
+        return isEnabled;
+    }
 }

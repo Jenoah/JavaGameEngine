@@ -230,4 +230,9 @@ public class Scene {
     public void setFogGradient(float fogGradient) {
         this.fogGradient = fogGradient;
     }
+
+    public void disableFog(){
+        this.fogGradient = 100000;
+        this.fogDensity = 0;
+    }
 }
