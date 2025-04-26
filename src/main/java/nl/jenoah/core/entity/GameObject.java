@@ -18,6 +18,7 @@ public class GameObject {
     private List<GameObject> children;
     private GameObject parent;
     protected boolean isEnabled = true;
+    protected boolean isStatic = false;
 
     private final List<Component> components = new ArrayList<>();
 
@@ -256,6 +257,15 @@ public class GameObject {
         component.setRoot(this);
         this.components.add(component);
         return component;
+    }
+
+    public boolean isStatic() {
+        return isStatic;
+    }
+
+    public GameObject setStatic(boolean isStatic) {
+        this.isStatic = isStatic;
+        return this;
     }
 
     public String ToString(){

@@ -1,17 +1,12 @@
 package nl.jenoah.core.rendering;
 
 import nl.jenoah.core.components.RenderComponent;
-import nl.jenoah.core.entity.Material;
-import nl.jenoah.core.entity.Mesh;
 import nl.jenoah.core.fonts.fontRendering.FontRenderer;
 import nl.jenoah.core.gui.GuiRenderer;
 import nl.jenoah.core.WindowManager;
 import nl.jenoah.core.entity.Scene;
 import nl.jenoah.core.skybox.SkyboxRenderer;
 import org.lwjgl.opengl.GL11;
-
-import java.util.HashMap;
-import java.util.List;
 
 import static org.lwjgl.opengl.GL11.glViewport;
 
@@ -71,20 +66,6 @@ public class RenderManager {
         fontRenderer.render(currentScene.getTextObjects());
     }
 
-//    public void processEntities(HashMap<Material, List<Entity>> entities){
-//        if(entities.isEmpty()) return;
-//        if(entities.entrySet().iterator().next().getValue().getFirst().isTransparent()){
-//            transparentEntityRenderer.setEntities(entities);
-//        }else{
-//            entityRenderer.setEntities(entities);
-//        }
-//    }
-
-    public void processRenderObjects(HashMap<Material, List<Mesh>> renderObjects){
-        if(renderObjects.isEmpty()) return;
-        //entityRenderer.setRenderObjects(renderObjects);
-    }
-
     public void clear(){
         GL11.glClear(GL11.GL_COLOR_BUFFER_BIT | GL11.GL_DEPTH_BUFFER_BIT);
     }
@@ -108,5 +89,13 @@ public class RenderManager {
 
     public void dequeueRender(RenderComponent renderComponent){
         componentRenderer.dequeue(renderComponent);
+    }
+
+    public void recordMetrics(boolean recordState){
+        componentRenderer.recordMetrics(recordState);
+    }
+
+    public String getMetrics(){
+        return componentRenderer.getMetrics();
     }
 }

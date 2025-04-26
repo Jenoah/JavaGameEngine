@@ -17,6 +17,7 @@ import nl.jenoah.core.loaders.OBJLoader.OBJLoader;
 import nl.jenoah.core.loaders.PrimitiveLoader;
 import nl.jenoah.core.loaders.TextureLoader;
 import nl.jenoah.core.rendering.MeshMaterialSet;
+import nl.jenoah.core.rendering.RenderManager;
 import nl.jenoah.core.shaders.ShaderManager;
 import nl.jenoah.core.utils.Calculus;
 import nl.jenoah.core.utils.Conversion;
@@ -37,10 +38,13 @@ public class Level0 extends Scene {
     private GameObject proxyEntity;
     private GameObject monkeyEntity;
 
+    private RenderManager renderManager;
+
     //Labels
     private GUIText fpsLabel;
     private GUIText positionLabel;
     private GUIText resolutionLabel;
+    private GUIText performanceLabel;
 
     private float UIUpdateTime = 0f;
 
@@ -51,6 +55,7 @@ public class Level0 extends Scene {
     @Override public void init() {
         super.init();
         levelName = "Level 0";
+        renderManager = DemoLauncher.getGame().getRenderer();
 
         terrainGeneration = new TerrainGeneration(renderDistance);
         terrainGeneration.setSurfaceFeatureDensity(0.7f);
@@ -76,7 +81,6 @@ public class Level0 extends Scene {
         monkeyEntity = new GameObject().setPosition(new Vector3f(0, 6.5f, -10f));
         monkeyEntity.addComponent(new RenderComponent(monkMeshMaterialSets));
         addEntity(monkeyEntity);
-
 
         MeshMaterialSet groundBlock = new MeshMaterialSet(PrimitiveLoader.getCube().getMesh().calculateNormals());
         groundBlock.material.setAlbedoTexture(new Texture("textures/rock/rock_albedo.jpg"));
@@ -155,8 +159,11 @@ public class Level0 extends Scene {
         resolutionLabel = new GUIText("Resolution: x", 1f, jetbrainFontType, new Vector2f(0.03f, 0.125f), 0.25f, false);
         addText(resolutionLabel);
 
-        GUIText instructionLabel = new GUIText(" Move: WASD + Q and E \nRotate: RMB + move mouse \nHigher speed: Left shift \nMove cat and lights: Arrows", 1f, jetbrainFontType, new Vector2f(0.03f, 0.16f), 0.25f, false);
-        addText(instructionLabel);
+        performanceLabel = new GUIText("Performance: Not measured", 1f, jetbrainFontType, new Vector2f(0.03f, 0.16f), 0.25f, false);
+        addText(performanceLabel);
+
+        //GUIText instructionLabel = new GUIText(" Move: WASD + Q and E \nRotate: RMB + move mouse \nHigher speed: Left shift \nMove cat and lights: Arrows", 1f, jetbrainFontType, new Vector2f(0.03f, 0.16f), 0.25f, false);
+        //addText(instructionLabel);
 
         //Shaders
         int grassTextureID = TextureLoader.loadTexture("textures/grass.jpg");
@@ -167,6 +174,8 @@ public class Level0 extends Scene {
         ShaderManager.litShader.setLights(getDirectionalLight(), getPointLights(), getSpotLights());
         ShaderManager.triplanarShader.setLights(getDirectionalLight(), getPointLights(), getSpotLights());
         ShaderManager.pbrShader.setLights(getDirectionalLight(), getPointLights(), getSpotLights());
+
+        renderManager.recordMetrics(true);
     }
 
     @Override
@@ -208,6 +217,7 @@ public class Level0 extends Scene {
         fpsLabel.setText("FPS: " + EngineManager.getFps());
         positionLabel.setText("Position: " + Conversion.V3ToString(player.getPosition()));
         resolutionLabel.setText("Resolution: " + windowManager.getWidth() + " x " + windowManager.getHeight());
+        performanceLabel.setText("Performance: " + renderManager.getMetrics());
         updateTerrain();
     }
 

@@ -2,6 +2,7 @@ package nl.jenoah.core.rendering;
 
 import nl.jenoah.core.Camera;
 import nl.jenoah.core.components.RenderComponent;
+import nl.jenoah.core.debugging.RenderMetrics;
 import nl.jenoah.core.entity.GameObject;
 import nl.jenoah.core.shaders.Shader;
 import org.lwjgl.opengl.GL11;
@@ -12,10 +13,12 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
-public class ComponentRenderer implements IRenderer{
+public class ComponentRenderer implements IRenderer {
 
     List<RenderComponent> renderObjects = new ArrayList<>();
     HashMap<Shader, List<MeshMaterialSet>> sortedRenderObjects = new HashMap<>();
+    private final RenderMetrics metrics = new RenderMetrics();
+    private boolean recordMetrics = false;
 
     @Override
     public void init() throws Exception {
@@ -24,16 +27,25 @@ public class ComponentRenderer implements IRenderer{
 
     @Override
     public void render(Camera camera) {
-        if(sortedRenderObjects.isEmpty()) return;
+        if (recordMetrics) metrics.frameStart();
+        if (sortedRenderObjects.isEmpty()) return;
 
         sortedRenderObjects.forEach((renderObjectShader, meshMaterialSetList) -> {
+            if (recordMetrics) metrics.recordShaderBind();
             renderObjectShader.bind();
             renderObjectShader.render(camera);
+
             meshMaterialSetList.forEach(meshMaterialSet -> {
-                if(!meshMaterialSet.getRoot().isEnabled()) return;
+                if (!meshMaterialSet.getRoot().isEnabled()) return;
+                if (recordMetrics) {
+                    metrics.recordStateChange();
+                    metrics.recordVaoBind();
+                }
                 bind(meshMaterialSet);
                 renderObjectShader.prepare(meshMaterialSet, camera);
 
+
+                if (recordMetrics) metrics.recordDrawCall();
                 GL11.glDrawElements(GL11.GL_TRIANGLES, meshMaterialSet.mesh.getVertexCount(), GL11.GL_UNSIGNED_INT, 0);
 
                 unbind();
@@ -42,6 +54,8 @@ public class ComponentRenderer implements IRenderer{
             });
             renderObjectShader.unbind();
         });
+
+        if (recordMetrics) metrics.frameEnd();
     }
 
     public void bind(MeshMaterialSet meshMaterialSet) {
@@ -49,15 +63,15 @@ public class ComponentRenderer implements IRenderer{
         GL20.glEnableVertexAttribArray(0);
         GL20.glEnableVertexAttribArray(1);
         GL20.glEnableVertexAttribArray(2);
-        if(meshMaterialSet.mesh.hasTangents()){
+        if (meshMaterialSet.mesh.hasTangents()) {
             GL20.glEnableVertexAttribArray(3);
             GL20.glEnableVertexAttribArray(4);
         }
-        if(meshMaterialSet.material.isDoubleSided()){
+        if (meshMaterialSet.material.isDoubleSided()) {
             GL11.glEnable(GL11.GL_BLEND);
             GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
             GL11.glDisable(GL11.GL_CULL_FACE);
-        }else{
+        } else {
             GL11.glDisable(GL11.GL_BLEND);
             GL11.glEnable(GL11.GL_CULL_FACE);
         }
@@ -81,20 +95,28 @@ public class ComponentRenderer implements IRenderer{
 
     }
 
-    public void queue(RenderComponent renderComponent){
+    public void queue(RenderComponent renderComponent) {
         this.renderObjects.add(renderComponent);
         renderComponent.getMeshMaterialSets().forEach(meshMaterialSet -> {
-            if(!sortedRenderObjects.containsKey(meshMaterialSet.material.getShader())){
+            if (!sortedRenderObjects.containsKey(meshMaterialSet.material.getShader())) {
                 List<MeshMaterialSet> meshMaterialSets = new ArrayList<>();
                 meshMaterialSets.add(meshMaterialSet);
                 sortedRenderObjects.put(meshMaterialSet.material.getShader(), meshMaterialSets);
-            }else{
+            } else {
                 sortedRenderObjects.get(meshMaterialSet.material.getShader()).add(meshMaterialSet);
             }
         });
     }
 
-    public void dequeue(RenderComponent renderComponent){
+    public void dequeue(RenderComponent renderComponent) {
         //TODO: Make dequeue function for render component
+    }
+
+    public void recordMetrics(boolean recordMetrics) {
+        this.recordMetrics = recordMetrics;
+    }
+
+    public String getMetrics() {
+        return recordMetrics ? metrics.getMetrics() : "Metrics not recorded";
     }
 }
