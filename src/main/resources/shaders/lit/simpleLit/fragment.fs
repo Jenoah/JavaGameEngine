@@ -15,6 +15,7 @@ struct Material {
     vec4 specular;
     int hasTexture;
     float reflectance;
+    float roughness;
 };
 
 struct DirectionalLight {

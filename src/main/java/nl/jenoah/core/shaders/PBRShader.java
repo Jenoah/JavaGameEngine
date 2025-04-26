@@ -26,6 +26,12 @@ public class PBRShader extends SimpleLitShader{
         createUniform("hasAlbedoMap");
         createUniform("normalMap");
         createUniform("hasNormalMap");
+        createUniform("roughnessMap");
+        createUniform("hasRoughnessMap");
+        createUniform("metallicMap");
+        createUniform("hasMetallicMap");
+        createUniform("aoMap");
+        createUniform("hasAOMap");
     }
 
     @Override
@@ -38,13 +44,11 @@ public class PBRShader extends SimpleLitShader{
         Shader shader = meshMaterialSet.material.getShader();
         shader.setUniform("material", meshMaterialSet.material);
         shader.setUniform("modelMatrix", modelMatrix);
-        //shader.setUniform("textureSampler", 0);
         shader.setUniform("viewMatrix", viewMatrix);
         shader.setUniform("projectionMatrix", window.getProjectionMatrix());
         shader.setUniform("fogColor", SceneManager.fogColor);
         shader.setUniform("fogDensity", SceneManager.fogDensity);
         shader.setUniform("fogGradient", SceneManager.fogGradient);
-
 
         if(meshMaterialSet.material.hasAlbedoTexture()) {
             GL13.glActiveTexture(GL13.GL_TEXTURE0);
@@ -61,6 +65,30 @@ public class PBRShader extends SimpleLitShader{
             shader.setUniform("hasNormalMap", 1);
         }else{
             shader.setUniform("hasNormalMap", 0);
+        }
+        if(meshMaterialSet.material.hasRoughnessMap()) {
+            GL13.glActiveTexture(GL13.GL_TEXTURE2);
+            GL11.glBindTexture(GL11.GL_TEXTURE_2D, meshMaterialSet.material.getRoughnessMap().getId());
+            shader.setTexture("roughnessMap", 1);
+            shader.setUniform("hasRoughnessMap", 1);
+        }else{
+            shader.setUniform("hasRoughnessMap", 0);
+        }
+        if(meshMaterialSet.material.hasMetallicMap()) {
+            GL13.glActiveTexture(GL13.GL_TEXTURE2);
+            GL11.glBindTexture(GL11.GL_TEXTURE_2D, meshMaterialSet.material.getMetallicMap().getId());
+            shader.setTexture("metallicMap", 1);
+            shader.setUniform("hasMetallicMap", 1);
+        }else{
+            shader.setUniform("hasMetallicMap", 0);
+        }
+        if(meshMaterialSet.material.hasAOMap()) {
+            GL13.glActiveTexture(GL13.GL_TEXTURE2);
+            GL11.glBindTexture(GL11.GL_TEXTURE_2D, meshMaterialSet.material.getAoMap().getId());
+            shader.setTexture("aoMap", 1);
+            shader.setUniform("hasAOMap", 1);
+        }else{
+            shader.setUniform("hasAOMap", 0);
         }
     }
 }

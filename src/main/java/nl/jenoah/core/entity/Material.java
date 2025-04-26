@@ -2,6 +2,7 @@ package nl.jenoah.core.entity;
 
 import nl.jenoah.core.shaders.Shader;
 import nl.jenoah.core.utils.Constants;
+import org.joml.Math;
 import org.joml.Vector4f;
 
 public class Material {
@@ -10,9 +11,13 @@ public class Material {
     private Vector4f diffuseColor = Constants.DEFAULT_COLOR;
     private Vector4f specularColor = Constants.DEFAULT_COLOR;
 
-    private float reflectance = 32;
+    private float reflectance = 0.04f;
+    private float roughness = 0.1f;
     private Texture albedoTexture = null;
     private Texture normalMap = null;
+    private Texture roughnessMap = null;
+    private Texture metallicMap = null;
+    private Texture aoMap = null;
 
     private boolean isDoubleSided = false;
 
@@ -31,6 +36,10 @@ public class Material {
         this.albedoTexture = material.getAlbedoTexture();
         this.normalMap = material.getNormalMap();
         this.isDoubleSided = material.isDoubleSided();
+        this.roughnessMap = material.getRoughnessMap();
+        this.metallicMap = material.getMetallicMap();
+        this.aoMap = material.getAoMap();
+        this.roughness = material.getRoughness();
     }
 
     public Material(Shader shader, Texture albedoTexture){
@@ -60,6 +69,11 @@ public class Material {
         return this;
     }
 
+    public Material setRoughness(float roughness){
+        this.roughness = Math.clamp(0.01f, 1f, roughness);
+        return this;
+    }
+
     public Material setAlbedoTexture(Texture texture) {
         this.albedoTexture = texture;
         return this;
@@ -67,6 +81,21 @@ public class Material {
 
     public Material setNormalMap(Texture texture) {
         this.normalMap = texture;
+        return this;
+    }
+
+    public Material setRoughnessMap(Texture texture) {
+        this.roughnessMap = texture;
+        return this;
+    }
+
+    public Material setMetallicMap(Texture texture) {
+        this.metallicMap = texture;
+        return this;
+    }
+
+    public Material setAOMap(Texture texture) {
+        this.aoMap = texture;
         return this;
     }
 
@@ -98,12 +127,28 @@ public class Material {
         return reflectance;
     }
 
+    public final float getRoughness(){
+        return roughness;
+    }
+
     public final Texture getAlbedoTexture() {
         return albedoTexture;
     }
 
     public final Texture getNormalMap() {
         return normalMap;
+    }
+
+    public final Texture getRoughnessMap() {
+        return roughnessMap;
+    }
+
+    public final Texture getMetallicMap() {
+        return metallicMap;
+    }
+
+    public final Texture getAoMap() {
+        return aoMap;
     }
 
     public final Shader getShader(){
@@ -122,5 +167,17 @@ public class Material {
 
     public final boolean hasNormalMap(){
         return normalMap != null;
+    }
+
+    public final boolean hasRoughnessMap(){
+        return roughnessMap != null;
+    }
+
+    public final boolean hasMetallicMap(){
+        return metallicMap != null;
+    }
+
+    public final boolean hasAOMap(){
+        return aoMap != null;
     }
 }

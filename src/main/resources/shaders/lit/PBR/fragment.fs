@@ -19,7 +19,7 @@ struct Material {
     vec4 specular;
     int hasTexture;
     float reflectance;
-    //TODO: IMPLEMENT REFLECTANCE IN THIS SHADER
+    float roughness;
 };
 
 struct DirectionalLight {
@@ -53,10 +53,16 @@ struct SpotLight {
 uniform Material material;
 uniform sampler2D albedoMap;
 uniform sampler2D normalMap;
+uniform sampler2D roughnessMap;
+uniform sampler2D metallicMap;
+uniform sampler2D aoMap;
 uniform int hasAlbedoMap = 0;
 uniform int hasNormalMap = 0;
-uniform float metallic = 0.1;
-uniform float roughness = 0.8;
+uniform int hasRoughnessMap = 0;
+uniform int hasMetallicMap = 0;
+uniform int hasAOMap;
+uniform float metallic = .1;
+//uniform float roughness = .2;
 uniform float specularPower = 0;
 
 uniform vec3 ambientColor;
@@ -124,8 +130,12 @@ vec3 getNormal()
     }
 }
 
+float getRoughness() { return (hasRoughnessMap == 1) ? texture(roughnessMap, UV).r * material.roughness : material.roughness; }
+float getMetallic()  { return (hasMetallicMap == 1)  ? texture(metallicMap, UV).r  : metallic; }
+float getAO()        { return (hasAOMap == 1)        ? texture(aoMap, UV).r        : 1.0; }
+
 // UNIFIED PBR LIGHT FUNCTION
-vec3 calculatePBRLight(vec3 lightColor, vec3 lightDirection, float attenuation, vec3 N, vec3 V, vec3 albedo)
+vec3 calculatePBRLight(vec3 lightColor, vec3 lightDirection, float attenuation, vec3 N, vec3 V, vec3 albedo, float roughness, float metallic)
 {
     vec3 L = normalize(lightDirection);
     vec3 H = normalize(V + L);
@@ -136,7 +146,7 @@ vec3 calculatePBRLight(vec3 lightColor, vec3 lightDirection, float attenuation, 
     float VdotH = max(dot(V, H), 0.0);
 
     // Fresnel
-    vec3 F0 = mix(vec3(0.04), albedo, metallic);
+    vec3 F0 = mix(vec3(material.reflectance), albedo, metallic);
     vec3 F = fresnelSchlick(VdotH, F0);
 
     // Distribution & Geometry
@@ -164,15 +174,19 @@ void main()
     vec3 N = getNormal();
     vec3 V = normalize(viewPosition - fragPosition);
 
-    // Ambient (simple, not IBL)
-    vec3 ambient = ambientColor * albedo * 0.3;
+    float rough = clamp((1 - getRoughness()), 0.05, 1.0); // avoid 0
+    float metal = clamp(getMetallic(), 0.0, 1.0);
+    float ao = getAO();
+
+    float irradiance = 0.5f; //irradiance should by replaced by the skybox contribution factor (IBL)
+    vec3 ambient = ambientColor * albedo * irradiance * ao;
 
     // Directional Light
     vec3 result = ambient;
     if (directionalLight.intensity > 0.0) {
         vec3 L = normalize(-directionalLight.direction);
         float attenuation = directionalLight.intensity;
-        result += calculatePBRLight(directionalLight.color, L, attenuation, N, V, albedo);
+        result += calculatePBRLight(directionalLight.color, L, attenuation, N, V, albedo, rough, metal);
     }
 
     // Point Lights
@@ -184,7 +198,7 @@ void main()
             (pointLights[i].constant +
             pointLights[i].linear * distance +
             pointLights[i].exponent * distance * distance);
-            result += calculatePBRLight(pointLights[i].color, L, attenuation, N, V, albedo);
+            result += calculatePBRLight(pointLights[i].color, L, attenuation, N, V, albedo, rough, metal);
         }
     }
 
@@ -206,7 +220,7 @@ void main()
             attenuation *= intensity;
 
             if (attenuation > 0.0)
-            result += calculatePBRLight(spotLights[i].color, L, attenuation, N, V, albedo);
+            result += calculatePBRLight(spotLights[i].color, L, attenuation, N, V, albedo, rough, metal);
         }
     }
 

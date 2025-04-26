@@ -141,6 +141,7 @@ public class Shader {
         createUniform(uniformName + ".specular");
         createUniform(uniformName + ".hasTexture");
         createUniform(uniformName + ".reflectance");
+        createUniform(uniformName + ".roughness");
     }
 
     //Set uniforms
@@ -185,5 +186,6 @@ public class Shader {
         setUniform(uniformName + ".specular", material.getSpecularColor());
         setUniform(uniformName + ".hasTexture", material.hasAlbedoTexture() ? 1 : 0);
         setUniform(uniformName + ".reflectance", material.getReflectance());
+        setUniform(uniformName + ".roughness", material.getRoughness());
     }
 }

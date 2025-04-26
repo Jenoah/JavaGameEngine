@@ -81,7 +81,9 @@ public class Level0 extends Scene {
         MeshMaterialSet groundBlock = new MeshMaterialSet(PrimitiveLoader.getCube().getMesh().calculateNormals());
         groundBlock.material.setAlbedoTexture(new Texture("textures/rock/rock_albedo.jpg"));
         groundBlock.material.setNormalMap(new Texture("textures/rock/rock_normal.jpg", false, false, true, true));
-        groundBlock.material.setReflectance(64);
+        groundBlock.material.setRoughnessMap(new Texture("textures/rock/rock_roughness.jpg", false, false, true, true));
+        //groundBlock.material.setAOMap(new Texture("textures/rock/rock_ao.jpg"));
+        groundBlock.material.setRoughness(.6f);
         GameObject groundBlockEntity = new GameObject().setPosition(new Vector3f(0, 2.5f, -10)).setScale(new Vector3f(10, 5, 15));
         groundBlockEntity.addComponent(new RenderComponent(groundBlock.mesh, groundBlock.material));
         addEntity(groundBlockEntity);
@@ -224,7 +226,7 @@ public class Level0 extends Scene {
 
             GameObject chunkEntity = chunk.getChunkEntity();
             if(chunkEntity != null) {
-                chunkEntity.getComponent(RenderComponent.class).getMeshMaterialSets().getFirst().material.setShader(ShaderManager.triplanarShader);
+                chunkEntity.getComponent(RenderComponent.class).getMeshMaterialSets().getFirst().material.setShader(ShaderManager.triplanarShader).setReflectance(64);
 
                 addEntity(chunk.getChunkEntity());
             }

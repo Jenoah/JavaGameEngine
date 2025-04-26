@@ -10,6 +10,7 @@ struct Material {
     vec4 specular;
     int hasTexture;
     float reflectance;
+    float roughness;
 };
 
 uniform sampler2D textureSampler;
