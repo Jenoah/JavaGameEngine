@@ -6,12 +6,12 @@ import nl.jenoah.core.rendering.MeshMaterialSet;
 import nl.jenoah.core.utils.Transformation;
 import nl.jenoah.core.utils.Utils;
 import org.joml.Matrix4f;
-import org.lwjgl.opengl.GL11;
-import org.lwjgl.opengl.GL13;
+import org.lwjgl.opengl.*;
 
 import static org.lwjgl.opengl.GL11.glDepthMask;
 
 public class PBRShader extends SimpleLitShader{
+
     public PBRShader() throws Exception {
         super();
         createVertexShader(Utils.loadResource("/shaders/lit/PBR/vertex.vs"));
@@ -32,6 +32,7 @@ public class PBRShader extends SimpleLitShader{
         createUniform("hasMetallicMap");
         createUniform("aoMap");
         createUniform("hasAOMap");
+        createUniform("useInstancing");
     }
 
     @Override
@@ -43,12 +44,17 @@ public class PBRShader extends SimpleLitShader{
 
         Shader shader = meshMaterialSet.material.getShader();
         shader.setUniform("material", meshMaterialSet.material);
-        shader.setUniform("modelMatrix", modelMatrix);
         shader.setUniform("viewMatrix", viewMatrix);
         shader.setUniform("projectionMatrix", window.getProjectionMatrix());
         shader.setUniform("fogColor", SceneManager.fogColor);
         shader.setUniform("fogDensity", SceneManager.fogDensity);
         shader.setUniform("fogGradient", SceneManager.fogGradient);
+        if(meshMaterialSet.mesh.isInstanced()){
+            shader.setUniform("useInstancing", true);
+        }else{
+            shader.setUniform("useInstancing", false);
+            shader.setUniform("modelMatrix", modelMatrix);
+        }
 
         if(meshMaterialSet.material.hasAlbedoTexture()) {
             GL13.glActiveTexture(GL13.GL_TEXTURE0);

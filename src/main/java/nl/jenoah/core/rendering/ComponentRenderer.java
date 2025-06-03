@@ -5,9 +5,7 @@ import nl.jenoah.core.components.RenderComponent;
 import nl.jenoah.core.debugging.RenderMetrics;
 import nl.jenoah.core.entity.GameObject;
 import nl.jenoah.core.shaders.Shader;
-import org.lwjgl.opengl.GL11;
-import org.lwjgl.opengl.GL20;
-import org.lwjgl.opengl.GL30;
+import org.lwjgl.opengl.*;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -46,7 +44,12 @@ public class ComponentRenderer implements IRenderer {
 
 
                 if (recordMetrics) metrics.recordDrawCall();
-                GL11.glDrawElements(GL11.GL_TRIANGLES, meshMaterialSet.mesh.getVertexCount(), GL11.GL_UNSIGNED_INT, 0);
+                if(meshMaterialSet.mesh.isInstanced()){
+                    GL33.glDrawElementsInstanced(GL11.GL_TRIANGLES, meshMaterialSet.mesh.getVertexCount(), GL11.GL_UNSIGNED_INT, 0, meshMaterialSet.mesh.getInstanceCount());
+                }else{
+                    GL11.glDrawElements(GL11.GL_TRIANGLES, meshMaterialSet.mesh.getVertexCount(), GL11.GL_UNSIGNED_INT, 0);
+
+                }
 
                 unbind();
 
@@ -67,6 +70,12 @@ public class ComponentRenderer implements IRenderer {
             GL20.glEnableVertexAttribArray(3);
             GL20.glEnableVertexAttribArray(4);
         }
+        if(meshMaterialSet.mesh.isInstanced()){
+            GL20.glEnableVertexAttribArray(5);
+            GL20.glEnableVertexAttribArray(6);
+            GL20.glEnableVertexAttribArray(7);
+            GL20.glEnableVertexAttribArray(8);
+        }
         if (meshMaterialSet.material.isDoubleSided()) {
             GL11.glEnable(GL11.GL_BLEND);
             GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
@@ -79,9 +88,9 @@ public class ComponentRenderer implements IRenderer {
 
     @Override
     public void unbind() {
-        GL20.glDisableVertexAttribArray(0);
-        GL20.glDisableVertexAttribArray(1);
-        GL20.glDisableVertexAttribArray(2);
+        for (int i = 0; i < 8; i++) {
+            GL20.glDisableVertexAttribArray(i);
+        }
         GL30.glBindVertexArray(0);
     }
 

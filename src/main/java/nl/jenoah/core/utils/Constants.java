@@ -18,7 +18,8 @@ public class Constants {
     public static final float MOUSE_SENSITIVITY = 2f;
 
     public static final Vector3f VECTOR3_UP = new Vector3f(0, 1, 0);
-
+    public static final Vector3f VECTOR3_ONE = new Vector3f(1, 1, 1);
+    public static final Vector3f VECTOR3_ZERO = new Vector3f(0, 0, 0);
 
     public static final int CHUNK_SIZE = 16;
 

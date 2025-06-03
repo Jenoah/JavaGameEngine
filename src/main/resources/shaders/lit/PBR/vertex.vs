@@ -5,6 +5,7 @@ layout (location=1) in vec2 textureCoords;
 layout (location=2) in vec3 normal;
 layout (location=3) in vec3 tangents;
 layout (location=4) in vec3 bitangents;
+layout (location=5) in mat4 instanceModelMatrix;
 
 out vec3 fragPosition;
 out vec2 UV;
@@ -18,12 +19,15 @@ uniform mat4 viewMatrix;
 uniform mat4 projectionMatrix;
 uniform float fogDensity;
 uniform float fogGradient;
+uniform bool useInstancing;
 
 void main(){
-    vec4 worldPosition = modelMatrix * vec4(position, 1.0);
+    mat4 finalModelMatrix = useInstancing ? instanceModelMatrix : modelMatrix;
+
+    vec4 worldPosition = finalModelMatrix * vec4(position, 1.0);
     vec4 cameraObjectPosition = viewMatrix * worldPosition;
 
-    mat3 normalMatrix = transpose(inverse(mat3(modelMatrix)));
+    mat3 normalMatrix = transpose(inverse(mat3(finalModelMatrix)));
     vec3 T = normalize(normalMatrix * tangents);
     vec3 N = normalize(normalMatrix * normal);
     vec3 B = normalize(cross(N, T));

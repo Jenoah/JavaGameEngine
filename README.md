@@ -3,8 +3,9 @@ A simple Java Game engine using LWJGL3 / OpenGL.
 
 ## Included features
 - 3D rendering
+- Instanced rendering
 - Game Object Components
-- Simple lighting
+- Simple (PBR) lighting
 - Custom shaders
 - Fog
 - Simple UI
@@ -13,7 +14,6 @@ A simple Java Game engine using LWJGL3 / OpenGL.
 - Marching cubes, multi-threaded terrain generation with surface features (foliage etc...)
 
 ## Planned features
-- PBR textures
 - Shadows
 - Collisions
 - Ambient Occlusion

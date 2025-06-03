@@ -4,12 +4,11 @@ import nl.jenoah.core.debugging.Debug;
 import nl.jenoah.core.utils.Calculus;
 import nl.jenoah.core.utils.Conversion;
 import nl.jenoah.core.utils.Utils;
+import org.joml.Matrix4f;
 import org.joml.Vector2f;
 import org.joml.Vector3f;
-import org.lwjgl.opengl.GL11;
-import org.lwjgl.opengl.GL15;
-import org.lwjgl.opengl.GL20;
-import org.lwjgl.opengl.GL30;
+import org.lwjgl.opengl.*;
+import org.lwjgl.system.MemoryUtil;
 
 import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
@@ -28,12 +27,15 @@ public class Mesh {
     private final List<Integer> vbos = new ArrayList<>();
 
     private int vaoID = -1;
-    private int vertexVBOID = -1, normalVBOID = -1, tangentsVBOID = -1, bitangentsVBOID = -1, triangleVBOID = -1, uvVBOID = -1;
+    private int vertexVBOID = -1, normalVBOID = -1, tangentsVBOID = -1, bitangentsVBOID = -1, triangleVBOID = -1, uvVBOID = -1, instanceVBOID = -1;
 
     private int vertexCount = -1;
 
     private boolean isVisible = true;
 
+    //Instancing
+    private boolean isInstanced = false;
+    private final List<Matrix4f> instanceOffsets = new ArrayList<>();
 
     public Mesh(Mesh mesh){
         float[] verticesStripped = Conversion.toFloatArray(mesh.vertices);
@@ -426,5 +428,69 @@ public class Mesh {
 
     public boolean hasTangents(){
         return tangentsVBOID != -1 && bitangentsVBOID != -1;
+    }
+
+    public final int getInstanceVBOID(){
+        return instanceVBOID;
+    }
+
+    public Mesh setInstanced(boolean instanced) {
+        isInstanced = instanced;
+        return this;
+    }
+
+    public void addInstanceOffset(Matrix4f offset){
+        isInstanced = true;
+        instanceOffsets.add(offset);
+    }
+
+    public boolean isInstanced() {
+        return isInstanced;
+    }
+
+    public int getInstanceCount() {
+        return instanceOffsets.size();
+    }
+
+    public void transferInstances(){
+        if (instanceVBOID == -1) {
+
+            GL30.glBindVertexArray(vaoID);
+            instanceVBOID = GL15.glGenBuffers();
+            vbos.add(instanceVBOID);
+
+            FloatBuffer buffer = MemoryUtil.memAllocFloat(instanceOffsets.size() * 16);
+            for (Matrix4f m : instanceOffsets) {
+                buffer.put(new float[] {
+                        m.m00(), m.m01(), m.m02(), m.m03(),
+                        m.m10(), m.m11(), m.m12(), m.m13(),
+                        m.m20(), m.m21(), m.m22(), m.m23(),
+                        m.m30(), m.m31(), m.m32(), m.m33()
+                });
+            }
+            buffer.flip();
+
+            GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, instanceVBOID);
+            GL15.glBufferData(GL15.GL_ARRAY_BUFFER, buffer, GL15.GL_DYNAMIC_DRAW);
+
+            int start = 5;
+            int mat4Size = 64; // bytes
+            int vec4Size = 16; // bytes
+
+            for (int i = 0; i < 4; i++) {
+                GL20.glEnableVertexAttribArray(start + i);
+                GL20.glVertexAttribPointer(start + i, 4, GL11.GL_FLOAT, false, mat4Size, i * vec4Size);
+                GL33.glVertexAttribDivisor(start + i, 1);
+            }
+
+            GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, 0);
+            GL30.glBindVertexArray(0);
+
+            unbind();
+        }
+    }
+
+    public List<Matrix4f> getInstanceOffsets(){
+        return instanceOffsets;
     }
 }

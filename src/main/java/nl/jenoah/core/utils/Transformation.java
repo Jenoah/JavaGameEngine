@@ -16,6 +16,14 @@ public class Transformation {
                 .scale(gameObject.getScale());
     }
 
+    public static Matrix4f toModelMatrix(Vector3f position, Quaternionf rotation, Vector3f scale){
+        return new Matrix4f()
+                .identity() // Start with an identity matrix
+                .translate(position) // Translate to the entity's position
+                .rotate(rotation)
+                .scale(scale);
+    }
+
     public static Matrix4f getViewMatrix(Camera camera){
         return new Matrix4f()
                 .identity() // Start with an identity matrix

@@ -109,7 +109,9 @@ public class Material {
         return this;
     }
 
-//    Getters
+
+
+    //    Getters
 
     public final Vector4f getAmbientColor() {
         return ambientColor;
@@ -159,7 +161,7 @@ public class Material {
         return isDoubleSided;
     }
 
-//    Has Getters
+//  Has Getters
 
     public final boolean hasAlbedoTexture(){
         return albedoTexture != null;
