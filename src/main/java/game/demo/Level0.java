@@ -45,6 +45,7 @@ public class Level0 extends Scene {
     private GUIText positionLabel;
     private GUIText resolutionLabel;
     private GUIText performanceLabel;
+    private GUIText chunkLabel;
 
     private float UIUpdateTime = 0f;
 
@@ -103,7 +104,6 @@ public class Level0 extends Scene {
         treeMeshMaterialSet.forEach((meshMaterialSet -> meshMaterialSet.mesh.generateUVs()));
         GameObject tree = new GameObject().setPosition(5, 5f, -2);
         tree.addComponent(new RenderComponent(treeMeshMaterialSet));
-        addEntity(tree);
 
         terrainGeneration.setSurfaceFeature(tree);
 
@@ -162,6 +162,9 @@ public class Level0 extends Scene {
         performanceLabel = new GUIText("Performance: Not measured", 1f, jetbrainFontType, new Vector2f(0.03f, 0.16f), 0.25f, false);
         addText(performanceLabel);
 
+        chunkLabel = new GUIText("Current loaded chunks: x", 1f, jetbrainFontType, new Vector2f(0.03f, 0.25f), 0.25f, false);
+        addText(chunkLabel);
+
         //GUIText instructionLabel = new GUIText(" Move: WASD + Q and E \nRotate: RMB + move mouse \nHigher speed: Left shift \nMove cat and lights: Arrows", 1f, jetbrainFontType, new Vector2f(0.03f, 0.16f), 0.25f, false);
         //addText(instructionLabel);
 
@@ -218,6 +221,7 @@ public class Level0 extends Scene {
         positionLabel.setText("Position: " + Conversion.V3ToString(player.getPosition()));
         resolutionLabel.setText("Resolution: " + windowManager.getWidth() + " x " + windowManager.getHeight());
         performanceLabel.setText("Performance: " + renderManager.getMetrics());
+        chunkLabel.setText("Active / total chunks: " + terrainGeneration.getActiveChunkCount() + " / " + terrainGeneration.getTotalChunkCount());
         updateTerrain();
     }
 

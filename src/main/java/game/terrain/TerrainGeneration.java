@@ -97,9 +97,8 @@ public class TerrainGeneration extends Thread{
                         chunkGenerationQueue.add(chunkCoord);
                     } else {
                         MarchingChunk chunk = chunks.get(chunkCoord);
-                        if(chunk == null || !chunk.isReady) continue;
-                        GameObject chunkEntity = chunks.get(chunkCoord).getChunkEntity();
-                        if(chunkEntity != null) chunkEntity.setEnabled(true);
+                        if(chunk == null || !chunk.isReady || chunk.isEmpty) continue;
+                        chunks.get(chunkCoord).setActive(true);
                     }
 
                     activeChunks.add(chunkCoord);
@@ -110,8 +109,7 @@ public class TerrainGeneration extends Thread{
         while(!previousRenderQueue.isEmpty()){
             ChunkCoord chunkCoord = previousRenderQueue.poll();
             if(!activeChunks.contains(chunkCoord)){
-                GameObject chunkEntity = chunks.get(chunkCoord).getChunkEntity();
-                if(chunkEntity != null) chunkEntity.setEnabled(false);
+                chunks.get(chunkCoord).setActive(false);
             }
         }
 
@@ -196,12 +194,11 @@ public class TerrainGeneration extends Thread{
                     Quaternionf normalUp = new Quaternionf().rotationTo(Constants.VECTOR3_UP, chunk.getNormalAt(sampleLocationX, sampleLocationZ));
                     normalUp.rotateY(rotationY);
 
-                    for (MeshMaterialSet meshMaterialSet : instanceMeshMaterialSets) {
-                        meshMaterialSet.mesh.addInstanceOffset(Transformation.toModelMatrix(new Vector3f(noiseLocationX, spawnHeight, noiseLocationZ), normalUp,Constants.VECTOR3_ONE));
-                    }
+                    chunk.addSurfaceFeature(new Vector3f(noiseLocationX, spawnHeight, noiseLocationZ), normalUp, Constants.VECTOR3_ONE);
                 }
             }
         }
+
 
         if (!hasSurfaceFeatures) return;
 
@@ -209,7 +206,8 @@ public class TerrainGeneration extends Thread{
         RenderComponent renderComponent = new RenderComponent(instanceMeshMaterialSets);
 
         for (MeshMaterialSet meshMaterialSet : renderComponent.getMeshMaterialSets()) {
-            meshMaterialSet.mesh.transferInstances();
+            meshMaterialSet.mesh.addInstanceOffset(chunk.getSurfaceFeatureMatrices());
+            meshMaterialSet.mesh.updateInstanceVBO();
         }
 
         surfaceFeatureInstance.addComponent(renderComponent);

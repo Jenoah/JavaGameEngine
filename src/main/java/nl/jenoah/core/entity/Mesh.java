@@ -35,7 +35,7 @@ public class Mesh {
 
     //Instancing
     private boolean isInstanced = false;
-    private final List<Matrix4f> instanceOffsets = new ArrayList<>();
+    private List<Matrix4f> instanceOffsets = new ArrayList<>();
 
     public Mesh(Mesh mesh){
         float[] verticesStripped = Conversion.toFloatArray(mesh.vertices);
@@ -158,6 +158,7 @@ public class Mesh {
         GL30.glBufferData(GL30.GL_ELEMENT_ARRAY_BUFFER, buffer, GL30.GL_STATIC_DRAW);
         return vbo;
     }
+
     private int storeDataInAttributeList(int attributeNumber, int vertexCount, float[] data){
         int vbo = GL15.glGenBuffers();
         vbos.add(vbo);
@@ -439,11 +440,6 @@ public class Mesh {
         return this;
     }
 
-    public void addInstanceOffset(Matrix4f offset){
-        isInstanced = true;
-        instanceOffsets.add(offset);
-    }
-
     public boolean isInstanced() {
         return isInstanced;
     }
@@ -452,26 +448,30 @@ public class Mesh {
         return instanceOffsets.size();
     }
 
-    public void transferInstances(){
-        if (instanceVBOID == -1) {
+    public void addInstanceOffset(Matrix4f offset){
+        isInstanced = true;
+        instanceOffsets.add(offset);
+    }
 
+    public void addInstanceOffset(List<Matrix4f> offset){
+        isInstanced = true;
+        instanceOffsets.addAll(offset);
+    }
+
+    public void setInstanceOffsets(List<Matrix4f> offset){
+        isInstanced = true;
+        instanceOffsets = offset;
+    }
+
+    public void updateInstanceVBO() {
+        if (instanceVBOID == -1) {
+            // Initial setup (run once)
             GL30.glBindVertexArray(vaoID);
             instanceVBOID = GL15.glGenBuffers();
             vbos.add(instanceVBOID);
 
-            FloatBuffer buffer = MemoryUtil.memAllocFloat(instanceOffsets.size() * 16);
-            for (Matrix4f m : instanceOffsets) {
-                buffer.put(new float[] {
-                        m.m00(), m.m01(), m.m02(), m.m03(),
-                        m.m10(), m.m11(), m.m12(), m.m13(),
-                        m.m20(), m.m21(), m.m22(), m.m23(),
-                        m.m30(), m.m31(), m.m32(), m.m33()
-                });
-            }
-            buffer.flip();
-
             GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, instanceVBOID);
-            GL15.glBufferData(GL15.GL_ARRAY_BUFFER, buffer, GL15.GL_DYNAMIC_DRAW);
+            GL15.glBufferData(GL15.GL_ARRAY_BUFFER, instanceOffsets.size() * 16 * Float.BYTES, GL15.GL_DYNAMIC_DRAW);
 
             int start = 5;
             int mat4Size = 64; // bytes
@@ -488,6 +488,25 @@ public class Mesh {
 
             unbind();
         }
+
+        GL30.glBindVertexArray(vaoID);
+        GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, instanceVBOID);
+
+        FloatBuffer buffer = MemoryUtil.memAllocFloat(instanceOffsets.size() * 16);
+        for (Matrix4f m : instanceOffsets) {
+            buffer.put(new float[]{
+                    m.m00(), m.m01(), m.m02(), m.m03(),
+                    m.m10(), m.m11(), m.m12(), m.m13(),
+                    m.m20(), m.m21(), m.m22(), m.m23(),
+                    m.m30(), m.m31(), m.m32(), m.m33()
+            });
+        }
+        buffer.flip();
+        GL15.glBufferData(GL15.GL_ARRAY_BUFFER, buffer, GL15.GL_DYNAMIC_DRAW);
+        MemoryUtil.memFree(buffer);
+
+        GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, 0);
+        GL30.glBindVertexArray(0);
     }
 
     public List<Matrix4f> getInstanceOffsets(){

@@ -8,6 +8,9 @@ import nl.jenoah.core.entity.GameObject;
 import nl.jenoah.core.entity.Model;
 import nl.jenoah.core.utils.Calculus;
 import nl.jenoah.core.utils.Constants;
+import nl.jenoah.core.utils.Transformation;
+import org.joml.Matrix4f;
+import org.joml.Quaternionf;
 import org.joml.Vector3f;
 import org.joml.Vector3i;
 
@@ -27,7 +30,9 @@ public class MarchingChunk {
 
     public ChunkCoord chunkPosition;
     public boolean isReady = false;
+    public boolean isEmpty = false;
 
+    List<Matrix4f> surfaceFeatureModelMatrices = new ArrayList<>();
 
     public MarchingChunk(ChunkCoord chunkPosition){
         this.chunkPosition = chunkPosition;
@@ -41,6 +46,9 @@ public class MarchingChunk {
             normals = calculateNormals();
             isReady = true;
             //publishChunk();
+        }else{
+            isEmpty = true;
+            isReady = true;
         }
     }
 
@@ -56,13 +64,14 @@ public class MarchingChunk {
     }
 
     public void publishChunk(){
+        if(vertices.isEmpty()) return;
+
         int[] triangleArray = triangles.stream().mapToInt(i->i).toArray();
 
         Model chunkModel = ModelManager.loadModel(vertices.toArray(new Vector3f[0]), null, triangleArray, normals);
         chunkModel.getMesh().generateUVs();
         chunkEntity = new GameObject().setPosition(chunkPosition.toVector3());
         chunkEntity.addComponent(new RenderComponent(chunkModel.getMesh(), chunkModel.getMaterial()));
-
     }
 
     private void MarchCube(Vector3i voxelPosition)
@@ -235,5 +244,21 @@ public class MarchingChunk {
         );
 
         return Calculus.cross(tangentZ, tangentX).normalize();
+    }
+
+    public void setActive(boolean active){
+        chunkEntity.setEnabled(active);
+    }
+
+    public void addSurfaceFeature(Matrix4f modelMatrix){
+        surfaceFeatureModelMatrices.add(modelMatrix);
+    }
+
+    public void addSurfaceFeature(Vector3f position, Quaternionf rotation, Vector3f scale){
+        surfaceFeatureModelMatrices.add(Transformation.toModelMatrix(position, rotation, scale));
+    }
+
+    public final List<Matrix4f> getSurfaceFeatureMatrices(){
+        return surfaceFeatureModelMatrices;
     }
 }
