@@ -4,6 +4,7 @@ import nl.jenoah.core.MouseInput;
 import nl.jenoah.core.components.Component;
 import nl.jenoah.core.debugging.Debug;
 import nl.jenoah.core.utils.Calculus;
+import nl.jenoah.core.utils.Constants;
 import org.joml.*;
 import org.joml.Math;
 
@@ -33,11 +34,13 @@ public class GameObject {
     }
 
     public Vector3f getPosition() {
-        if(parent != null){
-            return Calculus.addVectors(parent.getPosition(), localPosition);
+        if (parent == null) {
+            return new Vector3f(localPosition);
+        } else {
+            Quaternionf parentRotation = parent.getRotation();
+            Vector3f rotatedPosition = new Vector3f(localPosition).rotate(parentRotation);
+            return new Vector3f(parent.getPosition()).add(rotatedPosition);
         }
-
-        return localPosition;
     }
 
     public Vector3f getLocalPosition(){
@@ -59,19 +62,31 @@ public class GameObject {
         return this;
     }
 
+    public void setWorldPosition(Vector3f worldPosition) {
+        if (parent == null) {
+            setPosition(worldPosition);
+        } else {
+            Vector3f parentWorldPos = parent.getPosition();
+            Quaternionf parentWorldRot = parent.getRotation();
+
+            Vector3f relativePos = new Vector3f(worldPosition).sub(parentWorldPos);
+            relativePos.rotate(parentWorldRot.conjugate()); // inverse rotate to get local position
+
+            setPosition(relativePos);
+        }
+    }
+
     public GameObject addPosition(Vector3f position){
         this.localPosition = Calculus.addVectors(this.localPosition, position);
         return this;
     }
 
     public Quaternionf getRotation() {
-        if(parent != null){
-            Quaternionf outputQuaternion = new Quaternionf();
-            outputQuaternion.set(parent.getRotation()).mul(getLocalRotation());
-            return outputQuaternion;
+        if (parent == null) {
+            return new Quaternionf(localRotation);
+        } else {
+            return new Quaternionf(parent.getRotation()).mul(localRotation);
         }
-
-        return localRotation;
     }
 
     public Vector3f getEulerAngles(){
@@ -100,8 +115,34 @@ public class GameObject {
         return  localRotation;
     }
 
+    public Vector3f getForward(){
+        return new Quaternionf(getRotation()).transform(new Vector3f(Constants.VECTOR3_FORWARD));
+    }
+
+    public Vector3f getRight(){
+        return new Quaternionf(getRotation()).transform(new Vector3f(Constants.VECTOR3_RIGHT));
+    }
+
+    public Vector3f getUp(){
+        return new Quaternionf(getRotation()).transform(new Vector3f(Constants.VECTOR3_UP));
+    }
+
     public GameObject setRotation(Quaternionf rotation){
         this.localRotation = rotation;
+        return this;
+    }
+
+    public GameObject setWorldRotation(Quaternionf worldRotation) {
+        if (parent == null) {
+            setRotation(worldRotation);
+        } else {
+            Quaternionf parentWorldRot = parent.getRotation();
+            Quaternionf inverseParentRot = parentWorldRot.conjugate();
+
+            Quaternionf localRot = new Quaternionf(inverseParentRot).mul(worldRotation);
+            setRotation(localRot);
+        }
+
         return this;
     }
 
@@ -133,12 +174,12 @@ public class GameObject {
         return this;
     }
 
-    public void lookAt(Vector3f target){
+    public GameObject lookAt(Vector3f target){
         Vector3f currentPosition = getPosition();
         Vector3f forward = new Vector3f(currentPosition).sub(target).normalize();
 
         if (forward.lengthSquared() < 1e-6) {
-            return; // Avoid calculations if at the target position
+            return this; // Avoid calculations if at the target position
         }
 
         Vector3f referenceDirection = new Vector3f(0, 0, -1).normalize();
@@ -147,6 +188,12 @@ public class GameObject {
         quaternion.rotationTo(referenceDirection, forward);
 
         setRotation(quaternion);
+        return this;
+    }
+
+    public void lookAtDirection(Vector3f direction) {
+        direction.normalize();
+        setRotation(new Quaternionf().rotateTo(new Vector3f(0,0,-1), direction));
     }
 
     public Vector3f getScale() {
@@ -174,9 +221,11 @@ public class GameObject {
     }
 
     public GameObject addChild(GameObject child){
-        if(!children.contains(child)) {
-            children.add(child);
+        if (child.parent != null) {
+            child.parent.children.remove(child);
         }
+        child.parent = this;
+        this.children.add(child);
         return this;
     }
 
@@ -189,13 +238,12 @@ public class GameObject {
     }
 
     public GameObject setParent(GameObject parent){
-        if(this.parent != null){
+        if (this.parent != null) {
             this.parent.children.remove(this);
         }
-
         this.parent = parent;
-        if(parent != null && !parent.children.contains(this)){
-            parent.addChild(this);
+        if (parent != null) {
+            parent.children.add(this);
         }
         return this;
     }

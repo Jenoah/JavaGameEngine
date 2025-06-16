@@ -28,8 +28,6 @@ public class Player extends GameObject {
         this.camera.setParent(this);
         moveDelta = new Vector3f(0, 0, 0);
 
-        //Model pointLightProxyModel = OBJLoader.loadOBJModel("/models/cube.obj");
-        //pointLightProxyModel.getMaterial().setAlbedoTexture(null);
         GameObject feet = new GameObject().setPosition(new Vector3f(0, -1f, 0)).setScale(0.1f);
         Material feetMaterial = new Material(ShaderManager.unlitShader).setAmbientColor(new Vector4f(1, .5f, 1, 1));
         feet.addComponent(new RenderComponent(PrimitiveLoader.getCube().getMesh(), feetMaterial));
@@ -86,17 +84,20 @@ public class Player extends GameObject {
     }
 
     public void movePosition(Vector3f movePosition){
+        Vector3f newPosition = new Vector3f(getPosition());
+
         if(movePosition.z != 0){
-            getPosition().x += (float) Math.sin(yaw) * -1f * movePosition.z;
-            getPosition().z += (float) Math.cos(yaw) * movePosition.z;
+            newPosition.x += (float) Math.sin(yaw) * -1f * movePosition.z;
+            newPosition.z += (float) Math.cos(yaw) * movePosition.z;
         }
 
         if(movePosition.x != 0){
-            getPosition().x += (float) Math.sin((yaw - Constants.DEGREES_90_IN_RADIANS)) * -1f * movePosition.x;
-            getPosition().z += (float) Math.cos((yaw - Constants.DEGREES_90_IN_RADIANS)) * movePosition.x;
+            newPosition.x += (float) Math.sin((yaw - Constants.DEGREES_90_IN_RADIANS)) * -1f * movePosition.x;
+            newPosition.z += (float) Math.cos((yaw - Constants.DEGREES_90_IN_RADIANS)) * movePosition.x;
         }
 
-        getPosition().y += movePosition.y;
+        newPosition.y += movePosition.y;
+        setPosition(newPosition);
     }
 
     public void moveRotation(float xDelta, float yDelta){
