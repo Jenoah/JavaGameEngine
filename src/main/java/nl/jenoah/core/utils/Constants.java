@@ -18,10 +18,26 @@ public class Constants {
     public static final float MOUSE_SENSITIVITY = 2f;
 
     public static final Vector3f VECTOR3_UP = new Vector3f(0, 1, 0);
+    public static final Vector3f VECTOR3_FORWARD = new Vector3f(0, 0, -1);
+    public static final Vector3f VECTOR3_BACK = new Vector3f(0, 0, 1);
+    public static final Vector3f VECTOR3_RIGHT = new Vector3f(1, 0, 0);
     public static final Vector3f VECTOR3_ONE = new Vector3f(1, 1, 1);
     public static final Vector3f VECTOR3_ZERO = new Vector3f(0, 0, 0);
 
+    public static final Vector4f VECTOR4_UP = new Vector4f(0, 1, 0, 0);
+    public static final Vector4f VECTOR4_FORWARD = new Vector4f(0, 0, -1, 0);
+    public static final Vector4f VECTOR4_BACK = new Vector4f(0, 0, 1, 0);
+    public static final Vector4f VECTOR4_ONE = new Vector4f(1, 1, 1, 1);
+    public static final Vector4f VECTOR4_ZERO = new Vector4f(0, 0, 0, 0);
+
     public static final int CHUNK_SIZE = 16;
+
+    public static final float SHADOW_DISTANCE = 40;
+    public static final float SHADOW_OFFSET = 10;
+    public static final float SHADOW_BIAS = 0.0015f;
+    public static final int SHADOW_MAP_SIZE = 2048;
+    public static final int SHADOW_TRANSITION_DISTANCE = 10;
+    public static final int SHADOW_PCF_COUNT = 2;
 
     public static final Vector4f DEFAULT_COLOR = new Vector4f(1f, 1f, 1f, 1f);
     public static final Vector3f AMBIENT_COLOR = new Vector3f(0.4f, 0.4f, 0.6f);
