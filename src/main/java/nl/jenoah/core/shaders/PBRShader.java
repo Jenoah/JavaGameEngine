@@ -1,14 +1,9 @@
 package nl.jenoah.core.shaders;
 
 import nl.jenoah.core.Camera;
-import nl.jenoah.core.entity.SceneManager;
 import nl.jenoah.core.rendering.MeshMaterialSet;
-import nl.jenoah.core.utils.Transformation;
 import nl.jenoah.core.utils.Utils;
-import org.joml.Matrix4f;
 import org.lwjgl.opengl.*;
-
-import static org.lwjgl.opengl.GL11.glDepthMask;
 
 public class PBRShader extends SimpleLitShader{
 
@@ -37,64 +32,49 @@ public class PBRShader extends SimpleLitShader{
 
     @Override
     public void prepare(MeshMaterialSet meshMaterialSet, Camera camera) {
-        glDepthMask(true);
+        super.prepare(meshMaterialSet, camera);
 
-        Matrix4f modelMatrix = Transformation.getModelMatrix(meshMaterialSet.getRoot());
-        Matrix4f viewMatrix = Transformation.getViewMatrix(camera);
-
-        Shader shader = meshMaterialSet.material.getShader();
-        shader.setUniform("material", meshMaterialSet.material);
-        shader.setUniform("viewMatrix", viewMatrix);
-        shader.setUniform("projectionMatrix", window.getProjectionMatrix());
-        shader.setUniform("fogColor", SceneManager.fogColor);
-        shader.setUniform("fogDensity", SceneManager.fogDensity);
-        shader.setUniform("fogGradient", SceneManager.fogGradient);
-        if(meshMaterialSet.mesh.isInstanced()){
-            shader.setUniform("useInstancing", true);
-        }else{
-            shader.setUniform("useInstancing", false);
-            shader.setUniform("modelMatrix", modelMatrix);
-        }
+        this.setUniform("useInstancing", meshMaterialSet.mesh.isInstanced());
 
         if(meshMaterialSet.material.hasAlbedoTexture()) {
             GL13.glActiveTexture(GL13.GL_TEXTURE0);
             GL11.glBindTexture(GL11.GL_TEXTURE_2D, meshMaterialSet.material.getAlbedoTexture().getId());
-            shader.setTexture("albedoMap", 0);
-            shader.setUniform("hasAlbedoMap", 1);
+            this.setTexture("albedoMap", 0);
+            this.setUniform("hasAlbedoMap", 1);
         }else{
-            shader.setUniform("hasAlbedoMap", 0);
+            this.setUniform("hasAlbedoMap", 0);
         }
         if(meshMaterialSet.material.hasNormalMap()) {
             GL13.glActiveTexture(GL13.GL_TEXTURE1);
             GL11.glBindTexture(GL11.GL_TEXTURE_2D, meshMaterialSet.material.getNormalMap().getId());
-            shader.setTexture("normalMap", 1);
-            shader.setUniform("hasNormalMap", 1);
+            this.setTexture("normalMap", 1);
+            this.setUniform("hasNormalMap", 1);
         }else{
-            shader.setUniform("hasNormalMap", 0);
+            this.setUniform("hasNormalMap", 0);
         }
         if(meshMaterialSet.material.hasRoughnessMap()) {
             GL13.glActiveTexture(GL13.GL_TEXTURE2);
             GL11.glBindTexture(GL11.GL_TEXTURE_2D, meshMaterialSet.material.getRoughnessMap().getId());
-            shader.setTexture("roughnessMap", 1);
-            shader.setUniform("hasRoughnessMap", 1);
+            this.setTexture("roughnessMap", 2);
+            this.setUniform("hasRoughnessMap", 1);
         }else{
-            shader.setUniform("hasRoughnessMap", 0);
+            this.setUniform("hasRoughnessMap", 0);
         }
         if(meshMaterialSet.material.hasMetallicMap()) {
-            GL13.glActiveTexture(GL13.GL_TEXTURE2);
+            GL13.glActiveTexture(GL13.GL_TEXTURE3);
             GL11.glBindTexture(GL11.GL_TEXTURE_2D, meshMaterialSet.material.getMetallicMap().getId());
-            shader.setTexture("metallicMap", 1);
-            shader.setUniform("hasMetallicMap", 1);
+            this.setTexture("metallicMap", 3);
+            this.setUniform("hasMetallicMap", 1);
         }else{
-            shader.setUniform("hasMetallicMap", 0);
+            this.setUniform("hasMetallicMap", 0);
         }
         if(meshMaterialSet.material.hasAOMap()) {
-            GL13.glActiveTexture(GL13.GL_TEXTURE2);
+            GL13.glActiveTexture(GL13.GL_TEXTURE4);
             GL11.glBindTexture(GL11.GL_TEXTURE_2D, meshMaterialSet.material.getAoMap().getId());
-            shader.setTexture("aoMap", 1);
-            shader.setUniform("hasAOMap", 1);
+            this.setTexture("aoMap", 4);
+            this.setUniform("hasAOMap", 1);
         }else{
-            shader.setUniform("hasAOMap", 0);
+            this.setUniform("hasAOMap", 0);
         }
     }
 }

@@ -13,7 +13,6 @@ uniform float fogDensity;
 uniform float fogGradient;
 
 void main(){
-
     vec4 worldPosition = modelMatrix * vec4(position, 1.0);
     vec4 cameraObjectPosition = viewMatrix * worldPosition;
 

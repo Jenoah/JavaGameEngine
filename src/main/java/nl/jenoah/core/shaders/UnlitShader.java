@@ -22,7 +22,7 @@ public class UnlitShader extends Shader{
     @Override
     public void createRequiredUniforms() throws Exception {
         createMaterialUniform("material");
-        createUniform("textureSampler");
+        createUniform("albedoMap");
         createUniform("modelMatrix");
         createUniform("viewMatrix");
         createUniform("projectionMatrix");
@@ -38,19 +38,18 @@ public class UnlitShader extends Shader{
         Matrix4f modelMatrix = Transformation.getModelMatrix(meshMaterialSet.getRoot());
         Matrix4f viewMatrix = Transformation.getViewMatrix(camera);
 
-        Shader shader = meshMaterialSet.material.getShader();
-        shader.setUniform("material", meshMaterialSet.material);
-        shader.setUniform("modelMatrix", modelMatrix);
-        shader.setUniform("viewMatrix", viewMatrix);
-        shader.setUniform("projectionMatrix", window.getProjectionMatrix());
-        shader.setUniform("fogColor", SceneManager.fogColor);
-        shader.setUniform("fogDensity", SceneManager.fogDensity);
-        shader.setUniform("fogGradient", SceneManager.fogGradient);
+        this.setUniform("material", meshMaterialSet.material);
+        this.setUniform("modelMatrix", modelMatrix);
+        this.setUniform("viewMatrix", viewMatrix);
+        this.setUniform("projectionMatrix", window.getProjectionMatrix());
+        this.setUniform("fogColor", SceneManager.fogColor);
+        this.setUniform("fogDensity", SceneManager.fogDensity);
+        this.setUniform("fogGradient", SceneManager.fogGradient);
 
-        if(meshMaterialSet.material.getAlbedoTexture() != null){
+        if(meshMaterialSet.material.hasAlbedoTexture()){
             GL13.glActiveTexture(GL13.GL_TEXTURE0);
             GL11.glBindTexture(GL11.GL_TEXTURE_2D, meshMaterialSet.material.getAlbedoTexture().getId());
-            shader.setTexture("textureSampler", 0);
+            this.setTexture("albedoMap", 0);
         }
     }
 }

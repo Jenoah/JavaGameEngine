@@ -10,6 +10,7 @@ import nl.jenoah.core.utils.Constants;
 import nl.jenoah.core.utils.Transformation;
 import nl.jenoah.core.utils.Utils;
 import org.joml.Matrix4f;
+import org.joml.Vector3f;
 
 import static org.lwjgl.opengl.GL11.glDepthMask;
 
@@ -18,6 +19,7 @@ public class SimpleLitShader extends Shader {
     private PointLight[] pointLights = new PointLight[0];
     private SpotLight[] spotLights = new SpotLight[0];
     private DirectionalLight directionalLight;
+    private Matrix4f shadowSpaceMatrix = new Matrix4f();
 
     public SimpleLitShader() throws Exception {
         super();
@@ -42,6 +44,15 @@ public class SimpleLitShader extends Shader {
         createUniform("ambientColor");
         createUniform("specularPower");
         createUniform("viewPosition");
+
+        createUniform("shadowMap");
+        createUniform("shadowSpaceMatrix");
+        createUniform("shadowDistance");
+        createUniform("shadowBias");
+        createUniform("shadowTransitionDistance");
+        createUniform("shadowPCFCount");
+        createUniform("shadowMapSize");
+
         createDirectionalLightUniform("directionalLight");
         createPointLightArrayUniform("pointLights", 5);
         createSpotLightArrayUniform("spotLights", 5);
@@ -54,15 +65,19 @@ public class SimpleLitShader extends Shader {
         Matrix4f modelMatrix = Transformation.getModelMatrix(meshMaterialSet.getRoot());
         Matrix4f viewMatrix = Transformation.getViewMatrix(camera);
 
-        Shader shader = meshMaterialSet.material.getShader();
-        shader.setUniform("material", meshMaterialSet.material);
-        shader.setUniform("modelMatrix", modelMatrix);
-        //shader.setUniform("textureSampler", 0);
-        shader.setUniform("viewMatrix", viewMatrix);
-        shader.setUniform("projectionMatrix", window.getProjectionMatrix());
-        shader.setUniform("fogColor", SceneManager.fogColor);
-        shader.setUniform("fogDensity", SceneManager.fogDensity);
-        shader.setUniform("fogGradient", SceneManager.fogGradient);
+        this.setUniform("material", meshMaterialSet.material);
+        this.setUniform("modelMatrix", modelMatrix);
+        this.setUniform("viewMatrix", viewMatrix);
+        this.setUniform("projectionMatrix", window.getProjectionMatrix());
+        this.setUniform("fogColor", SceneManager.fogColor);
+        this.setUniform("fogDensity", SceneManager.fogDensity);
+        this.setUniform("fogGradient", SceneManager.fogGradient);
+        this.setUniform("shadowSpaceMatrix", shadowSpaceMatrix);
+        this.setUniform("shadowDistance", Constants.SHADOW_DISTANCE);
+        this.setUniform("shadowBias", Constants.SHADOW_BIAS);
+        this.setUniform("shadowTransitionDistance", Constants.SHADOW_TRANSITION_DISTANCE);
+        this.setUniform("shadowPCFCount", Constants.SHADOW_PCF_COUNT);
+        this.setUniform("shadowMapSize", Constants.SHADOW_MAP_SIZE);
 
         /*
         if(mat.getAlbedoTexture() != null){
@@ -145,7 +160,8 @@ public class SimpleLitShader extends Shader {
     //Set uniforms
     public void setUniform(String uniformName, DirectionalLight directionalLight){
         setUniform(uniformName + ".color", directionalLight.getColor());
-        setUniform(uniformName + ".direction", directionalLight.getDirection());
+        Vector3f lightDir = directionalLight.getForward();
+        setUniform(uniformName + ".direction", new Vector3f(lightDir));
         setUniform(uniformName + ".intensity", directionalLight.getIntensity());
     }
 
@@ -192,4 +208,7 @@ public class SimpleLitShader extends Shader {
         setUniform(uniformName + "[" + position + "]", spotLight);
     }
 
+    public void setShadowSpaceMatrix(Matrix4f shadowSpaceMatrix){
+        this.shadowSpaceMatrix = shadowSpaceMatrix;
+    }
 }

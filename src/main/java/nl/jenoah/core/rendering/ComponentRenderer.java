@@ -4,7 +4,8 @@ import nl.jenoah.core.Camera;
 import nl.jenoah.core.components.RenderComponent;
 import nl.jenoah.core.debugging.RenderMetrics;
 import nl.jenoah.core.entity.GameObject;
-import nl.jenoah.core.shaders.Shader;
+import nl.jenoah.core.shaders.*;
+import org.joml.Matrix4f;
 import org.lwjgl.opengl.*;
 
 import java.util.ArrayList;
@@ -17,6 +18,8 @@ public class ComponentRenderer implements IRenderer {
     HashMap<Shader, List<MeshMaterialSet>> sortedRenderObjects = new HashMap<>();
     private final RenderMetrics metrics = new RenderMetrics();
     private boolean recordMetrics = false;
+    private Matrix4f shadowSpaceMatrix = new Matrix4f();
+    private int shadowMapID = 0;
 
     @Override
     public void init() throws Exception {
@@ -40,6 +43,7 @@ public class ComponentRenderer implements IRenderer {
                     metrics.recordVaoBind();
                 }
                 bind(meshMaterialSet);
+                prepareShadow(meshMaterialSet);
                 renderObjectShader.prepare(meshMaterialSet, camera);
 
 
@@ -48,7 +52,6 @@ public class ComponentRenderer implements IRenderer {
                     GL33.glDrawElementsInstanced(GL11.GL_TRIANGLES, meshMaterialSet.mesh.getVertexCount(), GL11.GL_UNSIGNED_INT, 0, meshMaterialSet.mesh.getInstanceCount());
                 }else{
                     GL11.glDrawElements(GL11.GL_TRIANGLES, meshMaterialSet.mesh.getVertexCount(), GL11.GL_UNSIGNED_INT, 0);
-
                 }
 
                 unbind();
@@ -83,6 +86,15 @@ public class ComponentRenderer implements IRenderer {
         } else {
             GL11.glDisable(GL11.GL_BLEND);
             GL11.glEnable(GL11.GL_CULL_FACE);
+        }
+    }
+
+    private void prepareShadow(MeshMaterialSet meshMaterialSet){
+        if(meshMaterialSet.material.receiveShadows() && meshMaterialSet.material.getShader() instanceof SimpleLitShader) {
+                ((SimpleLitShader) meshMaterialSet.material.getShader()).setShadowSpaceMatrix(shadowSpaceMatrix);
+            GL13.glActiveTexture(GL13.GL_TEXTURE9);
+            GL11.glBindTexture(GL11.GL_TEXTURE_2D, shadowMapID);
+            meshMaterialSet.material.getShader().setTexture("shadowMap", 9);
         }
     }
 
@@ -127,5 +139,13 @@ public class ComponentRenderer implements IRenderer {
 
     public String getMetrics() {
         return recordMetrics ? metrics.getMetrics() : "Metrics not recorded";
+    }
+
+    public void setShadowSpaceMatrix(Matrix4f shadowSpaceMatrix){
+        this.shadowSpaceMatrix = shadowSpaceMatrix;
+    }
+
+    public void setShadowMapID(int shadowMapID){
+        this.shadowMapID = shadowMapID;
     }
 }

@@ -18,8 +18,8 @@ public class TriplanarShader extends SimpleLitShader {
 
     public TriplanarShader() throws Exception {
         super();
-        createVertexShader(Utils.loadResource("/shaders/triplanar.vs"));
-        createFragmentShader(Utils.loadResource("/shaders/triplanar.fs"));
+        createVertexShader(Utils.loadResource("/shaders/lit/triplanar/triplanar.vs"));
+        createFragmentShader(Utils.loadResource("/shaders/lit/triplanar/triplanar.fs"));
         link();
         init();
     }

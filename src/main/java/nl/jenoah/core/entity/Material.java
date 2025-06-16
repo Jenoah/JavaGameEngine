@@ -20,6 +20,8 @@ public class Material {
     private Texture aoMap = null;
 
     private boolean isDoubleSided = false;
+    private boolean castShadow = true;
+    private boolean receiveShadows = true;
 
     private Shader shader;
 
@@ -109,7 +111,15 @@ public class Material {
         return this;
     }
 
+    public Material castShadow(boolean canCast){
+        castShadow = canCast;
+        return this;
+    }
 
+    public Material receiveShadows(boolean canReceive){
+        receiveShadows = canReceive;
+        return this;
+    }
 
     //    Getters
 
@@ -160,6 +170,10 @@ public class Material {
     public final boolean isDoubleSided(){
         return isDoubleSided;
     }
+
+    public final boolean castShadow(){ return castShadow; }
+
+    public final boolean receiveShadows(){ return receiveShadows; }
 
 //  Has Getters
 

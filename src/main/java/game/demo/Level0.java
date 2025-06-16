@@ -19,10 +19,7 @@ import nl.jenoah.core.loaders.TextureLoader;
 import nl.jenoah.core.rendering.MeshMaterialSet;
 import nl.jenoah.core.rendering.RenderManager;
 import nl.jenoah.core.shaders.ShaderManager;
-import nl.jenoah.core.utils.Calculus;
-import nl.jenoah.core.utils.Conversion;
-import nl.jenoah.core.utils.Transformation;
-import nl.jenoah.core.utils.Utils;
+import nl.jenoah.core.utils.*;
 import org.joml.Math;
 import org.joml.Vector2f;
 import org.joml.Vector3f;
@@ -83,6 +80,12 @@ public class Level0 extends Scene {
         monkeyEntity.addComponent(new RenderComponent(monkMeshMaterialSets));
         addEntity(monkeyEntity);
 
+        List<MeshMaterialSet> testMeshMaterialSets = OBJLoader.loadOBJModel("/models/monk.obj", blockPaletteTexture);
+        testMeshMaterialSets.forEach((meshMaterialSet -> meshMaterialSet.material.setShader(ShaderManager.unlitShader).setAmbientColor(new Vector4f(1, 0, 1, 1))));
+        GameObject testEntity = new GameObject().setPosition(new Vector3f(2, 6.5f, -3f)).setScale(0.3f).lookAt(player.getPosition());
+        testEntity.addComponent(new RenderComponent(testMeshMaterialSets));
+        addEntity(testEntity);
+
         MeshMaterialSet groundBlock = new MeshMaterialSet(PrimitiveLoader.getCube().getMesh().calculateNormals());
         groundBlock.material.setAlbedoTexture(new Texture("textures/rock/rock_albedo.jpg"));
         groundBlock.material.setNormalMap(new Texture("textures/rock/rock_normal.jpg", false, false, true, true));
@@ -110,11 +113,12 @@ public class Level0 extends Scene {
         //Lighting
         //Directional Light
         Vector3f lightColor = new Vector3f(1f, 1f, .75f);
-        Vector3f lightDirection = new Vector3f(-1f, 1f, 2f);
+        Vector3f lightDirection = new Vector3f(0.5f, -0.75f, -0.5f);
         lightDirection.normalize();
 
         DirectionalLight directionalLight = new DirectionalLight(lightColor, lightDirection, 1);
         directionalLight.showProxy();
+        directionalLight.setPosition(-2, 7, -4);
         setDirectionalLight(directionalLight);
 
         //Point light
@@ -186,6 +190,7 @@ public class Level0 extends Scene {
         super.postStart();
         terrainGeneration.start();
         terrainGeneration.setUpdatePosition(player.getPosition());
+        renderManager.shadowRenderer.setMainCamera(player.getCamera());
     }
 
     @Override

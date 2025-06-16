@@ -5,16 +5,17 @@ A simple Java Game engine using LWJGL3 / OpenGL.
 - 3D rendering
 - Instanced rendering
 - Game Object Components
-- Simple (PBR) lighting
+- PBR lighting
+- Shadows
 - Custom shaders
 - Fog
 - Simple UI
-- Text rendering(Credits to [Thin Matrix's font rendering tutorial](https://www.youtube.com/watch?v=mnIQEQoHHCU))
+- Text rendering (Credits to [Thin Matrix's font rendering tutorial](https://www.youtube.com/watch?v=mnIQEQoHHCU))
 - Post-processing
 - Marching cubes, multi-threaded terrain generation with surface features (foliage etc...)
 
 ## Planned features
-- Shadows
+- Point- and spotlight shadows
 - Collisions
 - Ambient Occlusion
 - Reflections
@@ -28,7 +29,7 @@ A simple Java Game engine using LWJGL3 / OpenGL.
 - If on Mac, use the file mentioned above with the '-XstartOnFirstThread' VM parameter
 
 ## Examples
-All the above-mentioned included features are shown in the demo scene.
+All the above-mentioned included features are shown in the demo scene. The previews below might be outdated.
 This demo scene includes a procedurally generated world. This is done with chunks of [Marching Cubes](https://en.wikipedia.org/wiki/Marching_cubes) that runs on a separate thread to prevent stuttering on generation.
 
 ![preview image of render](git-files/images/preview3.png)

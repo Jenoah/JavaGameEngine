@@ -6,6 +6,7 @@ in vec2 texCoords;
 in vec3 vertexNormal;
 in vec3 fragPosition;
 in float fogFactor;
+in vec4 shadowCoords;
 
 out vec4 outColor;
 
@@ -46,10 +47,14 @@ struct SpotLight{
 };
 
 uniform sampler2D textureSampler;
+uniform sampler2D shadowMap;
 uniform vec3 ambientColor;
 uniform vec3 viewPosition;
 uniform vec3 fogColor;
 uniform float specularPower;
+uniform float shadowBias;
+uniform int shadowPCFCount = 2;
+uniform int shadowMapSize;
 
 uniform Material material;
 uniform DirectionalLight directionalLight;
@@ -149,6 +154,25 @@ void main() {
         diffuseMap = material.ambient;
     }
 
+    //Shadow calculation
+    //Shadow calculation
+    float shadowTotalTexels = (shadowPCFCount * 2 + 1);
+    float shadowMapTexelSize = 1.0 / shadowMapSize;
+    float shadowFactorTotal = 0.0;
+
+    for(int x = -shadowPCFCount; x <= shadowPCFCount; x++){
+        for(int y = -shadowPCFCount; y <= shadowPCFCount; y++){
+            float objectNearestLight = texture(shadowMap, shadowCoords.xy + vec2(x, y) * shadowMapTexelSize).r;
+            if(shadowCoords.z > objectNearestLight + shadowBias){
+                shadowFactorTotal++;
+            }
+        }
+    }
+
+    shadowFactorTotal /= shadowTotalTexels;
+
+    float shadowFactor = 1.0 - (shadowFactorTotal * shadowCoords.w);
+
     //Correct intensities of textures and lighting
     ambient = vec3(0.3) * ambientColor;
     diffuse = vec3(1.0) * diffuseMap.rgb;
@@ -171,6 +195,8 @@ void main() {
             outColor += calculateSpotLight(spotLights[i]);
         }
     }
+
+    outColor.rgb *= shadowFactor;
 
     outColor.rgb = mix(vec4(fogColor, 1.0), outColor, fogFactor).rgb;
     outColor.a = diffuseMap.a;

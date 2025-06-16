@@ -5,7 +5,7 @@ in float fogFactor;
 out vec4 outColor;
 
 struct Material {
-    vec4 ambient;
+    //vec4 ambient;
     vec4 diffuse;
     vec4 specular;
     int hasTexture;
@@ -13,15 +13,18 @@ struct Material {
     float roughness;
 };
 
-uniform sampler2D textureSampler;
+uniform sampler2D albedoMap;
 uniform vec3 fogColor;
 uniform Material material;
 
 void main() {
     if(material.hasTexture == 1){
-        outColor = texture(textureSampler, texCoords) * material.ambient;
+        vec4 albedoTexture = texture(albedoMap, texCoords);
+        outColor = albedoTexture * material.diffuse;
+        outColor.a = albedoTexture.a;
     }else{
-        outColor = material.ambient;
+        outColor = material.diffuse;
     }
 
-    outColor.rgb = mix(vec4(fogColor, 1.0), outColor, fogFactor).rgb; }
+    outColor.rgb = mix(vec4(fogColor, 1.0), outColor, fogFactor).rgb;
+}

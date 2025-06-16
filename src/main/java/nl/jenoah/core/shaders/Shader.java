@@ -85,7 +85,9 @@ public class Shader {
 
     public void render(Camera camera){}
 
-    public void prepare(MeshMaterialSet meshMaterialSet, Camera camera) {}
+    public void prepare(MeshMaterialSet meshMaterialSet, Camera camera) {
+
+    }
 
     public void prepare(){}
 

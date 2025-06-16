@@ -9,11 +9,13 @@ out vec3 vertexColor;
 out vec3 fragPosition;
 out vec2 texCoords;
 out float fogFactor;
+out vec4 shadowCoords;
 
 uniform vec2 terrainHeight;
 uniform mat4 modelMatrix;
 uniform mat4 viewMatrix;
 uniform mat4 projectionMatrix;
+uniform mat4 shadowSpaceMatrix;
 uniform float fogDensity;
 uniform float fogGradient;
 
@@ -25,6 +27,7 @@ const float middleColorInfluence = 0.8;
 void main(){
     vec4 worldPosition = modelMatrix * vec4(position, 1.0);
     vec4 cameraObjectPosition = viewMatrix * worldPosition;
+    shadowCoords = shadowSpaceMatrix * worldPosition;
 
     gl_Position = projectionMatrix * cameraObjectPosition;
 

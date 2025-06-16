@@ -1,19 +1,16 @@
 #version 400 core
-
-// CONSTANTS
 const int MAXIMUM_POINT_LIGHTS = 5;
 const int MAXIMUM_SPOT_LIGHTS = 5;
 const float PI = 3.14159265359;
 
-// INPUTS
 in vec2 UV;
 in vec3 fragPosition;
 in float fogFactor;
 in mat3 TBN;
+in vec4 shadowCoords;
 
 out vec4 color;
 
-// STRUCTS
 struct Material {
     vec4 diffuse;
     vec4 specular;
@@ -56,6 +53,7 @@ uniform sampler2D normalMap;
 uniform sampler2D roughnessMap;
 uniform sampler2D metallicMap;
 uniform sampler2D aoMap;
+uniform sampler2D shadowMap;
 uniform int hasAlbedoMap = 0;
 uniform int hasNormalMap = 0;
 uniform int hasRoughnessMap = 0;
@@ -64,6 +62,9 @@ uniform int hasAOMap;
 uniform float metallic = .1;
 //uniform float roughness = .2;
 uniform float specularPower = 0;
+uniform float shadowBias;
+uniform int shadowPCFCount = 2;
+uniform int shadowMapSize;
 
 uniform vec3 ambientColor;
 uniform vec3 viewPosition;
@@ -135,7 +136,7 @@ float getMetallic()  { return (hasMetallicMap == 1)  ? texture(metallicMap, UV).
 float getAO()        { return (hasAOMap == 1)        ? texture(aoMap, UV).r        : 1.0; }
 
 // UNIFIED PBR LIGHT FUNCTION
-vec3 calculatePBRLight(vec3 lightColor, vec3 lightDirection, float attenuation, vec3 N, vec3 V, vec3 albedo, float roughness, float metallic)
+vec3 calculatePBRLight(vec3 lightColor, vec3 lightDirection, float attenuation, vec3 N, vec3 V, vec3 albedo, float roughness, float metallic, float shadowInfluence)
 {
     vec3 L = normalize(lightDirection);
     vec3 H = normalize(V + L);
@@ -163,7 +164,26 @@ vec3 calculatePBRLight(vec3 lightColor, vec3 lightDirection, float attenuation, 
     vec3 diffuse = kD * albedo / PI;
 
     // Final
-    return (diffuse + specular) * lightColor * NdotL * attenuation;
+    return (diffuse + specular) * lightColor * NdotL * attenuation * shadowInfluence;
+}
+
+float calculateShadowFactor(){
+    float shadowTotalTexels = (shadowPCFCount * 2.0 + 1.0);
+    float shadowMapTexelSize = 1.0 / shadowMapSize;
+    float shadowFactorTotal = 0.0;
+
+    for(int x = -shadowPCFCount; x <= shadowPCFCount; x++){
+        for(int y = -shadowPCFCount; y <= shadowPCFCount; y++){
+            float objectNearestLight = texture(shadowMap, shadowCoords.xy + vec2(x, y) * shadowMapTexelSize).r;
+            if(shadowCoords.z > objectNearestLight + shadowBias){
+                shadowFactorTotal += 1.0;
+            }
+        }
+    }
+
+    shadowFactorTotal /= shadowTotalTexels;
+
+    return clamp(1.0 - (shadowFactorTotal * shadowCoords.w), 0.0, 1.0);
 }
 
 // MAIN
@@ -181,12 +201,16 @@ void main()
     float irradiance = 0.5f; //irradiance should by replaced by the skybox contribution factor (IBL)
     vec3 ambient = ambientColor * albedo * irradiance * ao;
 
+    //Shadow calculation
+
+    float shadowFactor = calculateShadowFactor();
+
     // Directional Light
     vec3 result = ambient;
     if (directionalLight.intensity > 0.0) {
         vec3 L = normalize(-directionalLight.direction);
         float attenuation = directionalLight.intensity;
-        result += calculatePBRLight(directionalLight.color, L, attenuation, N, V, albedo, rough, metal);
+        result += calculatePBRLight(directionalLight.color, L, attenuation, N, V, albedo, rough, metal, shadowFactor);
     }
 
     // Point Lights
@@ -198,7 +222,7 @@ void main()
             (pointLights[i].constant +
             pointLights[i].linear * distance +
             pointLights[i].exponent * distance * distance);
-            result += calculatePBRLight(pointLights[i].color, L, attenuation, N, V, albedo, rough, metal);
+            result += calculatePBRLight(pointLights[i].color, L, attenuation, N, V, albedo, rough, metal, shadowFactor);
         }
     }
 
@@ -220,7 +244,7 @@ void main()
             attenuation *= intensity;
 
             if (attenuation > 0.0)
-            result += calculatePBRLight(spotLights[i].color, L, attenuation, N, V, albedo, rough, metal);
+            result += calculatePBRLight(spotLights[i].color, L, attenuation, N, V, albedo, rough, metal, shadowFactor);
         }
     }
 

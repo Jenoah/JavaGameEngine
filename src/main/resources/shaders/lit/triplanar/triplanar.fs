@@ -6,6 +6,7 @@ in vec2 texCoords;
 in vec3 vertexNormal;
 in vec3 fragPosition;
 in float fogFactor;
+in vec4 shadowCoords;
 
 out vec4 outColor;
 
@@ -46,11 +47,15 @@ struct SpotLight{
 
 uniform sampler2D topTexture;
 uniform sampler2D sideTexture;
+uniform sampler2D shadowMap;
 uniform vec3 ambientColor;
 uniform vec3 viewPosition;
 uniform vec3 fogColor;
 uniform float specularPower;
 uniform float blendFactor;
+uniform float shadowBias;
+uniform int shadowPCFCount = 2;
+uniform int shadowMapSize;
 
 uniform Material material;
 uniform DirectionalLight directionalLight;
@@ -125,8 +130,8 @@ vec4 calculateSpotLight(SpotLight light){
     return outColor;
 }
 
-vec4 calculateDirectionalLight(DirectionalLight light){
-    vec3 lightDirection = normalize(light.direction);
+vec4 calculateDirectionalLight(DirectionalLight light, float shadowInfluence){
+    vec3 lightDirection = normalize(-light.direction);
 
     //Diffuse
     float diffuseInfluence = max(dot(fragNormal, lightDirection), 0.0);
@@ -138,14 +143,36 @@ vec4 calculateDirectionalLight(DirectionalLight light){
 
     //Calculation
     vec3 ambientOutput = ambient * diffuse;
-    vec3 diffuseOutput = light.color * diffuseInfluence * diffuse;
+    vec3 diffuseOutput = light.color * diffuseInfluence * diffuse * shadowInfluence;
     vec3 specularOutput = light.color * specularInfuence * specularPower;
     specularOutput = vec3(0);
 
     return vec4((ambientOutput + diffuseOutput + specularOutput), 0.0);
 }
 
+float calculateShadowFactor(){
+    float shadowTotalTexels = (shadowPCFCount * 2.0 + 1.0);
+    float shadowMapTexelSize = 1.0 / shadowMapSize;
+    float shadowFactorTotal = 0.0;
+
+    for(int x = -shadowPCFCount; x <= shadowPCFCount; x++){
+        for(int y = -shadowPCFCount; y <= shadowPCFCount; y++){
+            float objectNearestLight = texture(shadowMap, shadowCoords.xy + vec2(x, y) * shadowMapTexelSize).r;
+            if(shadowCoords.z > objectNearestLight + shadowBias){
+                shadowFactorTotal += 1.0;
+            }
+        }
+    }
+
+    shadowFactorTotal /= shadowTotalTexels;
+
+    return clamp(1.0 - (shadowFactorTotal * shadowCoords.w), 0.0, 1.0);
+}
+
 void main() {
+    //Shadow calculation
+    float shadowFactor = calculateShadowFactor();
+
     fragNormal = normalize(vertexNormal);
     viewDirection = normalize(viewPosition - fragPosition);
     vec4 sideTex = texture(sideTexture, texCoords);
@@ -157,19 +184,21 @@ void main() {
     ambient = vec3(0.3) * ambientColor;
     diffuse = vec3(1.0) * diffuseMap.rgb;
 
-    outColor = calculateDirectionalLight(directionalLight);
+    outColor = calculateDirectionalLight(directionalLight, shadowFactor);
     for(int i = 0; i < MAXIMUM_POINT_LIGHTS; i++){
         if(pointLights[i].intensity > 0){
-            outColor += calculatePointLight(pointLights[i]);
+            //outColor += calculatePointLight(pointLights[i]);
         }
     }
 
     for(int i = 0; i < MAXIMUM_SPOT_LIGHTS; i++){
         if(spotLights[i].intensity > 0){
-            outColor += calculateSpotLight(spotLights[i]);
+            //outColor += calculateSpotLight(spotLights[i]);
         }
     }
 
+    //outColor.rgb *= shadowFactor;
     outColor.rgb = mix(vec4(fogColor, 1.0), outColor, fogFactor).rgb;
+    //outColor.rgb = texture(shadowMap, shadowCoords.xy).rgb;
     outColor.a = diffuseMap.a;
 }

@@ -13,6 +13,7 @@ import static org.lwjgl.opengl.GL11.glViewport;
 public class RenderManager {
     private final WindowManager window;
     private ComponentRenderer componentRenderer;
+    public ShadowRenderer shadowRenderer;
     private GuiRenderer guiRenderer;
     private FontRenderer fontRenderer;
     private FrameBuffer frameBuffer;
@@ -24,11 +25,14 @@ public class RenderManager {
 
     public void init() throws Exception {
         componentRenderer = new ComponentRenderer();
+        shadowRenderer = new ShadowRenderer();
 
         guiRenderer = new GuiRenderer();
         fontRenderer = new FontRenderer();
         skyboxRenderer = new SkyboxRenderer(new String[]{"textures/skyboxes/clouds1/right.png", "textures/skyboxes/clouds1/left.png", "textures/skyboxes/clouds1/top.png", "textures/skyboxes/clouds1/bottom.png", "textures/skyboxes/clouds1/back.png", "textures/skyboxes/clouds1/front.png"});
         componentRenderer.init();
+        shadowRenderer.init();
+        componentRenderer.setShadowMapID(shadowRenderer.getShadowMapID());
 
         regenerateFrameBuffer();
         PostProcessing.init();
@@ -45,20 +49,21 @@ public class RenderManager {
             PostProcessing.updateResolution();
         }
 
+        shadowRenderer.render(currentScene);
+        componentRenderer.setShadowSpaceMatrix(shadowRenderer.getToShadowMapSpaceMatrix());
+
         //3D rendering
         frameBuffer.bindFrameBuffer();
         clear();
 
         //Rendering of scene
-        //entityRenderer.render(currentScene.getPlayer().getCamera());
         componentRenderer.render(currentScene.getPlayer().getCamera());
         skyboxRenderer.render(currentScene.getPlayer().getCamera());
-        //transparentEntityRenderer.render(currentScene.getPlayer().getCamera());
+
         frameBuffer.unbindFrameBuffer();
 
         //Post Processing
         PostProcessing.render(frameBuffer.getColourTexture());
-
         //End of 3D rendering
 
         //Overlay
@@ -77,6 +82,7 @@ public class RenderManager {
         guiRenderer.cleanUp();
         fontRenderer.cleanUp();
         skyboxRenderer.cleanUp();
+        shadowRenderer.cleanUp();
     }
 
     private void regenerateFrameBuffer(){
@@ -85,6 +91,7 @@ public class RenderManager {
 
     public void queueRender(RenderComponent renderComponent){
         componentRenderer.queue(renderComponent);
+        shadowRenderer.queue(renderComponent);
     }
 
     public void dequeueRender(RenderComponent renderComponent){
