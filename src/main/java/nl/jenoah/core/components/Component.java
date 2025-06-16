@@ -3,7 +3,7 @@ package nl.jenoah.core.components;
 import nl.jenoah.core.entity.GameObject;
 
 public class Component {
-    private GameObject root = null;
+    protected GameObject root = null;
     protected boolean hasInitiated = false;
 
     //TODO: MAKE isEnabled LOOK AT THE isEnabled STATE OF THE root

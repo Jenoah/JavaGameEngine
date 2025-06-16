@@ -19,7 +19,7 @@ import java.util.*;
 
 public class OBJLoader {
 
-    public static List<MeshMaterialSet> loadOBJModel(String fileName) {
+    public static Set<MeshMaterialSet> loadOBJModel(String fileName) {
         List<String> lines = Utils.readAllLines(fileName);
         OBJObject objObject = new OBJObject();
 
@@ -161,8 +161,8 @@ public class OBJLoader {
         return ModelManager.loadModel(objObject);
     }
 
-    public static List<MeshMaterialSet> loadOBJModel(String fileName, Texture texturePath) {
-        List<MeshMaterialSet> meshMaterialSets = loadOBJModel(fileName);
+    public static Set<MeshMaterialSet> loadOBJModel(String fileName, Texture texturePath) {
+        Set<MeshMaterialSet> meshMaterialSets = loadOBJModel(fileName);
         meshMaterialSets.forEach((meshMaterialSet -> {
             meshMaterialSet.material.setAlbedoTexture(texturePath);
         }));

@@ -42,11 +42,7 @@ public class DemoGame implements ILogic {
 
     @Override
     public void update(float interval, MouseInput mouseInput) {
-
         sceneManager.getCurrentScene().update(mouseInput);
-
-        //renderer.processEntities(sceneManager.getCurrentScene().getSolidEntities());
-        //renderer.processEntities(sceneManager.getCurrentScene().getTransparentEntities());
     }
 
     @Override

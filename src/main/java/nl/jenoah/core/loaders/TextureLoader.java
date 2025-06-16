@@ -8,14 +8,14 @@ import org.lwjgl.system.MemoryStack;
 
 import java.nio.ByteBuffer;
 import java.nio.IntBuffer;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
 
 import static org.lwjgl.stb.STBImage.stbi_set_flip_vertically_on_load;
 
 public class TextureLoader {
 
-    private static final List<Integer> textures = new ArrayList<>();
+    private static final Set<Integer> textures = new HashSet<>();
     private static boolean flipTexture = true;
     private static boolean pointFilter = false;
     private static boolean repeatTexture = true;

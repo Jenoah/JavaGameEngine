@@ -1,6 +1,7 @@
 package nl.jenoah.core.gui;
 
 import nl.jenoah.core.ModelManager;
+import nl.jenoah.core.debugging.RenderMetrics;
 import nl.jenoah.core.entity.Model;
 import org.joml.Vector2f;
 import org.lwjgl.opengl.GL11;
@@ -14,6 +15,9 @@ public class GuiRenderer {
 
     private final Model quad;
     private final GuiShader shader;
+
+    private RenderMetrics metrics;
+    private boolean recordMetrics = false;
 
     public GuiRenderer(){
         Vector2f[] positions = {
@@ -33,17 +37,28 @@ public class GuiRenderer {
     }
 
     public void render(List<GuiObject> guiObjects){
+        if (recordMetrics) metrics.recordShaderBind();
         prepare();
 
+        if (recordMetrics) {
+            metrics.recordVaoBind();
+        }
         GL30.glBindVertexArray(quad.getId());
         GL20.glEnableVertexAttribArray(0);
 
         for (GuiObject gui: guiObjects) {
             shader.prepare(gui);
+
+            if (recordMetrics) {
+                metrics.recordStateChange();
+            }
+
             if(gui.getTexture() != -1) {
                 GL13.glActiveTexture(GL13.GL_TEXTURE0);
                 GL11.glBindTexture(GL11.GL_TEXTURE_2D, gui.getTexture());
             }
+
+            if (recordMetrics) metrics.recordDrawCall();
             GL11.glDrawArrays(GL11.GL_TRIANGLE_STRIP, 0, 4);
         }
 
@@ -68,5 +83,14 @@ public class GuiRenderer {
         shader.unbind();
         GL11.glDisable(GL11.GL_BLEND);
         GL11.glEnable(GL11.GL_DEPTH_TEST);
+    }
+
+    public void setMetrics(RenderMetrics metrics){
+        this.metrics = metrics;
+        recordMetrics = true;
+    }
+
+    public void recordMetrics(boolean recordMetrics) {
+        this.recordMetrics = recordMetrics;
     }
 }

@@ -110,12 +110,16 @@ public class RenderManager {
         if(recordMetrics){
             componentRenderer.setMetrics(this.metrics);
             shadowRenderer.setMetrics(this.metrics);
+            guiRenderer.setMetrics(this.metrics);
+            fontRenderer.setMetrics(this.metrics);
         }
         componentRenderer.recordMetrics(recordMetrics);
         shadowRenderer.recordMetrics(recordMetrics);
+        guiRenderer.recordMetrics(recordMetrics);
+        fontRenderer.recordMetrics(recordMetrics);
     }
 
-    public String getMetrics(){
-        return componentRenderer.getMetrics();
+    public String getMetrics() {
+        return recordMetrics ? metrics.getMetrics() : "Metrics not recorded";
     }
 }

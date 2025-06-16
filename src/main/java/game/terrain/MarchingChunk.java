@@ -15,7 +15,9 @@ import org.joml.Vector3f;
 import org.joml.Vector3i;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import static org.joml.Math.lerp;
 
@@ -32,7 +34,7 @@ public class MarchingChunk {
     public boolean isReady = false;
     public boolean isEmpty = false;
 
-    List<Matrix4f> surfaceFeatureModelMatrices = new ArrayList<>();
+    Set<Matrix4f> surfaceFeatureModelMatrices = new HashSet<>();
 
     public MarchingChunk(ChunkCoord chunkPosition){
         this.chunkPosition = chunkPosition;
@@ -74,56 +76,40 @@ public class MarchingChunk {
         chunkEntity.addComponent(new RenderComponent(chunkModel.getMesh(), chunkModel.getMaterial()));
     }
 
-    private void MarchCube(Vector3i voxelPosition)
-    {
-        //Check to see which corners of the voxel are visible
+    private void MarchCube(Vector3i voxelPosition) {
         float[] voxelCorners = new float[8];
-        for (int i = 0; i < 8; i++)
-        {
+        for (int i = 0; i < 8; i++) {
             Vector3i cornerPosition = Calculus.addVectors(voxelPosition, Constants.cornerTable[i]);
-            //voxelCorners[i] = voxels[cornerPosition.x][cornerPosition.y][cornerPosition.z];
-
-            // Sample height at this corner position (use chunk position to offset properly)
             float heightSample = ChunkUtils.SampleHeight(chunkPosition.x + cornerPosition.x, chunkPosition.z + cornerPosition.z) - chunkPosition.y;
-
-            // Store the voxel value (this is the y-coordinate minus the sampled height)
             voxelCorners[i] = cornerPosition.y - heightSample;
         }
 
-        //See which shape of Marching cube the current voxel should get
         int configIndex = ChunkUtils.GetVoxelConfiguration(voxelCorners);
-
-        //Return if the voxel will not have any vertices
         if (configIndex == 0 || configIndex == 255) return;
 
-        //Calculate vertices that correspond to the index of the voxel
-        int edgeIndex = 0;
-        for (int t = 0; t < 5; t++)
-        {
-            for (int p = 0; p < 3; p++)
-            {
-                int indice = Constants.triangleTable[configIndex][edgeIndex];
+        Vector3f vertex1;
+        Vector3f vertex2;
+        Vector3f vertexPosition;
 
+        int edgeIndex = 0;
+        for (int t = 0; t < 5; t++) {
+            for (int p = 0; p < 3; p++) {
+                int indice = Constants.triangleTable[configIndex][edgeIndex];
                 if (indice == -1) return;
 
-                //Get start and end of the edge between the vertices
-                Vector3f vertex1 = new Vector3f(Calculus.addVectors(voxelPosition, Constants.cornerTable[Constants.edgeIndexes[indice][0]]));
-                Vector3f vertex2 = new Vector3f(Calculus.addVectors(voxelPosition, Constants.cornerTable[Constants.edgeIndexes[indice][1]]));
+                vertex1 = Calculus.addVectorsF(voxelPosition, Constants.cornerTable[Constants.edgeIndexes[indice][0]]);
+                vertex2 = Calculus.addVectorsF(voxelPosition, Constants.cornerTable[Constants.edgeIndexes[indice][1]]);
 
-                Vector3f vertexPosition;
-                //Get the center of the edge
-
-                if (ChunkUtils.smoothTerrain)
-                {
+                if (ChunkUtils.smoothTerrain) {
                     float difference = getVertexDifference(voxelCorners, indice);
-
-                    vertexPosition = Calculus.addVectors(vertex1, Calculus.multiplyVector(Calculus.subtractVectors(vertex2, vertex1), difference));
+                    vertexPosition = Calculus.subtractVectors(vertex2, vertex1);
+                    vertexPosition = Calculus.multiplyVector(vertexPosition, difference);
+                    vertexPosition = Calculus.addVectors(vertex1, vertexPosition);
                     triangles.add(VertForIndex(vertexPosition));
-                }
-                else
-                {
-                    vertexPosition = Calculus.multiplyVector(Calculus.addVectors(vertex1,vertex2), 0.5f);
-                    vertices.add(vertexPosition);
+                } else {
+                    vertexPosition = Calculus.addVectors(vertex1, vertex2);
+                    vertexPosition = Calculus.multiplyVector(vertexPosition, 0.5f);
+                    vertices.add(new Vector3f(vertexPosition));
                     triangles.add(vertices.size() - 1);
                 }
                 edgeIndex++;
@@ -247,6 +233,7 @@ public class MarchingChunk {
     }
 
     public void setActive(boolean active){
+        if(chunkEntity == null) return;
         chunkEntity.setEnabled(active);
     }
 
@@ -258,7 +245,7 @@ public class MarchingChunk {
         surfaceFeatureModelMatrices.add(Transformation.toModelMatrix(position, rotation, scale));
     }
 
-    public final List<Matrix4f> getSurfaceFeatureMatrices(){
+    public final Set<Matrix4f> getSurfaceFeatureMatrices(){
         return surfaceFeatureModelMatrices;
     }
 }

@@ -8,20 +8,19 @@ import nl.jenoah.core.shaders.*;
 import org.joml.Matrix4f;
 import org.lwjgl.opengl.*;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
+import java.util.*;
 
 public class ComponentRenderer implements IRenderer {
 
-    List<RenderComponent> renderObjects = new ArrayList<>();
+    Set<RenderComponent> renderObjects = new HashSet<>();
     HashMap<Shader, List<MeshMaterialSet>> sortedRenderObjects = new HashMap<>();
     HashMap<Shader, List<MeshMaterialSet>> sortedTransparentRenderObjects = new HashMap<>();
-    private boolean recordMetrics = false;
+
     private Matrix4f shadowSpaceMatrix = new Matrix4f();
     private int shadowMapID = 0;
-    private RenderMetrics metrics;
 
+    private RenderMetrics metrics;
+    private boolean recordMetrics = false;
 
     @Override
     public void init() throws Exception {  }
@@ -45,10 +44,7 @@ public class ComponentRenderer implements IRenderer {
 
         meshMaterialSetList.forEach(meshMaterialSet -> {
             if (!meshMaterialSet.getRoot().isEnabled()) return;
-            if (recordMetrics) {
-                metrics.recordStateChange();
-                metrics.recordVaoBind();
-            }
+            if (recordMetrics) metrics.recordStateChange();
             bind(meshMaterialSet);
             prepareShadow(meshMaterialSet);
             shader.prepare(meshMaterialSet, camera);
@@ -70,6 +66,8 @@ public class ComponentRenderer implements IRenderer {
 
     public void bind(MeshMaterialSet meshMaterialSet) {
         GL30.glBindVertexArray(meshMaterialSet.mesh.getVaoID());
+        if (recordMetrics) metrics.recordVaoBind();
+
         GL20.glEnableVertexAttribArray(0);
         GL20.glEnableVertexAttribArray(1);
         GL20.glEnableVertexAttribArray(2);
@@ -147,14 +145,6 @@ public class ComponentRenderer implements IRenderer {
         //TODO: Make dequeue function for render component
     }
 
-    public void recordMetrics(boolean recordMetrics) {
-        this.recordMetrics = recordMetrics;
-    }
-
-    public String getMetrics() {
-        return recordMetrics ? metrics.getMetrics() : "Metrics not recorded";
-    }
-
     public void setShadowSpaceMatrix(Matrix4f shadowSpaceMatrix){
         this.shadowSpaceMatrix = shadowSpaceMatrix;
     }
@@ -166,5 +156,9 @@ public class ComponentRenderer implements IRenderer {
     public void setMetrics(RenderMetrics metrics){
         this.metrics = metrics;
         recordMetrics = true;
+    }
+
+    public void recordMetrics(boolean recordMetrics) {
+        this.recordMetrics = recordMetrics;
     }
 }

@@ -12,8 +12,8 @@ import org.lwjgl.system.MemoryUtil;
 
 import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
 
 public class Mesh {
     private Vector3f[] vertices;
@@ -24,7 +24,7 @@ public class Mesh {
     private int[] triangles;
     private int dimension = 3;
 
-    private final List<Integer> vbos = new ArrayList<>();
+    private final Set<Integer> vbos = new HashSet<>();
 
     private int vaoID = -1;
     private int vertexVBOID = -1, normalVBOID = -1, tangentsVBOID = -1, bitangentsVBOID = -1, triangleVBOID = -1, uvVBOID = -1, instanceVBOID = -1;
@@ -32,10 +32,11 @@ public class Mesh {
     private int vertexCount = -1;
 
     private boolean isVisible = true;
+    private boolean isStatic = true;
 
     //Instancing
     private boolean isInstanced = false;
-    private List<Matrix4f> instanceOffsets = new ArrayList<>();
+    private Set<Matrix4f> instanceOffsets = new HashSet<>();
 
     public Mesh(Mesh mesh){
         float[] verticesStripped = Conversion.toFloatArray(mesh.vertices);
@@ -453,12 +454,12 @@ public class Mesh {
         instanceOffsets.add(offset);
     }
 
-    public void addInstanceOffset(List<Matrix4f> offset){
+    public void addInstanceOffset(Set<Matrix4f> offset){
         isInstanced = true;
         instanceOffsets.addAll(offset);
     }
 
-    public void setInstanceOffsets(List<Matrix4f> offset){
+    public void setInstanceOffsets(Set<Matrix4f> offset){
         isInstanced = true;
         instanceOffsets = offset;
     }
@@ -471,7 +472,7 @@ public class Mesh {
             vbos.add(instanceVBOID);
 
             GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, instanceVBOID);
-            GL15.glBufferData(GL15.GL_ARRAY_BUFFER, instanceOffsets.size() * 16 * Float.BYTES, GL15.GL_DYNAMIC_DRAW);
+            GL15.glBufferData(GL15.GL_ARRAY_BUFFER, (long) instanceOffsets.size() * 64, isStatic ? GL15.GL_STATIC_DRAW : GL15.GL_DYNAMIC_DRAW);
 
             int start = 5;
             int mat4Size = 64; // bytes
@@ -502,14 +503,22 @@ public class Mesh {
             });
         }
         buffer.flip();
-        GL15.glBufferData(GL15.GL_ARRAY_BUFFER, buffer, GL15.GL_DYNAMIC_DRAW);
+        GL15.glBufferData(GL15.GL_ARRAY_BUFFER, buffer, isStatic ? GL15.GL_STATIC_DRAW : GL15.GL_DYNAMIC_DRAW);
         MemoryUtil.memFree(buffer);
 
         GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, 0);
         GL30.glBindVertexArray(0);
     }
 
-    public List<Matrix4f> getInstanceOffsets(){
+    public Set<Matrix4f> getInstanceOffsets(){
         return instanceOffsets;
+    }
+
+    public void setStatic(boolean isStatic){
+        this.isStatic = isStatic;
+    }
+
+    public boolean isStatic(){
+        return isStatic;
     }
 }

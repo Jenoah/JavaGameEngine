@@ -2,6 +2,7 @@ package nl.jenoah.core;
 
 import nl.jenoah.core.debugging.Debug;
 import nl.jenoah.core.entity.SceneManager;
+import org.joml.Math;
 import org.lwjgl.glfw.GLFW;
 import org.lwjgl.glfw.GLFWErrorCallback;
 
@@ -57,53 +58,6 @@ public class EngineManager {
         cleanUp();
     }
 
-    /*
-    public void runOLD(){
-        this.isRunning = true;
-
-        int frames = 0;
-        long frameCounter = 0;
-        long lastTime = System.nanoTime();
-        double unprocessedTime = 0;
-
-        while(isRunning){
-            boolean render = false;
-            long startTime = System.nanoTime();
-            long passedTime = startTime - lastTime;
-            lastTime = startTime;
-
-            unprocessedTime += passedTime / (double)NANOSECOND;
-            frameCounter += passedTime;
-
-            float frameTime = 1.0f / FRAMERATE;
-            while(unprocessedTime > frameTime){
-                render = true;
-                unprocessedTime -= frameTime;
-
-                if(window.windowShouldClose()){
-                    stop();
-                }
-
-                if(frameCounter >= NANOSECOND) {
-                    setFps(frames);
-                    //window.setWindowTitle(Constants.TITLE + " - FPS: " + getFps());
-                    frames = 0;
-                    frameCounter = 0;
-                }
-            }
-
-            if(render){
-                input();
-                update(frameTime);
-                render();
-                frames++;
-                currentFrameCount++;
-            }
-        }
-
-        cleanUp();
-    }*/
-
     private void stop(){
         if(!isRunning)
             return;
@@ -143,7 +97,7 @@ public class EngineManager {
     }
 
     public static int getFps() {
-        return fps;
+        return Math.round(1f / deltaTime);
     }
 
     public static double getTime() {
@@ -160,6 +114,12 @@ public class EngineManager {
 
     public static float getDeltaTime(){
         return deltaTime;
+    }
+
+    public static float getDeltaTimeMS(){
+        float ms = deltaTime * 1000;
+        //(int)(ms * 100f) / 100f truncates the deltatime to two decimals without using a costly String.format("%.2f", ms)
+        return (int)(ms * 100f) / 100f;
     }
 
     private void updateFPS() {

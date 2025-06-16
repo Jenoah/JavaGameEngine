@@ -15,22 +15,22 @@ import org.lwjgl.opengl.GL20;
 import org.lwjgl.opengl.GL30;
 import org.lwjgl.opengl.GL33;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
 
 
 public class ShadowRenderer implements IRenderer{
-    private final List<MeshMaterialSet> shadowSets = new ArrayList<>();
+    private final Set<MeshMaterialSet> shadowSets = new HashSet<>();
     private ShadowShader shadowShader;
     private ShadowFrameBuffer shadowFrameBuffer;
     private ShadowFrustum shadowFrustum;
     private RenderMetrics metrics;
     private boolean recordMetrics = false;
 
-    private Matrix4f lightViewMatrix = new Matrix4f();
-    private Matrix4f projectionMatrix = new Matrix4f();
-    private Matrix4f projectionViewMatrix = new Matrix4f();
-    private Matrix4f offset = createOffset();
+    private final Matrix4f lightViewMatrix = new Matrix4f();
+    private final Matrix4f projectionMatrix = new Matrix4f();
+    private final Matrix4f projectionViewMatrix = new Matrix4f();
+    private final Matrix4f offset = createOffset();
 
     @Override
     public void init() throws Exception {
@@ -64,7 +64,6 @@ public class ShadowRenderer implements IRenderer{
             if (!meshMaterialSet.getRoot().isEnabled()) return;
             if (recordMetrics) {
                 metrics.recordStateChange();
-                metrics.recordVaoBind();
             }
 
             bind(meshMaterialSet);
@@ -89,6 +88,7 @@ public class ShadowRenderer implements IRenderer{
     @Override
     public void bind(MeshMaterialSet meshMaterialSet) {
         GL30.glBindVertexArray(meshMaterialSet.mesh.getVaoID());
+        if (recordMetrics) metrics.recordVaoBind();
         GL20.glEnableVertexAttribArray(0);
         if(meshMaterialSet.mesh.isInstanced()){
             GL20.glEnableVertexAttribArray(5);
@@ -113,8 +113,6 @@ public class ShadowRenderer implements IRenderer{
         updateOrthoProjectionMatrix();
         updateLightViewMatrix(lightDirection, shadowFrustum.getCenter());
         shadowFrustum.update(lightViewMatrix);
-
-        //projectionMatrix.mul(lightViewMatrix, projectionViewMatrix);
 
         projectionMatrix.mulOrthoAffine(lightViewMatrix, projectionViewMatrix); //If the regular multiply works, try this one too
 

@@ -1,5 +1,6 @@
 package nl.jenoah.core.fonts.fontRendering;
 
+import nl.jenoah.core.debugging.RenderMetrics;
 import nl.jenoah.core.fonts.fontMeshCreator.FontType;
 import nl.jenoah.core.fonts.fontMeshCreator.GUIText;
 import org.lwjgl.opengl.GL11;
@@ -14,6 +15,9 @@ public class FontRenderer {
 
     private final FontShader shader;
 
+    private RenderMetrics metrics;
+    private boolean recordMetrics = false;
+
     public FontRenderer(){
         try {
             shader = new FontShader();
@@ -24,11 +28,15 @@ public class FontRenderer {
     }
 
     public void render(Map<FontType, List<GUIText>> texts){
+        if (recordMetrics) metrics.recordShaderBind();
         prepare();
         for(FontType font : texts.keySet()){
+            if (recordMetrics) metrics.recordStateChange();
+
             GL13.glActiveTexture(GL13.GL_TEXTURE0);
             GL11.glBindTexture(GL11.GL_TEXTURE_2D, font.getTextureAtlas());
             for(GUIText text : texts.get(font)){
+                if (recordMetrics) metrics.recordDrawCall();
                 renderText(text);
             }
         }
@@ -65,5 +73,12 @@ public class FontRenderer {
         GL11.glEnable(GL11.GL_DEPTH_TEST);
     }
 
+    public void setMetrics(RenderMetrics metrics){
+        this.metrics = metrics;
+        recordMetrics = true;
+    }
 
+    public void recordMetrics(boolean recordMetrics) {
+        this.recordMetrics = recordMetrics;
+    }
 }

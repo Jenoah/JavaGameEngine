@@ -5,10 +5,9 @@ import game.utils.ChunkUtils;
 import nl.jenoah.core.components.RenderComponent;
 import nl.jenoah.core.debugging.Debug;
 import nl.jenoah.core.entity.GameObject;
-import nl.jenoah.core.entity.Mesh;
-import nl.jenoah.core.rendering.MeshMaterialSet;
 import nl.jenoah.core.utils.*;
 import org.joml.Math;
+import org.joml.Matrix4f;
 import org.joml.Quaternionf;
 import org.joml.Vector3f;
 
@@ -16,12 +15,11 @@ import java.util.*;
 
 public class TerrainGeneration extends Thread{
     private HashMap<ChunkCoord, MarchingChunk> chunks = new HashMap<ChunkCoord, MarchingChunk>();
-    private final Queue<ChunkCoord> chunkGenerationQueue;
-    private Queue<ChunkCoord> previousRenderQueue;
-    private final Queue<ChunkCoord> activeChunks;
-
-    private Queue<MarchingChunk> marchingChunksQueue = new ArrayDeque<>();
-    private final Queue<MarchingChunk> marchingChunkRequeue = new ArrayDeque<>();
+    private final Set<ChunkCoord> chunkGenerationQueue;
+    private final Set<ChunkCoord> previousRenderQueue;
+    private final Set<ChunkCoord> activeChunks;
+    private final Set<MarchingChunk> marchingChunksQueue = new HashSet<>();
+    private final Set<MarchingChunk> marchingChunkRequeue = new HashSet<>();
 
 
     private final int renderDistance;
@@ -35,14 +33,15 @@ public class TerrainGeneration extends Thread{
     private float surfaceFeatureDensity = .4f;
     private int surfaceFeatureSamples = 16;
     private GameObject surfaceFeatureEntity = null;
+    private RenderComponent surfaceFeatureRenderComponent;
 
     public TerrainGeneration(int renderDistance){
         this.renderDistance = renderDistance;
         previousPlayerChunkCoord = ChunkCoord.toChunkCoord(new Vector3f(-999));
-        chunks = new HashMap<ChunkCoord, MarchingChunk>();
-        chunkGenerationQueue = new ArrayDeque<>();
-        previousRenderQueue = new ArrayDeque<>();
-        activeChunks = new ArrayDeque<>();
+        chunks = new HashMap<>();
+        chunkGenerationQueue = new HashSet<>();
+        previousRenderQueue = new HashSet<>();
+        activeChunks = new HashSet<>();
         verticalRenderDistance = (int)Math.ceil(ChunkUtils.maxTerrainHeight / (float)Constants.CHUNK_SIZE);
     }
 
@@ -52,22 +51,26 @@ public class TerrainGeneration extends Thread{
 
         this.isRunning = true;
 
-        while(isRunning){
-            try{
-                if(this.canUpdate){
-                    updateChunks();
-                    canUpdate = false;
+        synchronized (this) {
+            while (isRunning) {
+                try {
+                    if (this.canUpdate) {
+                        updateChunks();
+                        canUpdate = false;
+                    }
+                    this.wait(waitTime);
+                } catch (InterruptedException e) {
+                    Debug.Log("STOPPING THREAD: " + e);
+                    isRunning = false;
                 }
-                Thread.sleep(waitTime);
-            }catch (InterruptedException e){
-                Debug.Log("STOPPING THREAD: " + e);
-                isRunning = false;
             }
         }
     }
 
     public void setSurfaceFeature(GameObject surfaceFeatureEntity){
         this.surfaceFeatureEntity = surfaceFeatureEntity;
+        this.surfaceFeatureRenderComponent = this.surfaceFeatureEntity.getComponent(RenderComponent.class);
+        surfaceFeatureRenderComponent.initiate();
     }
 
     public void end(){
@@ -85,20 +88,21 @@ public class TerrainGeneration extends Thread{
     private void updateChunks(){
         chunkGenerationQueue.clear();
         activeChunks.clear();
-        previousRenderQueue = new ArrayDeque<>(chunks.keySet());
+        previousRenderQueue.clear();
+        previousRenderQueue.addAll(chunks.keySet());
 
         for (int x = -renderDistance; x < renderDistance; x++) {
             for (int y = 0; y < verticalRenderDistance; y++){
                 for (int z = -renderDistance; z < renderDistance; z++) {
-                    Vector3f playerPos = new Vector3f(playerPosition);
-                    playerPos.y = 0;
-                    ChunkCoord chunkCoord = ChunkCoord.toChunkCoord(Calculus.addVectors(playerPos, new Vector3f(x * Constants.CHUNK_SIZE, y * Constants.CHUNK_SIZE, z * Constants.CHUNK_SIZE)));
+                    playerPosition.y = 0;
+                    ChunkCoord chunkCoord = ChunkCoord.toChunkCoord(Calculus.addVectors(playerPosition, new Vector3f(x * Constants.CHUNK_SIZE, y * Constants.CHUNK_SIZE, z * Constants.CHUNK_SIZE)));
                     if (!chunks.containsKey(chunkCoord) && !chunkGenerationQueue.contains(chunkCoord)) {
                         chunkGenerationQueue.add(chunkCoord);
                     } else {
                         MarchingChunk chunk = chunks.get(chunkCoord);
-                        if(chunk == null || !chunk.isReady || chunk.isEmpty) continue;
-                        chunks.get(chunkCoord).setActive(true);
+                        if(chunk != null && chunk.isReady && !chunk.isEmpty) {
+                            chunk.setActive(true);
+                        }
                     }
 
                     activeChunks.add(chunkCoord);
@@ -106,17 +110,17 @@ public class TerrainGeneration extends Thread{
             }
         }
 
-        while(!previousRenderQueue.isEmpty()){
-            ChunkCoord chunkCoord = previousRenderQueue.poll();
-            if(!activeChunks.contains(chunkCoord)){
-                chunks.get(chunkCoord).setActive(false);
+
+        for(ChunkCoord coord : previousRenderQueue){
+            if(!activeChunks.contains(coord)){
+                chunks.get(coord).setActive(false);
             }
         }
 
-        while(!chunkGenerationQueue.isEmpty()){
-            ChunkCoord chunkCoord = chunkGenerationQueue.poll();
-            MarchingChunk newChunk = new MarchingChunk(chunkCoord);
-            chunks.put(chunkCoord, newChunk);
+
+        for(ChunkCoord coord : chunkGenerationQueue){
+            MarchingChunk newChunk = new MarchingChunk(coord);
+            chunks.put(coord, newChunk);
             queueChunk(newChunk);
         }
     }
@@ -129,16 +133,17 @@ public class TerrainGeneration extends Thread{
         return chunks.size();
     }
 
-    public Queue<MarchingChunk> getMarchingChunksQueue() {
+    public Set<MarchingChunk> getMarchingChunksQueue() {
         return marchingChunksQueue;
     }
 
-    public Queue<MarchingChunk> getMarchingChunkRequeue() {
+    public Set<MarchingChunk> getMarchingChunkRequeue() {
         return marchingChunkRequeue;
     }
 
     public void restockQueue(){
-        marchingChunksQueue = new ArrayDeque<>(marchingChunkRequeue);
+        marchingChunksQueue.clear();
+        marchingChunksQueue.addAll(marchingChunkRequeue);
         marchingChunkRequeue.clear();
     }
 
@@ -161,31 +166,17 @@ public class TerrainGeneration extends Thread{
     public void addSurfaceFeatures(MarchingChunk chunk) {
         if (surfaceFeatureEntity == null) return;
 
-        boolean hasSurfaceFeatures = false;
-        List<MeshMaterialSet> instanceMeshMaterialSets = null;
-        List<MeshMaterialSet> originalMeshMaterialSets = surfaceFeatureEntity.getComponent(RenderComponent.class).getMeshMaterialSets();
-
         float stepSize = (float) Constants.CHUNK_SIZE / surfaceFeatureSamples;
 
         for (int x = 0; x < surfaceFeatureSamples; x++) {
             for (int z = 0; z < surfaceFeatureSamples; z++) {
-
                 float localPositionX = (float) x * stepSize;
                 float localPositionZ = (float) z * stepSize;
-
                 float noiseLocationX = chunk.chunkPosition.x + localPositionX;
                 float noiseLocationZ = chunk.chunkPosition.z + localPositionZ;
                 float spawnChance = Utils.fastNoise.GetNoise(noiseLocationX, noiseLocationZ) + 1f / 2f;
 
                 if (spawnChance > surfaceFeatureDensity) {
-                    if (!hasSurfaceFeatures) {
-                        instanceMeshMaterialSets = new ArrayList<>(originalMeshMaterialSets.size());
-                        for (MeshMaterialSet meshMaterialSet : originalMeshMaterialSets) {
-                            instanceMeshMaterialSets.add(new MeshMaterialSet(new Mesh(meshMaterialSet.mesh), meshMaterialSet.material));
-                        }
-                        hasSurfaceFeatures = true;
-                    }
-
                     float sampleLocationX = noiseLocationX - chunk.chunkPosition.x;
                     float sampleLocationZ = noiseLocationZ - chunk.chunkPosition.z;
                     float spawnHeight = chunk.getHeightAt(sampleLocationX, sampleLocationZ);
@@ -194,24 +185,18 @@ public class TerrainGeneration extends Thread{
                     Quaternionf normalUp = new Quaternionf().rotationTo(Constants.VECTOR3_UP, chunk.getNormalAt(sampleLocationX, sampleLocationZ));
                     normalUp.rotateY(rotationY);
 
-                    chunk.addSurfaceFeature(new Vector3f(noiseLocationX, spawnHeight, noiseLocationZ), normalUp, Constants.VECTOR3_ONE);
+                    Matrix4f transform = new Matrix4f().translation(noiseLocationX, spawnHeight, noiseLocationZ)
+                            .rotate(normalUp)
+                            .scale(Constants.VECTOR3_ONE);
+
+                    surfaceFeatureRenderComponent.getMeshMaterialSets().forEach(mms -> mms.mesh.addInstanceOffset(transform));
                 }
             }
         }
+    }
 
-
-        if (!hasSurfaceFeatures) return;
-
-        GameObject surfaceFeatureInstance = new GameObject().setPosition(new Vector3f(0, 0, 0));
-        RenderComponent renderComponent = new RenderComponent(instanceMeshMaterialSets);
-
-        for (MeshMaterialSet meshMaterialSet : renderComponent.getMeshMaterialSets()) {
-            meshMaterialSet.mesh.addInstanceOffset(chunk.getSurfaceFeatureMatrices());
-            meshMaterialSet.mesh.updateInstanceVBO();
-        }
-
-        surfaceFeatureInstance.addComponent(renderComponent);
-        renderComponent.initiate();
-        surfaceFeatureInstance.setParent(chunk.chunkEntity);
+    // At the end of your frame, update the VBOs once:
+    public void updateSurfaceFeatures() {
+        surfaceFeatureRenderComponent.getMeshMaterialSets().forEach(mms -> mms.mesh.updateInstanceVBO());
     }
 }

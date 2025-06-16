@@ -8,9 +8,7 @@ import nl.jenoah.core.rendering.MeshMaterialSet;
 import org.joml.Vector2f;
 import org.joml.Vector3f;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
+import java.util.*;
 
 public class ModelManager {
     private static final HashMap<Integer, Mesh> meshes = new HashMap<>();
@@ -21,8 +19,8 @@ public class ModelManager {
         return new Model(mesh);
     }
 
-    public static List<MeshMaterialSet> loadModel(OBJObject objObject){
-        List<MeshMaterialSet> meshMaterialSets = new ArrayList<>();
+    public static Set<MeshMaterialSet> loadModel(OBJObject objObject){
+        Set<MeshMaterialSet> meshMaterialSets = new HashSet<>();
 
         objObject.getObjModels().forEach((objModel -> {
             if(objModel.getVertices().length == 0) return;

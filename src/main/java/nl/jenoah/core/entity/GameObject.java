@@ -2,6 +2,7 @@ package nl.jenoah.core.entity;
 
 import nl.jenoah.core.MouseInput;
 import nl.jenoah.core.components.Component;
+import nl.jenoah.core.components.RenderComponent;
 import nl.jenoah.core.debugging.Debug;
 import nl.jenoah.core.utils.Calculus;
 import nl.jenoah.core.utils.Constants;
@@ -76,7 +77,7 @@ public class GameObject {
         }
     }
 
-    public GameObject addPosition(Vector3f position){
+    public GameObject translateLocal(Vector3f position){
         this.localPosition = Calculus.addVectors(this.localPosition, position);
         return this;
     }
@@ -313,6 +314,12 @@ public class GameObject {
 
     public GameObject setStatic(boolean isStatic) {
         this.isStatic = isStatic;
+
+        RenderComponent renderComponent = getComponent(RenderComponent.class);
+        if(renderComponent != null){
+            renderComponent.getMeshMaterialSets().forEach((meshMaterialSet -> meshMaterialSet.mesh.setStatic(isStatic)));
+        }
+
         return this;
     }
 

@@ -1,7 +1,8 @@
 package nl.jenoah.core.loaders.OBJLoader;
 
 import java.util.ArrayList;
-import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
 
 public class OBJObject {
     private ArrayList<OBJModel> objModels = new ArrayList<>();
@@ -21,7 +22,7 @@ public class OBJObject {
 
 
     public void cleanUp(){
-        List<Integer> indicesToRemove = new ArrayList<>();
+        Set<Integer> indicesToRemove = new HashSet<>();
 
         for (int i = 0; i < objModels.size(); i++) {
             if(objModels.get(i).getFaces().isEmpty()) indicesToRemove.add(i);
