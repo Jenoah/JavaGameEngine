@@ -62,8 +62,8 @@ public class RenderManager {
         clear();
 
         //Rendering of scene
-        componentRenderer.render(currentScene.getPlayer().getCamera());
         skyboxRenderer.render(currentScene.getPlayer().getCamera());
+        componentRenderer.render(currentScene.getPlayer().getCamera());
 
         frameBuffer.unbindFrameBuffer();
 

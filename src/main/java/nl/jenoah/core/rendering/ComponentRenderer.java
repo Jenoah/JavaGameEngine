@@ -16,6 +16,7 @@ public class ComponentRenderer implements IRenderer {
 
     List<RenderComponent> renderObjects = new ArrayList<>();
     HashMap<Shader, List<MeshMaterialSet>> sortedRenderObjects = new HashMap<>();
+    HashMap<Shader, List<MeshMaterialSet>> sortedTransparentRenderObjects = new HashMap<>();
     private boolean recordMetrics = false;
     private Matrix4f shadowSpaceMatrix = new Matrix4f();
     private int shadowMapID = 0;
@@ -27,37 +28,44 @@ public class ComponentRenderer implements IRenderer {
 
     @Override
     public void render(Camera camera) {
-        if (sortedRenderObjects.isEmpty()) return;
+        if (sortedRenderObjects.isEmpty() && sortedTransparentRenderObjects.isEmpty()) return;
 
         sortedRenderObjects.forEach((renderObjectShader, meshMaterialSetList) -> {
-            if (recordMetrics) metrics.recordShaderBind();
-            renderObjectShader.bind();
-            renderObjectShader.render(camera);
-
-            meshMaterialSetList.forEach(meshMaterialSet -> {
-                if (!meshMaterialSet.getRoot().isEnabled()) return;
-                if (recordMetrics) {
-                    metrics.recordStateChange();
-                    metrics.recordVaoBind();
-                }
-                bind(meshMaterialSet);
-                prepareShadow(meshMaterialSet);
-                renderObjectShader.prepare(meshMaterialSet, camera);
-
-
-                if (recordMetrics) metrics.recordDrawCall();
-                if(meshMaterialSet.mesh.isInstanced()){
-                    GL33.glDrawElementsInstanced(GL11.GL_TRIANGLES, meshMaterialSet.mesh.getVertexCount(), GL11.GL_UNSIGNED_INT, 0, meshMaterialSet.mesh.getInstanceCount());
-                }else{
-                    GL11.glDrawElements(GL11.GL_TRIANGLES, meshMaterialSet.mesh.getVertexCount(), GL11.GL_UNSIGNED_INT, 0);
-                }
-
-                unbind();
-
-
-            });
-            renderObjectShader.unbind();
+            RenderPass(camera, renderObjectShader, meshMaterialSetList);
         });
+        sortedTransparentRenderObjects.forEach((renderObjectShader, meshMaterialSetList) -> {
+            RenderPass(camera, renderObjectShader, meshMaterialSetList);
+        });
+    }
+
+    private void RenderPass(Camera camera, Shader shader, List<MeshMaterialSet> meshMaterialSetList){
+        if (recordMetrics) metrics.recordShaderBind();
+        shader.bind();
+        shader.render(camera);
+
+        meshMaterialSetList.forEach(meshMaterialSet -> {
+            if (!meshMaterialSet.getRoot().isEnabled()) return;
+            if (recordMetrics) {
+                metrics.recordStateChange();
+                metrics.recordVaoBind();
+            }
+            bind(meshMaterialSet);
+            prepareShadow(meshMaterialSet);
+            shader.prepare(meshMaterialSet, camera);
+
+
+            if (recordMetrics) metrics.recordDrawCall();
+            if(meshMaterialSet.mesh.isInstanced()){
+                GL33.glDrawElementsInstanced(GL11.GL_TRIANGLES, meshMaterialSet.mesh.getVertexCount(), GL11.GL_UNSIGNED_INT, 0, meshMaterialSet.mesh.getInstanceCount());
+            }else{
+                GL11.glDrawElements(GL11.GL_TRIANGLES, meshMaterialSet.mesh.getVertexCount(), GL11.GL_UNSIGNED_INT, 0);
+            }
+
+            unbind();
+
+
+        });
+        shader.unbind();
     }
 
     public void bind(MeshMaterialSet meshMaterialSet) {
@@ -115,12 +123,22 @@ public class ComponentRenderer implements IRenderer {
     public void queue(RenderComponent renderComponent) {
         this.renderObjects.add(renderComponent);
         renderComponent.getMeshMaterialSets().forEach(meshMaterialSet -> {
-            if (!sortedRenderObjects.containsKey(meshMaterialSet.material.getShader())) {
-                List<MeshMaterialSet> meshMaterialSets = new ArrayList<>();
-                meshMaterialSets.add(meshMaterialSet);
-                sortedRenderObjects.put(meshMaterialSet.material.getShader(), meshMaterialSets);
-            } else {
-                sortedRenderObjects.get(meshMaterialSet.material.getShader()).add(meshMaterialSet);
+            if(meshMaterialSet.material.isTransparent()){
+                if (!sortedTransparentRenderObjects.containsKey(meshMaterialSet.material.getShader())) {
+                    List<MeshMaterialSet> meshMaterialSets = new ArrayList<>();
+                    meshMaterialSets.add(meshMaterialSet);
+                    sortedTransparentRenderObjects.put(meshMaterialSet.material.getShader(), meshMaterialSets);
+                } else {
+                    sortedTransparentRenderObjects.get(meshMaterialSet.material.getShader()).add(meshMaterialSet);
+                }
+            }else{
+                if (!sortedRenderObjects.containsKey(meshMaterialSet.material.getShader())) {
+                    List<MeshMaterialSet> meshMaterialSets = new ArrayList<>();
+                    meshMaterialSets.add(meshMaterialSet);
+                    sortedRenderObjects.put(meshMaterialSet.material.getShader(), meshMaterialSets);
+                } else {
+                    sortedRenderObjects.get(meshMaterialSet.material.getShader()).add(meshMaterialSet);
+                }
             }
         });
     }

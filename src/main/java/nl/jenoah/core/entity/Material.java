@@ -22,6 +22,7 @@ public class Material {
     private boolean isDoubleSided = false;
     private boolean castShadow = true;
     private boolean receiveShadows = true;
+    private boolean isTransparent;
 
     private Shader shader;
 
@@ -121,6 +122,11 @@ public class Material {
         return this;
     }
 
+    public Material setTransparent(boolean isTransparent){
+        this.isTransparent = isTransparent;
+        return this;
+    }
+
     //    Getters
 
     public final Vector4f getAmbientColor() {
@@ -174,6 +180,8 @@ public class Material {
     public final boolean castShadow(){ return castShadow; }
 
     public final boolean receiveShadows(){ return receiveShadows; }
+
+    public final boolean isTransparent() { return isTransparent; }
 
 //  Has Getters
 

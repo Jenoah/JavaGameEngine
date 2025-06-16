@@ -106,6 +106,7 @@ public class Level0 extends Scene {
         List<MeshMaterialSet> treeMeshMaterialSet = OBJLoader.loadOBJModel("/models/birch.obj");
         treeMeshMaterialSet.forEach((meshMaterialSet -> meshMaterialSet.mesh.generateUVs()));
         GameObject tree = new GameObject().setPosition(5, 5f, -2);
+        tree.setStatic(true);
         tree.addComponent(new RenderComponent(treeMeshMaterialSet));
 
         terrainGeneration.setSurfaceFeature(tree);

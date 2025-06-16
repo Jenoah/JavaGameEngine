@@ -84,6 +84,7 @@ public class Light extends GameObject {
     public GameObject showProxy(){
         if(proxy == null){
             Material proxyMaterial = new Material(ShaderManager.unlitShader);
+            proxyMaterial.setTransparent(true);
             proxyMaterial.setAlbedoTexture(new Texture("textures/lightDirection.png"));
             proxyMaterial.setDoubleSided(true);
             proxy = new GameObject().setRotation(new Vector3f(0f, 90f, 0f));
