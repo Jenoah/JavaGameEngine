@@ -3,6 +3,7 @@ package nl.jenoah.core.rendering;
 import nl.jenoah.core.Camera;
 import nl.jenoah.core.components.RenderComponent;
 import nl.jenoah.core.debugging.Debug;
+import nl.jenoah.core.debugging.RenderMetrics;
 import nl.jenoah.core.entity.GameObject;
 import nl.jenoah.core.entity.Scene;
 import nl.jenoah.core.shaders.ShadowShader;
@@ -23,6 +24,8 @@ public class ShadowRenderer implements IRenderer{
     private ShadowShader shadowShader;
     private ShadowFrameBuffer shadowFrameBuffer;
     private ShadowFrustum shadowFrustum;
+    private RenderMetrics metrics;
+    private boolean recordMetrics = false;
 
     private Matrix4f lightViewMatrix = new Matrix4f();
     private Matrix4f projectionMatrix = new Matrix4f();
@@ -49,6 +52,7 @@ public class ShadowRenderer implements IRenderer{
 
         prepare(currentScene.getDirectionalLight().getForward(), shadowFrustum);
 
+        if (recordMetrics) metrics.recordShaderBind();
         shadowShader.bind();
 
         GL11.glEnable(GL11.GL_DEPTH_TEST);
@@ -58,11 +62,16 @@ public class ShadowRenderer implements IRenderer{
 
         shadowSets.forEach((meshMaterialSet) -> {
             if (!meshMaterialSet.getRoot().isEnabled()) return;
+            if (recordMetrics) {
+                metrics.recordStateChange();
+                metrics.recordVaoBind();
+            }
 
             bind(meshMaterialSet);
 
             shadowShader.prepare(meshMaterialSet, projectionViewMatrix);
 
+            if (recordMetrics) metrics.recordDrawCall();
             if(meshMaterialSet.mesh.isInstanced()){
                 GL33.glDrawElementsInstanced(GL11.GL_TRIANGLES, meshMaterialSet.mesh.getVertexCount(), GL11.GL_UNSIGNED_INT, 0, meshMaterialSet.mesh.getInstanceCount());
             }else{
@@ -160,5 +169,14 @@ public class ShadowRenderer implements IRenderer{
         return new Matrix4f()
                 .translate(0.5f, 0.5f, 0.5f)
                 .scale(0.5f, 0.5f, 0.5f);
+    }
+
+    public void setMetrics(RenderMetrics metrics){
+        this.metrics = metrics;
+        recordMetrics = true;
+    }
+
+    public void recordMetrics(boolean recordMetrics) {
+        this.recordMetrics = recordMetrics;
     }
 }

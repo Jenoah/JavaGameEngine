@@ -1,6 +1,7 @@
 package nl.jenoah.core.rendering;
 
 import nl.jenoah.core.components.RenderComponent;
+import nl.jenoah.core.debugging.RenderMetrics;
 import nl.jenoah.core.fonts.fontRendering.FontRenderer;
 import nl.jenoah.core.gui.GuiRenderer;
 import nl.jenoah.core.WindowManager;
@@ -18,9 +19,12 @@ public class RenderManager {
     private FontRenderer fontRenderer;
     private FrameBuffer frameBuffer;
     private SkyboxRenderer skyboxRenderer;
+    private final RenderMetrics metrics;
+    private boolean recordMetrics = false;
 
     public RenderManager() {
         window = WindowManager.getInstance();
+        metrics = new RenderMetrics();
     }
 
     public void init() throws Exception {
@@ -40,6 +44,7 @@ public class RenderManager {
 
     public void render(Scene currentScene){
         clear();
+        if (recordMetrics) metrics.frameStart();
 
         if(window.isResize()){
             glViewport(0, 0, window.getWidth(), window.getHeight());
@@ -69,6 +74,8 @@ public class RenderManager {
         //Overlay
         guiRenderer.render(currentScene.getGuiObjects());
         fontRenderer.render(currentScene.getTextObjects());
+
+        if (recordMetrics) metrics.frameEnd();
     }
 
     public void clear(){
@@ -99,7 +106,13 @@ public class RenderManager {
     }
 
     public void recordMetrics(boolean recordState){
-        componentRenderer.recordMetrics(recordState);
+        this.recordMetrics = recordState;
+        if(recordMetrics){
+            componentRenderer.setMetrics(this.metrics);
+            shadowRenderer.setMetrics(this.metrics);
+        }
+        componentRenderer.recordMetrics(recordMetrics);
+        shadowRenderer.recordMetrics(recordMetrics);
     }
 
     public String getMetrics(){

@@ -16,19 +16,17 @@ public class ComponentRenderer implements IRenderer {
 
     List<RenderComponent> renderObjects = new ArrayList<>();
     HashMap<Shader, List<MeshMaterialSet>> sortedRenderObjects = new HashMap<>();
-    private final RenderMetrics metrics = new RenderMetrics();
     private boolean recordMetrics = false;
     private Matrix4f shadowSpaceMatrix = new Matrix4f();
     private int shadowMapID = 0;
+    private RenderMetrics metrics;
+
 
     @Override
-    public void init() throws Exception {
-
-    }
+    public void init() throws Exception {  }
 
     @Override
     public void render(Camera camera) {
-        if (recordMetrics) metrics.frameStart();
         if (sortedRenderObjects.isEmpty()) return;
 
         sortedRenderObjects.forEach((renderObjectShader, meshMaterialSetList) -> {
@@ -60,8 +58,6 @@ public class ComponentRenderer implements IRenderer {
             });
             renderObjectShader.unbind();
         });
-
-        if (recordMetrics) metrics.frameEnd();
     }
 
     public void bind(MeshMaterialSet meshMaterialSet) {
@@ -147,5 +143,10 @@ public class ComponentRenderer implements IRenderer {
 
     public void setShadowMapID(int shadowMapID){
         this.shadowMapID = shadowMapID;
+    }
+
+    public void setMetrics(RenderMetrics metrics){
+        this.metrics = metrics;
+        recordMetrics = true;
     }
 }
