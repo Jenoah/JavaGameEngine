@@ -8,8 +8,6 @@ import org.joml.Vector4f;
 
 public class GuiShader extends Shader {
 
-    private Vector4f color = new Vector4f(1f);
-
     public GuiShader() throws Exception {
         super();
     }
@@ -31,11 +29,7 @@ public class GuiShader extends Shader {
     public void prepare(GuiObject guiObject) {
         Matrix4f modelMatrix = Transformation.getModelMatrix(guiObject);
         setUniform("modelMatrix", modelMatrix);
-        setUniform("uiColor", color);
+        setUniform("uiColor", guiObject.getColor());
         setUniform("hasTexture", guiObject.getTexture() == -1 ? 0 : 1);
-    }
-
-    public void setColor(Vector4f color){
-        this.color = color;
     }
 }

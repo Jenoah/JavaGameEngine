@@ -40,7 +40,6 @@ public class GuiRenderer {
 
         for (GuiObject gui: guiObjects) {
             shader.prepare(gui);
-            shader.setColor(gui.getColor());
             if(gui.getTexture() != -1) {
                 GL13.glActiveTexture(GL13.GL_TEXTURE0);
                 GL11.glBindTexture(GL11.GL_TEXTURE_2D, gui.getTexture());
