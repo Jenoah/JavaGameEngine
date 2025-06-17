@@ -9,124 +9,175 @@ import org.lwjgl.glfw.GLFWErrorCallback;
 import static org.lwjgl.glfw.GLFW.glfwGetTime;
 
 public class EngineManager {
-    private boolean isRunning;
+    private boolean running = false;
 
     private WindowManager window;
     private GLFWErrorCallback errorCallback;
     private ILogic gameLogic;
     private MouseInput mouseInput;
 
-    private static double lastLoopTime = 0;
-    private static float timeCount = 0;
-    private static int fps;
-    public static int fpsCount;
-    private int ups;
-    private int upsCount;
-    private static float deltaTime;
+    private static double lastLoopTime = 0.0;
+    private static float timeAccumulator = 0.0f;
+    private static int fps = 0;
+    public static int frameCount = 0;
+    private static float deltaTime = 0.0f;
+    private static float frameTime = 0.0f;
+    private static float spareTime = 0.0f;
 
-    private void init(ILogic gameLogic) throws Exception{
-        GLFW.glfwSetErrorCallback(errorCallback = GLFWErrorCallback.createPrint(System.err));
-        window =  WindowManager.getInstance();
+    /**
+     * Initializes the engine and all subsystems.
+     */
+    private void init(final ILogic gameLogic) throws Exception {
+        errorCallback = GLFWErrorCallback.createPrint(System.err);
+        GLFW.glfwSetErrorCallback(errorCallback);
+
+        window = WindowManager.getInstance();
         this.gameLogic = gameLogic;
         mouseInput = new MouseInput();
+
         window.init();
         gameLogic.init();
         mouseInput.init();
         SceneManager.getInstance().getCurrentScene().postStart();
-        lastLoopTime = getTime();
+
+        lastLoopTime = getCurrentTime();
     }
 
-    public void start(ILogic gameLogic) throws Exception{
+    /**
+     * Starts the engine loop.
+     */
+    public void start(final ILogic gameLogic) throws Exception {
+        if (running) return;
         init(gameLogic);
-        if(isRunning)
-            return;
         Debug.Log("Starting Engine...");
         run();
     }
 
-    public void run(){
-        isRunning = true;
-        while(isRunning){
-            if(window.windowShouldClose()) stop();
+    /**
+     * The main engine loop.
+     */
+    public void run() {
+        running = true;
+        try {
+            while (running) {
+                if (window.windowShouldClose()) stop();
 
-            setDeltaTime();
-            deltaTime = getDeltaTime();
-            input();
-            update(deltaTime);
-            render();
+                double frameStart = getCurrentTime();
+
+                updateDeltaTime();
+                handleInput();
+                updateGame();
+                renderFrame();
+
+                double frameEnd = getCurrentTime();
+                frameTime = (float)(frameEnd - frameStart);
+                spareTime = getDeltaTime() - frameTime;
+            }
+        } finally {
+            cleanup();
         }
-        cleanUp();
     }
 
-    private void stop(){
-        if(!isRunning)
-            return;
-        isRunning = false;
+    /**
+     * Stops the engine loop.
+     */
+    public void stop() {
+        running = false;
     }
 
-    private void input(){
+    /**
+     * Handles user input.
+     */
+    private void handleInput() {
         mouseInput.input();
         gameLogic.input();
     }
 
-    private void render(){
+    /**
+     * Updates game logic and FPS counter.
+     */
+    private void updateGame() {
+        gameLogic.update(deltaTime, mouseInput);
+
+        frameCount++;
+        timeAccumulator += deltaTime;
+
+        if (timeAccumulator >= 1.0f) {
+            fps = frameCount;
+            frameCount = 0;
+            timeAccumulator -= 1.0f;
+        }
+    }
+
+    /**
+     * Renders a frame.
+     */
+    private void renderFrame() {
         gameLogic.render();
         window.update();
     }
 
-    private void update(float interval){
-        gameLogic.update(interval, mouseInput);
-        if (timeCount > 1f) {
-            fps = fpsCount;
-            fpsCount = 0;
-
-            ups = upsCount;
-            upsCount = 0;
-
-            timeCount -= 1f;
-        }
-        updateFPS();
-        updateUPS();
-    }
-
-    public void cleanUp(){
+    /**
+     * Cleans up resources.
+     */
+    private void cleanup() {
         window.cleanUp();
         gameLogic.cleanUp();
-        errorCallback.free();
+        if (errorCallback != null) errorCallback.free();
         GLFW.glfwTerminate();
     }
 
+    /**
+     * @return the most recent FPS value.
+     */
     public static int getFps() {
-        return Math.round(1f / deltaTime);
+        return fps;
     }
 
-    public static double getTime() {
-        return glfwGetTime();
+    /**
+     * @return the current time in seconds.
+     */
+    public static double getCurrentTime() {
+        return GLFW.glfwGetTime();
     }
 
-    private void setDeltaTime() {
-        double time = getTime();
-        float delta = (float) (time - lastLoopTime);
-        lastLoopTime = time;
-        timeCount += delta;
-        deltaTime = delta;
+    /**
+     * Updates deltaTime for the current frame.
+     */
+    private void updateDeltaTime() {
+        final double currentTime = getCurrentTime();
+        deltaTime = (float) (currentTime - lastLoopTime);
+        lastLoopTime = currentTime;
     }
 
-    public static float getDeltaTime(){
+    /**
+     * @return deltaTime in seconds.
+     */
+    public static float getDeltaTime() {
         return deltaTime;
     }
 
-    public static float getDeltaTimeMS(){
-        float ms = deltaTime * 1000;
-        //(int)(ms * 100f) / 100f truncates the deltatime to two decimals without using a costly String.format("%.2f", ms)
-        return (int)(ms * 100f) / 100f;
+    /**
+     * @return deltaTime in milliseconds, rounded to two decimals.
+     */
+    public static float getDeltaTimeMS() {
+        return Math.round(deltaTime * 100000f) / 100f;
     }
 
-    private void updateFPS() {
-        fpsCount++;
+    /**
+     * @return The time in seconds it took to process the last frame (excluding waiting).
+     */
+    public static float getFrameTime() {
+        return frameTime;
     }
 
-    private void updateUPS() {
-        upsCount++;
+    /**
+     * @return The time in milliseconds it took to process the last frame (rounded to 2 decimals).
+     */
+    public static float getFrameTimeMS() {
+        return Math.round(frameTime * 100000f) / 100f;
     }
+
+    public static float getSpareTime() { return spareTime; }
+    public static float getSpareTimeMS() { return Math.round(spareTime * 100000f) / 100f; }
 }

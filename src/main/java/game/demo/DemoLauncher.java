@@ -13,7 +13,8 @@ public class DemoLauncher {
     public static void main(String[] args){
         System.out.println(Version.getVersion());
 
-        window = new WindowManager(Constants.TITLE, 1280, 720, Settings.isUseVSync());
+        WindowManager.createInstance(Constants.TITLE, 1280, 720, Settings.isUseVSync());
+        window = WindowManager.getInstance();
         game = new DemoGame();
         EngineManager engine = new EngineManager();
 

@@ -213,7 +213,7 @@ public class Level0 extends Scene {
         fpsLabel.setText("FPS: " + EngineManager.getFps());
         positionLabel.setText("Position: " + Conversion.V3ToString(player.getPosition()));
         resolutionLabel.setText("Resolution: " + windowManager.getWidth() + " x " + windowManager.getHeight());
-        performanceLabel.setText("Performance: " + renderManager.getMetrics() + " |\nLoop time: " + EngineManager.getDeltaTimeMS() + "ms");
+        performanceLabel.setText("Performance: " + renderManager.getMetrics() + " |\nFrame time: " + EngineManager.getFrameTimeMS() + "ms");
         chunkLabel.setText("Active / total chunks: " + terrainGeneration.getActiveChunkCount() + " / " + terrainGeneration.getTotalChunkCount());
         updateTerrain();
     }
