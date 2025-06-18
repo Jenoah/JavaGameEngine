@@ -47,7 +47,6 @@ public class MarchingChunk {
         if(!vertices.isEmpty()) {
             normals = calculateNormals();
             isReady = true;
-            //publishChunk();
         }else{
             isEmpty = true;
             isReady = true;
@@ -102,13 +101,10 @@ public class MarchingChunk {
 
                 if (ChunkUtils.smoothTerrain) {
                     float difference = getVertexDifference(voxelCorners, indice);
-                    vertexPosition = Calculus.subtractVectors(vertex2, vertex1);
-                    vertexPosition = Calculus.multiplyVector(vertexPosition, difference);
-                    vertexPosition = Calculus.addVectors(vertex1, vertexPosition);
+                    vertexPosition = new Vector3f(vertex2).sub(vertex1).mul(difference).add(vertex1);
                     triangles.add(VertForIndex(vertexPosition));
                 } else {
-                    vertexPosition = Calculus.addVectors(vertex1, vertex2);
-                    vertexPosition = Calculus.multiplyVector(vertexPosition, 0.5f);
+                    vertexPosition = new Vector3f(vertex1).add(vertex2).mul(0.5f);
                     vertices.add(new Vector3f(vertexPosition));
                     triangles.add(vertices.size() - 1);
                 }
@@ -147,15 +143,7 @@ public class MarchingChunk {
         float vertex2Sample = voxelCorners[Constants.edgeIndexes[index][1]];
 
         float difference = vertex2Sample - vertex1Sample;
-        if (difference == 0f)
-        {
-            difference = ChunkUtils.terrainSurfaceHeight;
-        }
-        else
-        {
-            difference = (ChunkUtils.terrainSurfaceHeight - vertex1Sample) / difference;
-        }
-        return difference;
+        return difference == 0f ? ChunkUtils.terrainSurfaceHeight : (ChunkUtils.terrainSurfaceHeight - vertex1Sample) / difference;
     }
 
     private Vector3f[] calculateNormals() {
@@ -186,8 +174,7 @@ public class MarchingChunk {
         return normals;
     }
 
-    private int VertForIndex(Vector3f vert)
-    {
+    private int VertForIndex(Vector3f vert) {
         for (int i = 0; i < vertices.size(); i++)
         {
             if (vertices.get(i) == vert) return i;
@@ -196,12 +183,9 @@ public class MarchingChunk {
         return vertices.size() - 1;
     }
 
-    public GameObject getChunkEntity(){
-        return chunkEntity;
-    }
+    public GameObject getChunkEntity(){ return chunkEntity; }
 
     private float getScalar(int x, int y, int z) {
-
         float heightSample = ChunkUtils.SampleHeight(chunkPosition.x + x, chunkPosition.z + z) - chunkPosition.y;
         return y - heightSample;
     }
@@ -229,7 +213,7 @@ public class MarchingChunk {
                 2.0f
         );
 
-        return Calculus.cross(tangentZ, tangentX).normalize();
+        return tangentZ.cross(tangentX).normalize();
     }
 
     public void setActive(boolean active){
