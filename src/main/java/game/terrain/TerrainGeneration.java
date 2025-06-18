@@ -13,7 +13,7 @@ import org.joml.Vector3f;
 
 import java.util.*;
 
-public class TerrainGeneration extends Thread{
+public class TerrainGeneration implements Runnable{
     private HashMap<ChunkCoord, MarchingChunk> chunks = new HashMap<ChunkCoord, MarchingChunk>();
     private final Set<ChunkCoord> chunkGenerationQueue;
     private final Set<ChunkCoord> previousRenderQueue;
@@ -27,7 +27,7 @@ public class TerrainGeneration extends Thread{
     private ChunkCoord previousPlayerChunkCoord;
     private boolean canUpdate = false;
     private boolean isRunning = false;
-    public static long waitTime = 300;
+    public static long waitTime = 500;
     private Vector3f playerPosition = new Vector3f(0);
 
     private float surfaceFeatureDensity = .4f;
@@ -51,19 +51,17 @@ public class TerrainGeneration extends Thread{
 
         this.isRunning = true;
 
-        synchronized (this) {
             while (isRunning) {
                 try {
                     if (this.canUpdate) {
                         updateChunks();
-                        canUpdate = false;
+                        this.canUpdate = false;
                     }
                     this.wait(waitTime);
                 } catch (InterruptedException e) {
                     Debug.Log("STOPPING THREAD: " + e);
                     isRunning = false;
                 }
-            }
         }
     }
 

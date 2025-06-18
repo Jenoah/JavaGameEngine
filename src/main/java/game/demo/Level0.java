@@ -52,6 +52,7 @@ public class Level0 extends Scene {
     private final int maxChunksPerFrame = 10;
 
     private TerrainGeneration terrainGeneration;
+    private Thread terrainGenerationThread;
     Set<MarchingChunk> marchingQueue = new HashSet<>();
 
     @Override public void init() {
@@ -60,11 +61,14 @@ public class Level0 extends Scene {
         renderManager = DemoLauncher.getGame().getRenderer();
 
         terrainGeneration = new TerrainGeneration(renderDistance);
+        terrainGenerationThread = new Thread(terrainGeneration);
+        terrainGenerationThread.setDaemon(true);
         terrainGeneration.setSurfaceFeatureDensity(0.7f);
         terrainGeneration.setSurfaceFeatureSamples(8);
 
         Utils.setNoiseSeed(123);
         player.setPosition(0, 6.5f, 0);
+        renderManager.setRenderCamera(player.getCamera());
 
         setFogColor(new Vector3f(0.7f, 0.75f, .8f));
         setFogDensity(.025f);
@@ -197,7 +201,7 @@ public class Level0 extends Scene {
     @Override
     public void postStart() {
         super.postStart();
-        terrainGeneration.start();
+        terrainGenerationThread.start();
         terrainGeneration.setUpdatePosition(player.getPosition());
         renderManager.shadowRenderer.setMainCamera(player.getCamera());
     }
