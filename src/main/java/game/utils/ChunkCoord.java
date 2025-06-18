@@ -39,7 +39,7 @@ public class ChunkCoord{
 
     public static boolean compareToVector(ChunkCoord a, Vector3f b){
 
-        int x = fastfloor((int)b.x / (float) Constants.CHUNK_SIZE) * Constants.CHUNK_SIZE;
+        int x = fastfloor((int)b.x / (float)Constants.CHUNK_SIZE) * Constants.CHUNK_SIZE;
         int y = fastfloor((int)b.y / (float)Constants.CHUNK_SIZE) * Constants.CHUNK_SIZE;
         int z = fastfloor((int)b.z / (float)Constants.CHUNK_SIZE) * Constants.CHUNK_SIZE;
 
