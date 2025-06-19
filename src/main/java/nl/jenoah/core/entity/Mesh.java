@@ -1,14 +1,12 @@
 package nl.jenoah.core.entity;
 
-import nl.jenoah.core.EngineManager;
 import nl.jenoah.core.debugging.Debug;
-import nl.jenoah.core.utils.Calculus;
-import nl.jenoah.core.utils.Conversion;
-import nl.jenoah.core.utils.Utils;
+import nl.jenoah.core.utils.*;
 import org.joml.Matrix4f;
 import org.joml.Vector2f;
 import org.joml.Vector3f;
 import org.lwjgl.opengl.*;
+import org.lwjgl.system.MemoryStack;
 import org.lwjgl.system.MemoryUtil;
 
 import java.nio.FloatBuffer;
@@ -46,7 +44,7 @@ public class Mesh {
         float[] uvFloatArray = mesh.uvs != null ? Conversion.toFloatArray(mesh.uvs) : null;
         float[] normalFloatArray = mesh.normals != null ? Conversion.toFloatArray(mesh.normals) : null;
 
-        load(verticesStripped, uvFloatArray, mesh.triangles, normalFloatArray);
+        load(verticesStripped, uvFloatArray, mesh.triangles, normalFloatArray, mesh.vertices);
     }
 
     public Mesh(Vector3f[] vertices){
@@ -54,7 +52,7 @@ public class Mesh {
 
         float[] verticesStripped = Conversion.toFloatArray(vertices);
 
-        load(verticesStripped, null, null, null);
+        load(verticesStripped, null, null, null, vertices);
     }
     public Mesh(Vector2f[] vertices){
         Vector3f[] vertices3D = new Vector3f[vertices.length];
@@ -65,7 +63,7 @@ public class Mesh {
 
         float[] verticesStripped = Conversion.toFloatArray(vertices3D);
 
-        load(verticesStripped, null, null, null);
+        load(verticesStripped, null, null, null, vertices3D);
     }
     public Mesh(Vector3f[] vertices, int[] triangles){
         this.vertices = vertices;
@@ -73,7 +71,7 @@ public class Mesh {
 
         float[] verticesStripped = Conversion.toFloatArray(vertices);
 
-        load(verticesStripped, null, triangles, null);
+        load(verticesStripped, null, triangles, null, vertices);
     }
     public Mesh(Vector3f[] vertices, Vector2f[] uvs, int[] triangles){
         this.vertices = vertices;
@@ -83,9 +81,8 @@ public class Mesh {
         float[] verticesStripped = Conversion.toFloatArray(vertices);
         float[] uvFloatArray = Conversion.toFloatArray(uvs);
 
-        load(verticesStripped, uvFloatArray, triangles, null);
+        load(verticesStripped, uvFloatArray, triangles, null, vertices);
     }
-
     public Mesh(Vector3f[] vertices, Vector3f[] normals, int[] triangles){
         this.vertices = vertices;
         this.normals = normals;
@@ -94,15 +91,14 @@ public class Mesh {
         float[] verticesStripped = Conversion.toFloatArray(vertices);
         float[] normalsFloatArray = Conversion.toFloatArray(normals);
 
-        load(verticesStripped, normalsFloatArray, triangles, null);
+        load(verticesStripped, normalsFloatArray, triangles, null, vertices);
     }
-
     public Mesh(Vector3f[] vertices, Vector2f[] uvs, int[] triangles, Vector3f[] normals){
         float[] verticesStripped = Conversion.toFloatArray(vertices);
         float[] uvFloatArray = uvs != null ? Conversion.toFloatArray(uvs) : null;
         float[] normalFloatArray = normals != null ? Conversion.toFloatArray(normals) : null;
 
-        load(verticesStripped, uvFloatArray, triangles, normalFloatArray);
+        load(verticesStripped, uvFloatArray, triangles, normalFloatArray, vertices);
     }
 
     public Mesh(float[] vertices, float[] uvs, int dimensions){
@@ -115,6 +111,9 @@ public class Mesh {
     }
 
     private void load(float[] vertexFloatArray, float[] uvFloatArray, int[] triangleArray, float[] normals){
+        load(vertexFloatArray, uvFloatArray, triangleArray, normals, null);
+    }
+    private void load(float[] vertexFloatArray, float[] uvFloatArray, int[] triangleArray, float[] normals, Vector3f[] vertexArray){
         vaoID = GL30.glGenVertexArrays();
         GL30.glBindVertexArray(vaoID);
 
@@ -127,7 +126,10 @@ public class Mesh {
         if(vertexFloatArray != null){
             vertexVBOID = storeDataInAttributeList(0, this.dimension, vertexFloatArray);
             if(this.vertices == null) {
-                if(this.dimension == 3) this.vertices = Conversion.floatArrayToVector3Array(vertexFloatArray);
+                if(this.dimension == 3){
+                    if(vertexArray == null) vertexArray = Conversion.floatArrayToVector3Array(vertexFloatArray);
+                    this.vertices = vertexArray;
+                }
             }
             vertexCount = vertexFloatArray.length;
         }
@@ -146,7 +148,6 @@ public class Mesh {
             }
         }
 
-
         if(uvs != null && uvs.length > 0 && triangles != null && vertices != null){
             calculateTangents();
         }
@@ -158,8 +159,12 @@ public class Mesh {
         int vbo = GL15.glGenBuffers();
         vbos.add(vbo);
         GL30.glBindBuffer(GL30.GL_ELEMENT_ARRAY_BUFFER, vbo);
-        IntBuffer buffer = Utils.storeDataInIntBuffer(triangles);
-        GL30.glBufferData(GL30.GL_ELEMENT_ARRAY_BUFFER, buffer, GL30.GL_STATIC_DRAW);
+        try (MemoryStack stack = MemoryStack.stackPush()) {
+            IntBuffer buffer = stack.mallocInt(triangles.length);
+            buffer.put(triangles);
+            buffer.flip();
+            GL30.glBufferData(GL30.GL_ELEMENT_ARRAY_BUFFER, buffer, GL30.GL_STATIC_DRAW);
+        }
         return vbo;
     }
 
@@ -167,9 +172,13 @@ public class Mesh {
         int vbo = GL15.glGenBuffers();
         vbos.add(vbo);
         GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, vbo);
-        FloatBuffer buffer = Utils.storeDataInFloatBuffer(data);
-        GL15.glBufferData(GL15.GL_ARRAY_BUFFER, buffer, GL15.GL_STATIC_DRAW);
-        GL20.glVertexAttribPointer(attributeNumber, vertexCount, GL11.GL_FLOAT, false, 0, 0);
+        try (MemoryStack stack = MemoryStack.stackPush()) {
+            FloatBuffer buffer = stack.mallocFloat(data.length);
+            buffer.put(data);
+            buffer.flip();
+            GL15.glBufferData(GL15.GL_ARRAY_BUFFER, buffer, GL15.GL_STATIC_DRAW);
+            GL20.glVertexAttribPointer(attributeNumber, vertexCount, GL11.GL_FLOAT, false, 0, 0);
+        }
         GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, 0);
         return vbo;
     }
@@ -184,7 +193,7 @@ public class Mesh {
         int triangleCount = triangles.length / 3;
         normals = new Vector3f[vertices.length];
         for (int i = 0; i < normals.length; i++) {
-            normals[i] = new Vector3f(0, 0, 0);
+            normals[i] = ObjectPool.VECTOR3F_POOL.obtain().set(0,0,0);
         }
 
         for (int i = 0; i < triangleCount; i++) {
@@ -204,6 +213,7 @@ public class Mesh {
 
         for (Vector3f normal : normals) {
             normal.normalize();
+            ObjectPool.VECTOR3F_POOL.free(normal);
         }
 
         return this;
@@ -214,8 +224,8 @@ public class Mesh {
         Vector3f[] tangents = new Vector3f[vertices.length];
         Vector3f[] bitangents = new Vector3f[vertices.length];
         for (int i = 0; i < vertices.length; i++) {
-            tangents[i] = new Vector3f(0, 0, 0);
-            bitangents[i] = new Vector3f(0, 0, 0);
+            tangents[i] = ObjectPool.VECTOR3F_POOL.obtain().set(0,0,0);
+            bitangents[i] = ObjectPool.VECTOR3F_POOL.obtain().set(0,0,0);;
         }
 
         int triangleCount = triangles.length / 3;
@@ -278,6 +288,11 @@ public class Mesh {
         float[] tangentFloatArray = Conversion.toFloatArray(tangents);
         float[] bitangentFloatArray = Conversion.toFloatArray(bitangents);
 
+        for (int i = 0; i < vertices.length; i++) {
+            ObjectPool.VECTOR3F_POOL.free(tangents[i]);
+            ObjectPool.VECTOR3F_POOL.free(bitangents[i]);
+        }
+
 // Tangents
         if (tangentsVBOID == -1) {
             GL30.glBindVertexArray(vaoID);
@@ -304,7 +319,6 @@ public class Mesh {
             GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, 0);
         }
 
-
         return this;
     }
 
@@ -314,9 +328,9 @@ public class Mesh {
         for (int i = 0; i < triangles.length - 2; i += 3) {
             Vector3f norm = new Vector3f(normals[triangles[i]]); // This may also need fixing, see below
 
-            float dotX = Math.abs(norm.dot(new Vector3f(1, 0, 0)));
-            float dotY = Math.abs(norm.dot(new Vector3f(0, 1, 0)));
-            float dotZ = Math.abs(norm.dot(new Vector3f(0, 0, 1)));
+            float dotX = Math.abs(norm.dot(Constants.VECTOR3_RIGHT));
+            float dotY = Math.abs(norm.dot(Constants.VECTOR3_UP));
+            float dotZ = Math.abs(norm.dot(Constants.VECTOR3_BACK));
 
             for (int j = 0; j < 3; j++) {
                 int triangleIndex = triangles[i + j];
@@ -339,8 +353,14 @@ public class Mesh {
             unbind();
         }else {
             GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, uvVBOID);
-            FloatBuffer buffer = Utils.storeDataInFloatBuffer(uvFloatArray);
-            GL15.glBufferData(GL15.GL_ARRAY_BUFFER, buffer, GL15.GL_STATIC_DRAW);
+
+            try (MemoryStack stack = MemoryStack.stackPush()) {
+                FloatBuffer buffer = stack.mallocFloat(uvFloatArray.length);
+                buffer.put(uvFloatArray);
+                buffer.flip();
+                GL15.glBufferData(GL15.GL_ARRAY_BUFFER, buffer, GL15.GL_STATIC_DRAW);
+            }
+
             GL20.glVertexAttribPointer(1, vertexCount, GL11.GL_FLOAT, false, 0, 0);
             GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, 0);
         }
@@ -370,7 +390,6 @@ public class Mesh {
 
         this.uvs = Conversion.floatArrayToVector2Array(updatedUVs);
     }
-
 
     public void setNormals(Vector3f[] normals){
         this.normals = normals;
@@ -454,9 +473,7 @@ public class Mesh {
 
     public void addInstanceOffset(Matrix4f offset){
         isInstanced = true;
-        if(instanceOffsets.size() == 0) instanceOffsets.add(new Matrix4f().identity());
         instanceOffsets.add(offset);
-
     }
 
     public void addInstanceOffset(Set<Matrix4f> offset){
@@ -472,9 +489,11 @@ public class Mesh {
     public void updateInstanceVBO() {
         int instanceCount = instanceOffsets.size();
 
-        if (instanceBuffer == null || instanceBuffer.capacity() < instanceOffsets.size() * 16) {
+        if (instanceBuffer == null || instanceBuffer.capacity() < instanceCount * 16) {
             if (instanceBuffer != null) MemoryUtil.memFree(instanceBuffer);
-            instanceBuffer = MemoryUtil.memAllocFloat(instanceOffsets.size() * 16);
+            // Grow by 1.5x or a fixed margin to reduce realloc frequency
+            int newCapacity = Math.max(instanceCount * 16, instanceBuffer != null ? (int)(instanceBuffer.capacity() * 1.5f) : 0);
+            instanceBuffer = MemoryUtil.memAllocFloat(newCapacity);
         } else {
             instanceBuffer.clear();
         }

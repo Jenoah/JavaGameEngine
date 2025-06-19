@@ -4,25 +4,27 @@ import nl.jenoah.core.MouseInput;
 import nl.jenoah.core.components.Component;
 import nl.jenoah.core.components.RenderComponent;
 import nl.jenoah.core.debugging.Debug;
-import nl.jenoah.core.utils.Calculus;
 import nl.jenoah.core.utils.Constants;
+import nl.jenoah.core.utils.ObjectPool;
 import org.joml.*;
 import org.joml.Math;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 public class GameObject {
-    private Vector3f localPosition = new Vector3f();
-    private Quaternionf localRotation = new Quaternionf();
-    private Vector3f scale = new Vector3f(1f);
+    private final Vector3f localPosition = new Vector3f();
+    private final Quaternionf localRotation = new Quaternionf();
+    private final Vector3f scale = new Vector3f(1f);
 
-    private List<GameObject> children;
+    private final List<GameObject> children;
     private GameObject parent;
     protected boolean isEnabled = true;
     protected boolean isStatic = false;
 
-    private final List<Component> components = new ArrayList<>();
+    private final Set<Component> components = new HashSet<>();
 
     public GameObject() {
         this.children = new ArrayList<>();
@@ -49,17 +51,17 @@ public class GameObject {
     }
 
     public GameObject setPosition(Vector3f position) {
-        this.localPosition = position;
+        this.localPosition.set(position);
         return this;
     }
 
     public GameObject setPosition(float x, float y) {
-        this.localPosition = new Vector3f(x, y, 0);
+        this.localPosition.set(x, y, 0);
         return this;
     }
 
     public GameObject setPosition(float x, float y, float z) {
-        this.localPosition = new Vector3f(x, y, z);
+        this.localPosition.set(x, y, z);
         return this;
     }
 
@@ -70,15 +72,16 @@ public class GameObject {
             Vector3f parentWorldPos = parent.getPosition();
             Quaternionf parentWorldRot = parent.getRotation();
 
-            Vector3f relativePos = new Vector3f(worldPosition).sub(parentWorldPos);
+            Vector3f relativePos = ObjectPool.VECTOR3F_POOL.obtain().set(worldPosition).sub(parentWorldPos);
             relativePos.rotate(parentWorldRot.conjugate()); // inverse rotate to get local position
 
             setPosition(relativePos);
+            ObjectPool.VECTOR3F_POOL.free(relativePos);
         }
     }
 
     public GameObject translateLocal(Vector3f position){
-        this.localPosition = Calculus.addVectors(this.localPosition, position);
+        this.localPosition.add(position);
         return this;
     }
 
@@ -93,27 +96,19 @@ public class GameObject {
     public Vector3f getEulerAngles(){
         Vector3f eulerAngles = new Vector3f();
         getRotation().getEulerAnglesXYZ(eulerAngles);
-
-        eulerAngles.x = (float) Math.toDegrees(eulerAngles.x);
-        eulerAngles.y = (float) Math.toDegrees(eulerAngles.y);
-        eulerAngles.z = (float) Math.toDegrees(eulerAngles.z);
-
+        eulerAngles.mul((float) Math.toDegrees(1));
         return eulerAngles;
     }
 
     public Vector3f getLocalEulerAngles(){
         Vector3f eulerAngles = new Vector3f();
         localRotation.getEulerAnglesXYZ(eulerAngles);
-
-        eulerAngles.x = (float) Math.toDegrees(eulerAngles.x);
-        eulerAngles.y = (float) Math.toDegrees(eulerAngles.y);
-        eulerAngles.z = (float) Math.toDegrees(eulerAngles.z);
-
+        eulerAngles.mul((float) Math.toDegrees(1));
         return eulerAngles;
     }
 
     public Quaternionf getLocalRotation(){
-        return  localRotation;
+        return new Quaternionf(localRotation);
     }
 
     public Vector3f getForward(){
@@ -129,7 +124,7 @@ public class GameObject {
     }
 
     public GameObject setRotation(Quaternionf rotation){
-        this.localRotation = rotation;
+        this.localRotation.set(rotation);
         return this;
     }
 
@@ -140,33 +135,30 @@ public class GameObject {
             Quaternionf parentWorldRot = parent.getRotation();
             Quaternionf inverseParentRot = parentWorldRot.conjugate();
 
-            Quaternionf localRot = new Quaternionf(inverseParentRot).mul(worldRotation);
+            Quaternionf localRot = ObjectPool.QUATERNIONF_OBJECT_POOL.obtain().set(inverseParentRot).mul(worldRotation);
             setRotation(localRot);
+            ObjectPool.QUATERNIONF_OBJECT_POOL.free(localRot);
         }
 
         return this;
     }
 
     public GameObject setRotation(Vector3f rotation) {
-        rotation.x = (float) Math.toRadians(rotation.x);
-        rotation.y = (float) Math.toRadians(rotation.y);
-        rotation.z = (float) Math.toRadians(rotation.z);
-        this.localRotation = new Quaternionf().rotateXYZ(rotation.x, rotation.y, rotation.z).normalize();
+        Vector3f radians = ObjectPool.VECTOR3F_POOL.obtain().set(rotation).mul((float) Math.toRadians(1));
+        localRotation.identity().rotateXYZ(radians.x, radians.y, radians.z).normalize();
+        ObjectPool.VECTOR3F_POOL.free(radians);
         return this;
     }
 
     public GameObject addRotation(Vector3f rotation){
-        rotation.x = (float) Math.toRadians(rotation.x);
-        rotation.y = (float) Math.toRadians(rotation.y);
-        rotation.z = (float) Math.toRadians(rotation.z);
+        Vector3f radians = new Vector3f(rotation).mul((float) Math.toRadians(1));
 
-        Quaternionf additionalRotation = new Quaternionf().identity().rotateXYZ(
-                rotation.x,
-                rotation.y,
-                rotation.z
-        );
-
-        localRotation.mul(additionalRotation).normalize();
+        localRotation.mul(
+                new Quaternionf().identity().rotateXYZ(
+                        radians.x,
+                        radians.y,
+                        radians.z
+                )).normalize();
         return this;
     }
 
@@ -177,24 +169,20 @@ public class GameObject {
 
     public GameObject lookAt(Vector3f target){
         Vector3f currentPosition = getPosition();
-        Vector3f forward = new Vector3f(currentPosition).sub(target).normalize();
+        Vector3f forward = ObjectPool.VECTOR3F_POOL.obtain().set(currentPosition).sub(target).normalize();
 
-        if (forward.lengthSquared() < 1e-6) {
-            return this; // Avoid calculations if at the target position
-        }
+        if (forward.lengthSquared() < 1e-6) return this;
 
-        Vector3f referenceDirection = new Vector3f(0, 0, -1).normalize();
-
-        Quaternionf quaternion = new Quaternionf();
-        quaternion.rotationTo(referenceDirection, forward);
-
+        Quaternionf quaternion = ObjectPool.QUATERNIONF_OBJECT_POOL.obtain().identity().rotationTo(Constants.VECTOR3_FORWARD, forward);
         setRotation(quaternion);
+        ObjectPool.VECTOR3F_POOL.free(forward);
+        ObjectPool.QUATERNIONF_OBJECT_POOL.free(quaternion);
         return this;
     }
 
     public void lookAtDirection(Vector3f direction) {
         direction.normalize();
-        setRotation(new Quaternionf().rotateTo(new Vector3f(0,0,-1), direction));
+        setRotation(new Quaternionf().rotateTo(new Vector3f(Constants.VECTOR3_FORWARD), direction));
     }
 
     public Vector3f getScale() {
@@ -202,22 +190,22 @@ public class GameObject {
     }
 
     public GameObject setScale(float scale) {
-        this.scale = new Vector3f(scale);
+        this.scale.set(scale);
         return this;
     }
 
     public GameObject setScale(Vector3f scale) {
-        this.scale = scale;
+        this.scale.set(scale);
         return this;
     }
 
     public GameObject setScale(float x, float y, float z) {
-        this.scale = new Vector3f(x, y, z);
+        this.scale.set(x, y, z);
         return this;
     }
 
     public GameObject setScale(float x, float y) {
-        this.scale = new Vector3f(x, y, 0);
+        this.scale.set(x, y, 0);
         return this;
     }
 
@@ -255,7 +243,7 @@ public class GameObject {
 
     public void update(MouseInput mouseInput){
         if(!isEnabled || components.isEmpty()) return;
-        for(Component component : components){ component.update(); }
+        for(Component component : components) component.update();
     }
 
     public boolean isEnabled() {
@@ -284,16 +272,17 @@ public class GameObject {
         return this;
     }
 
-    public List<Component> getComponents(){
+    public Set<Component> getComponents(){
         return components;
     }
 
-    public <C extends Component> C getComponent(Class<C> component){
+    @SuppressWarnings("unchecked")
+    public <C extends Component> C getComponent(Class<C> componentClass) {
         for (Component c : components) {
-            if (c.getClass() == component)
+            if (componentClass.isInstance(c)) {
                 return (C) c;
+            }
         }
-
         return null;
     }
 
@@ -314,12 +303,12 @@ public class GameObject {
 
     public GameObject setStatic(boolean isStatic) {
         this.isStatic = isStatic;
-
         RenderComponent renderComponent = getComponent(RenderComponent.class);
-        if(renderComponent != null){
-            renderComponent.getMeshMaterialSets().forEach((meshMaterialSet -> meshMaterialSet.mesh.setStatic(isStatic)));
+        if (renderComponent != null) {
+            renderComponent.getMeshMaterialSets().forEach(meshMaterialSet ->
+                    meshMaterialSet.mesh.setStatic(isStatic)
+            );
         }
-
         return this;
     }
 
