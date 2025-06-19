@@ -4,6 +4,7 @@ import game.utils.ChunkCoord;
 import game.utils.ChunkUtils;
 import nl.jenoah.core.ModelManager;
 import nl.jenoah.core.components.RenderComponent;
+import nl.jenoah.core.debugging.Debug;
 import nl.jenoah.core.entity.GameObject;
 import nl.jenoah.core.entity.Model;
 import nl.jenoah.core.utils.Calculus;
@@ -14,17 +15,21 @@ import org.joml.Quaternionf;
 import org.joml.Vector3f;
 import org.joml.Vector3i;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 import static org.joml.Math.lerp;
 
 public class MarchingChunk {
 
-    List<Vector3f> vertices = new ArrayList<>();
-    List<Integer> triangles = new ArrayList<>();
+    private static final int MAX_VERTICES = 4096; // Estimate or calculate max needed
+    private static final int MAX_TRIANGLES = 8192;
+
+    Vector3f[] vertices = new Vector3f[MAX_VERTICES];
+    int[] triangles = new int[MAX_TRIANGLES];
+
+    int vertexCount = 0;
+    int triangleCount = 0;
+
     float[] terrainHeights;
     Vector3f[] normals;
 
@@ -44,7 +49,7 @@ public class MarchingChunk {
 
     private void init(){
         UpdateChunk();
-        if(!vertices.isEmpty()) {
+        if(vertexCount > 0) {
             normals = calculateNormals();
             isReady = true;
         }else{
@@ -65,11 +70,9 @@ public class MarchingChunk {
     }
 
     public void publishChunk(){
-        if(vertices.isEmpty()) return;
+        if(vertexCount == 0) return;
 
-        int[] triangleArray = triangles.stream().mapToInt(i->i).toArray();
-
-        Model chunkModel = ModelManager.loadModel(vertices.toArray(new Vector3f[0]), null, triangleArray, normals);
+        Model chunkModel = ModelManager.loadModel(Arrays.copyOf(vertices, vertexCount), null, Arrays.copyOf(triangles, triangleCount), normals);
         chunkModel.getMesh().generateUVs();
         chunkEntity = new GameObject().setPosition(chunkPosition.toVector3());
         chunkEntity.addComponent(new RenderComponent(chunkModel.getMesh(), chunkModel.getMaterial()));
@@ -102,11 +105,11 @@ public class MarchingChunk {
                 if (ChunkUtils.smoothTerrain) {
                     float difference = getVertexDifference(voxelCorners, indice);
                     vertexPosition = new Vector3f(vertex2).sub(vertex1).mul(difference).add(vertex1);
-                    triangles.add(VertForIndex(vertexPosition));
+                    addTriangle(VertForIndex(vertexPosition));
                 } else {
                     vertexPosition = new Vector3f(vertex1).add(vertex2).mul(0.5f);
-                    vertices.add(new Vector3f(vertexPosition));
-                    triangles.add(vertices.size() - 1);
+                    addVertex(new Vector3f(vertexPosition));
+                    addTriangle(vertexCount - 1);
                 }
                 edgeIndex++;
             }
@@ -147,10 +150,10 @@ public class MarchingChunk {
     }
 
     private Vector3f[] calculateNormals() {
-        Vector3f[] normals = new Vector3f[vertices.size()];
+        Vector3f[] normals = new Vector3f[vertexCount];
 
-        for(int i = 0; i < vertices.size(); i++) {
-            Vector3f vertex = vertices.get(i);
+        for(int i = 0; i < vertexCount; i++) {
+            Vector3f vertex = vertices[i];
             int x = (int) vertex.x;
             int y = (int) vertex.y;
             int z = (int) vertex.z;
@@ -175,12 +178,12 @@ public class MarchingChunk {
     }
 
     private int VertForIndex(Vector3f vert) {
-        for (int i = 0; i < vertices.size(); i++)
+        for (int i = 0; i < vertexCount; i++)
         {
-            if (vertices.get(i) == vert) return i;
+            if (vertices[i] == vert) return i;
         }
-        vertices.add(vert);
-        return vertices.size() - 1;
+        addVertex(vert);
+        return vertexCount - 1;
     }
 
     public GameObject getChunkEntity(){ return chunkEntity; }
@@ -231,5 +234,19 @@ public class MarchingChunk {
 
     public final Set<Matrix4f> getSurfaceFeatureMatrices(){
         return surfaceFeatureModelMatrices;
+    }
+
+    private void addVertex(Vector3f v) {
+        if (vertexCount >= vertices.length) {
+            Debug.LogError("Marching chunk vertexCount exceeds vertex array length");
+        }
+        vertices[vertexCount++] = v;
+    }
+
+    private void addTriangle(int idx) {
+        if (triangleCount >= triangles.length) {
+            Debug.LogError("Marching chunk triangleCount exceeds triangles array length");
+        }
+        triangles[triangleCount++] = idx;
     }
 }
