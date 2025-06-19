@@ -51,6 +51,7 @@ public class TerrainGeneration implements Runnable{
 
         this.isRunning = true;
 
+        synchronized (this){
             while (isRunning) {
                 try {
                     if (this.canUpdate) {
@@ -62,6 +63,7 @@ public class TerrainGeneration implements Runnable{
                     Debug.Log("STOPPING THREAD: " + e);
                     isRunning = false;
                 }
+            }
         }
     }
 
