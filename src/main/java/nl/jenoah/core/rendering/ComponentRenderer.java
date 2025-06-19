@@ -18,6 +18,7 @@ public class ComponentRenderer implements IRenderer {
 
     private Matrix4f shadowSpaceMatrix = new Matrix4f();
     private int shadowMapID = 0;
+    private Camera mainCamera;
 
     private RenderMetrics metrics;
     private boolean recordMetrics = false;
@@ -26,14 +27,14 @@ public class ComponentRenderer implements IRenderer {
     public void init() throws Exception {  }
 
     @Override
-    public void render(Camera camera) {
-        if (sortedRenderObjects.isEmpty() && sortedTransparentRenderObjects.isEmpty()) return;
+    public void render() {
+        if (sortedRenderObjects.isEmpty() && sortedTransparentRenderObjects.isEmpty() || mainCamera == null) return;
 
         sortedRenderObjects.forEach((renderObjectShader, meshMaterialSetList) -> {
-            RenderPass(camera, renderObjectShader, meshMaterialSetList);
+            RenderPass(mainCamera, renderObjectShader, meshMaterialSetList);
         });
         sortedTransparentRenderObjects.forEach((renderObjectShader, meshMaterialSetList) -> {
-            RenderPass(camera, renderObjectShader, meshMaterialSetList);
+            RenderPass(mainCamera, renderObjectShader, meshMaterialSetList);
         });
     }
 
@@ -54,6 +55,7 @@ public class ComponentRenderer implements IRenderer {
             if(meshMaterialSet.mesh.isInstanced()){
                 GL33.glDrawElementsInstanced(GL11.GL_TRIANGLES, meshMaterialSet.mesh.getVertexCount(), GL11.GL_UNSIGNED_INT, 0, meshMaterialSet.mesh.getInstanceCount());
             }else{
+                if(recordMetrics) metrics.recordVertexCount(meshMaterialSet.mesh.getVertexCount());
                 GL11.glDrawElements(GL11.GL_TRIANGLES, meshMaterialSet.mesh.getVertexCount(), GL11.GL_UNSIGNED_INT, 0);
             }
 
@@ -160,5 +162,9 @@ public class ComponentRenderer implements IRenderer {
 
     public void recordMetrics(boolean recordMetrics) {
         this.recordMetrics = recordMetrics;
+    }
+
+    public void setMainCamera(Camera camera){
+        this.mainCamera = camera;
     }
 }

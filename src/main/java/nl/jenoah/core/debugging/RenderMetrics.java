@@ -13,6 +13,7 @@ public class RenderMetrics {
     private int shaderBinds;
     private int stateChanges;
     private int vaoBinds;
+    private int vertexCount;
 
     // GPU Timing
     private int queryID;
@@ -33,6 +34,7 @@ public class RenderMetrics {
         shaderBinds = 0;
         stateChanges = 0;
         vaoBinds = 0;
+        vertexCount = 0;
 
         // Begin GPU timing (alternating queries)
         if(!queryActive) {
@@ -57,17 +59,18 @@ public class RenderMetrics {
     public void recordShaderBind() { shaderBinds++; }
     public void recordStateChange() { stateChanges++; }
     public void recordVaoBind() { vaoBinds++; }
+    public void recordVertexCount(int vertexCount){ this.vertexCount += vertexCount; }
 
     // Reporting
     public String getMetrics() {
         return String.format(
-                "CPU: %.2fms | GPU: %.2fms | Draws: %d | Shaders: %d | State: %d | VAOs: %d",
+                "CPU: %.2fms | GPU: %.2fms | Draws: %d | Shaders: %d | VAOs: %d | Vertex count: %d",
                 lastFrameDuration / 1e6,
                 gpuTimeNs / 1e6,
                 drawCalls,
                 shaderBinds,
-                stateChanges,
-                vaoBinds
+                vaoBinds,
+                vertexCount
         );
     }
 }

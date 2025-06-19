@@ -1,5 +1,6 @@
 package nl.jenoah.core.rendering;
 
+import nl.jenoah.core.Camera;
 import nl.jenoah.core.components.RenderComponent;
 import nl.jenoah.core.debugging.RenderMetrics;
 import nl.jenoah.core.fonts.fontRendering.FontRenderer;
@@ -21,6 +22,7 @@ public class RenderManager {
     private SkyboxRenderer skyboxRenderer;
     private final RenderMetrics metrics;
     private boolean recordMetrics = false;
+    public static float aspectRatio = 1.77f;
 
     public RenderManager() {
         window = WindowManager.getInstance();
@@ -52,6 +54,7 @@ public class RenderManager {
             window.setResize(false);
             window.updateProjectionMatrix();
             PostProcessing.updateResolution();
+            aspectRatio = (float)window.getWidth() / (float)window.getHeight();
         }
 
         shadowRenderer.render(currentScene);
@@ -62,8 +65,8 @@ public class RenderManager {
         clear();
 
         //Rendering of scene
-        skyboxRenderer.render(currentScene.getPlayer().getCamera());
-        componentRenderer.render(currentScene.getPlayer().getCamera());
+        skyboxRenderer.render();
+        componentRenderer.render();
 
         frameBuffer.unbindFrameBuffer();
 
@@ -103,6 +106,12 @@ public class RenderManager {
 
     public void dequeueRender(RenderComponent renderComponent){
         componentRenderer.dequeue(renderComponent);
+    }
+
+    public void setRenderCamera(Camera renderCamera){
+        shadowRenderer.setMainCamera(renderCamera);
+        componentRenderer.setMainCamera(renderCamera);
+        skyboxRenderer.setMainCamera(renderCamera);
     }
 
     public void recordMetrics(boolean recordState){

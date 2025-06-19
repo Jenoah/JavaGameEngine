@@ -31,6 +31,7 @@ public class ShadowRenderer implements IRenderer{
     private final Matrix4f projectionMatrix = new Matrix4f();
     private final Matrix4f projectionViewMatrix = new Matrix4f();
     private final Matrix4f offset = createOffset();
+    private final Matrix4f shadowMapSpaceMatrix = new Matrix4f();
 
     @Override
     public void init() throws Exception {
@@ -41,14 +42,12 @@ public class ShadowRenderer implements IRenderer{
     }
 
     @Override
-    public void render(Camera camera) {
+    public void render() {
         Debug.LogError("Using wrong render method for rendering shadows");
     }
 
     public void render(Scene currentScene) {
         if(shadowSets.isEmpty()) return;
-
-        shadowFrustum.setCamera(currentScene.getPlayer().getCamera());
 
         prepare(currentScene.getDirectionalLight().getForward(), shadowFrustum);
 
@@ -59,6 +58,8 @@ public class ShadowRenderer implements IRenderer{
         GL11.glClear(GL11.GL_DEPTH_BUFFER_BIT);
         GL11.glDisable(GL11.GL_BLEND);
         GL11.glEnable(GL11.GL_CULL_FACE);
+        GL11.glCullFace(GL11.GL_FRONT);
+
 
         shadowSets.forEach((meshMaterialSet) -> {
             if (!meshMaterialSet.getRoot().isEnabled()) return;
@@ -71,9 +72,11 @@ public class ShadowRenderer implements IRenderer{
             shadowShader.prepare(meshMaterialSet, projectionViewMatrix);
 
             if (recordMetrics) metrics.recordDrawCall();
+
             if(meshMaterialSet.mesh.isInstanced()){
                 GL33.glDrawElementsInstanced(GL11.GL_TRIANGLES, meshMaterialSet.mesh.getVertexCount(), GL11.GL_UNSIGNED_INT, 0, meshMaterialSet.mesh.getInstanceCount());
             }else{
+                if(recordMetrics) metrics.recordVertexCount(meshMaterialSet.mesh.getVertexCount());
                 GL11.glDrawElements(GL11.GL_TRIANGLES, meshMaterialSet.mesh.getVertexCount(), GL11.GL_UNSIGNED_INT, 0);
             }
 
@@ -90,19 +93,15 @@ public class ShadowRenderer implements IRenderer{
         GL30.glBindVertexArray(meshMaterialSet.mesh.getVaoID());
         if (recordMetrics) metrics.recordVaoBind();
         GL20.glEnableVertexAttribArray(0);
-        if(meshMaterialSet.mesh.isInstanced()){
-            GL20.glEnableVertexAttribArray(5);
-            GL20.glEnableVertexAttribArray(6);
-            GL20.glEnableVertexAttribArray(7);
-            GL20.glEnableVertexAttribArray(8);
+        if (meshMaterialSet.mesh.isInstanced()) {
+            for (int i = 5; i <= 8; i++) GL20.glEnableVertexAttribArray(i);
         }
     }
 
     @Override
     public void unbind() {
-        for (int i = 0; i < 8; i++) {
-            GL20.glDisableVertexAttribArray(i);
-        }
+        GL20.glDisableVertexAttribArray(0);
+        for (int i = 5; i <= 8; i++) GL20.glDisableVertexAttribArray(i);
         GL30.glBindVertexArray(0);
     }
 
@@ -114,10 +113,7 @@ public class ShadowRenderer implements IRenderer{
         updateLightViewMatrix(lightDirection, shadowFrustum.getCenter());
         shadowFrustum.update(lightViewMatrix);
 
-        projectionMatrix.mulOrthoAffine(lightViewMatrix, projectionViewMatrix); //If the regular multiply works, try this one too
-
-        GL11.glEnable(GL11.GL_CULL_FACE);
-        GL11.glCullFace(GL11.GL_FRONT);
+        projectionMatrix.mulOrthoAffine(lightViewMatrix, projectionViewMatrix);
         shadowFrameBuffer.bindFrameBuffer();
     }
 
@@ -139,7 +135,7 @@ public class ShadowRenderer implements IRenderer{
     }
 
     public final Matrix4f getToShadowMapSpaceMatrix() {
-        return new Matrix4f(offset).mul(projectionViewMatrix);
+        return shadowMapSpaceMatrix.set(offset).mul(projectionViewMatrix);
     }
 
     public void setMainCamera(Camera camera){
@@ -150,7 +146,7 @@ public class ShadowRenderer implements IRenderer{
         lightViewMatrix.identity().lookAt(
                 new Vector3f(center).sub(lightDirection),
                 center,
-                new Vector3f(0, 1, 0)
+                Constants.VECTOR3_UP
         );
     }
 

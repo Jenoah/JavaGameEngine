@@ -2,6 +2,7 @@ package nl.jenoah.core.skybox;
 
 import nl.jenoah.core.Camera;
 import nl.jenoah.core.ModelManager;
+import nl.jenoah.core.debugging.RenderMetrics;
 import nl.jenoah.core.entity.Model;
 import nl.jenoah.core.loaders.TextureLoader;
 import org.joml.Vector3f;
@@ -56,6 +57,10 @@ public class SkyboxRenderer {
     private final Model cube;
     private final int textureID;
     private final SkyboxShader shader;
+    private Camera mainCamera;
+
+    private RenderMetrics metrics;
+    private boolean recordMetrics = false;
 
     public SkyboxRenderer(String[] textureFiles){
         cube = ModelManager.loadModel(VERTICES);
@@ -69,13 +74,17 @@ public class SkyboxRenderer {
         }
     }
 
-    public void render(Camera camera){
+    public void render(){
+        if(mainCamera == null) return;
         prepare();
-        shader.prepare(camera);
+        if (recordMetrics) metrics.recordStateChange();
+        shader.prepare(mainCamera);
+        if (recordMetrics) metrics.recordVaoBind();
         GL30.glBindVertexArray(cube.getId());
         GL20.glEnableVertexAttribArray(0);
         GL13.glActiveTexture(GL13.GL_TEXTURE0);
         GL11.glBindTexture(GL13.GL_TEXTURE_CUBE_MAP, textureID);
+        if (recordMetrics) metrics.recordDrawCall();
         GL11.glDrawArrays(GL11.GL_TRIANGLES, 0, cube.getMesh().getVertexCount());
         GL20.glDisableVertexAttribArray(0);
         GL30.glBindVertexArray(0);
@@ -88,13 +97,25 @@ public class SkyboxRenderer {
 
     private void prepare(){
         GL11.glDepthMask(false);
-        //GL11.glDepthRange(1f, 1f);
+        if (recordMetrics) metrics.recordShaderBind();
         shader.bind();
     }
 
     private void endRendering(){
-        //GL11.glDepthRange(0f, 1f);
         GL11.glDepthMask(true);
         shader.unbind();
+    }
+
+    public void setMetrics(RenderMetrics metrics){
+        this.metrics = metrics;
+        recordMetrics = true;
+    }
+
+    public void recordMetrics(boolean recordMetrics) {
+        this.recordMetrics = recordMetrics;
+    }
+
+    public void setMainCamera(Camera camera){
+        this.mainCamera = camera;
     }
 }

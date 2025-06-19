@@ -8,7 +8,7 @@ public interface IRenderer<T>{
 
     public void init() throws Exception;
 
-    public void render(Camera camera);
+    public void render();
 
     abstract void bind(MeshMaterialSet meshMaterialSet);
 

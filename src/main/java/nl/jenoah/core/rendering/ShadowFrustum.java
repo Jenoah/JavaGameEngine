@@ -15,9 +15,13 @@ public class ShadowFrustum {
     private float minY, maxY;
     private float minZ, maxZ;
     private Matrix4f lightViewMatrix = new Matrix4f();
+    private Matrix4f rotationMatrix = new Matrix4f();
     private Camera cam;
+    private Vector3f cameraPosition = new Vector3f(0);
 
     private float farHeight, farWidth, nearHeight, nearWidth;
+    private final Vector3f center = new Vector3f();
+    private final Vector4f tmpVec4 = new Vector4f();
 
     protected ShadowFrustum() {
         this.window = WindowManager.getInstance();
@@ -26,17 +30,18 @@ public class ShadowFrustum {
 
     protected void update(Matrix4f lightViewMatrix) {
         if(cam == null) return;
-        this.lightViewMatrix = new Matrix4f(lightViewMatrix);
+        this.lightViewMatrix.set(lightViewMatrix);
+        this.cameraPosition.set(cam.getPosition());
 
         Matrix4f rotation = calculateCameraRotationMatrix();
         Vector3f forwardVector = new Vector3f(Constants.VECTOR3_FORWARD).mulDirection(rotation);
 
-        Vector3f centerNear = new Vector3f(cam.getPosition()).fma(Constants.Z_NEAR, forwardVector);
-        Vector3f centerFar  = new Vector3f(cam.getPosition()).fma(Constants.SHADOW_DISTANCE, forwardVector);
+        Vector3f centerNear = new Vector3f(cameraPosition).fma(Constants.Z_NEAR, forwardVector);
+        Vector3f centerFar  = new Vector3f(cameraPosition).fma(Constants.SHADOW_DISTANCE, forwardVector);
 
-        Vector4f[] points = calculateFrustumVertices(rotation, forwardVector, centerNear, centerFar);
+        Vector3f[] points = calculateFrustumVertices(rotation, forwardVector, centerNear, centerFar);
         boolean first = true;
-        for (Vector4f point : points) {
+        for (Vector3f point : points) {
             if (first) {
                 minX = maxX = point.x;
                 minY = maxY = point.y;
@@ -51,7 +56,7 @@ public class ShadowFrustum {
         maxZ += Constants.SHADOW_OFFSET;
     }
 
-    private Vector4f[] calculateFrustumVertices(Matrix4f rotation, Vector3f forward, Vector3f centerNear, Vector3f centerFar) {
+    private Vector3f[] calculateFrustumVertices(Matrix4f rotation, Vector3f forward, Vector3f centerNear, Vector3f centerFar) {
         Vector3f up = new Vector3f(Constants.VECTOR3_UP).mulDirection(rotation);
         Vector3f right = new Vector3f(forward).cross(up);
         Vector3f down = new Vector3f(up).negate();
@@ -62,7 +67,7 @@ public class ShadowFrustum {
         Vector3f nearTop = new Vector3f(up).mul(nearHeight).add(centerNear);
         Vector3f nearBottom = new Vector3f(down).mul(nearHeight).add(centerNear);
 
-        Vector4f[] points = new Vector4f[8];
+        Vector3f[] points = new Vector3f[8];
         points[0] = calculateLightSpaceFrustumCorner(farTop, right, farWidth);
         points[1] = calculateLightSpaceFrustumCorner(farTop, left, farWidth);
         points[2] = calculateLightSpaceFrustumCorner(farBottom, right, farWidth);
@@ -74,12 +79,12 @@ public class ShadowFrustum {
         return points;
     }
 
-    private Vector4f calculateLightSpaceFrustumCorner(Vector3f startPoint, Vector3f direction, float width) {
+    private Vector3f calculateLightSpaceFrustumCorner(Vector3f startPoint, Vector3f direction, float width) {
         Vector3f point = new Vector3f(direction).mul(width).add(startPoint);
         Vector4f point4f = new Vector4f(point, 1.0f);
-        lightViewMatrix.transform(point4f);
+        lightViewMatrix.transform(point4f).xyz(point);
 
-        return point4f;
+        return point;
     }
 
 
@@ -103,21 +108,14 @@ public class ShadowFrustum {
     }
 
     protected Vector3f getCenter() {
-        float x = (minX + maxX) / 2f;
-        float y = (minY + maxY) / 2f;
-        float z = (minZ + maxZ) / 2f;
-
-        Vector4f cen = new Vector4f(x, y, z, 1.0f);
+        tmpVec4.set((minX + maxX) / 2f, (minY + maxY) / 2f, (minZ + maxZ) / 2f, 1.0f);
         Matrix4f invertedLight = new Matrix4f(lightViewMatrix).invert();
-        Vector4f transformed = invertedLight.transform(cen);
-
-        return new Vector3f(transformed.x, transformed.y, transformed.z);
+        invertedLight.transform(tmpVec4).xyz(center);
+        return center;
     }
 
     private Matrix4f calculateCameraRotationMatrix() {
-        Vector3f cameraPos = cam.getPosition();
-
-        return new Matrix4f().lookAt(cameraPos, new Vector3f(cameraPos).add(cam.getForward()), Constants.VECTOR3_UP);
+        return rotationMatrix.identity().lookAt(cameraPosition, new Vector3f(cameraPosition).add(cam.getForward()), Constants.VECTOR3_UP);
     }
 
     private float getAspectRatio() {
