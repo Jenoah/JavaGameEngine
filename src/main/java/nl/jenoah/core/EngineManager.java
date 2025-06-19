@@ -16,17 +16,17 @@ public class EngineManager {
     private ILogic gameLogic;
     private MouseInput mouseInput;
 
-    private static double lastLoopTime = 0.0;
-    private static float timeAccumulator = 0.0f;
+    // Consider making these instance fields if multiple EngineManagers are possible
+    private double lastLoopTime = 0.0;
+    private float timeAccumulator = 0.0f;
     private static int fps = 0;
     public static int frameCount = 0;
     private static float deltaTime = 0.0f;
     private static float frameTime = 0.0f;
     private static float spareTime = 0.0f;
 
-    /**
-     * Initializes the engine and all subsystems.
-     */
+    private static final float MIN_DELTA_TIME = 1.0f / 1000f; // 1ms minimum, adjust as needed
+
     private void init(final ILogic gameLogic) throws Exception {
         errorCallback = GLFWErrorCallback.createPrint(System.err);
         GLFW.glfwSetErrorCallback(errorCallback);
@@ -43,9 +43,6 @@ public class EngineManager {
         lastLoopTime = getCurrentTime();
     }
 
-    /**
-     * Starts the engine loop.
-     */
     public void start(final ILogic gameLogic) throws Exception {
         if (running) return;
         init(gameLogic);
@@ -53,9 +50,6 @@ public class EngineManager {
         run();
     }
 
-    /**
-     * The main engine loop.
-     */
     public void run() {
         running = true;
         try {
@@ -71,31 +65,22 @@ public class EngineManager {
 
                 double frameEnd = getCurrentTime();
                 frameTime = (float)(frameEnd - frameStart);
-                spareTime = getDeltaTime() - frameTime;
+                spareTime = Math.max(0f, getDeltaTime() - frameTime); // Ensure spare time is non-negative
             }
         } finally {
             cleanup();
         }
     }
 
-    /**
-     * Stops the engine loop.
-     */
     public void stop() {
         running = false;
     }
 
-    /**
-     * Handles user input.
-     */
     private void handleInput() {
         mouseInput.input();
         gameLogic.input();
     }
 
-    /**
-     * Updates game logic and FPS counter.
-     */
     private void updateGame() {
         gameLogic.update(deltaTime, mouseInput);
 
@@ -109,17 +94,11 @@ public class EngineManager {
         }
     }
 
-    /**
-     * Renders a frame.
-     */
     private void renderFrame() {
         gameLogic.render();
         window.update();
     }
 
-    /**
-     * Cleans up resources.
-     */
     private void cleanup() {
         window.cleanUp();
         gameLogic.cleanUp();
@@ -127,57 +106,41 @@ public class EngineManager {
         GLFW.glfwTerminate();
     }
 
-    /**
-     * @return the most recent FPS value.
-     */
     public static int getFps() {
         return fps;
     }
 
-    /**
-     * @return the current time in seconds.
-     */
     public static double getCurrentTime() {
         return GLFW.glfwGetTime();
     }
 
-    /**
-     * Updates deltaTime for the current frame.
-     */
     private void updateDeltaTime() {
         final double currentTime = getCurrentTime();
         deltaTime = (float) (currentTime - lastLoopTime);
+        deltaTime = Math.max(deltaTime, MIN_DELTA_TIME); // Clamp to avoid extremely small values
         lastLoopTime = currentTime;
     }
 
-    /**
-     * @return deltaTime in seconds.
-     */
     public static float getDeltaTime() {
         return deltaTime;
     }
 
-    /**
-     * @return deltaTime in milliseconds, rounded to two decimals.
-     */
     public static float getDeltaTimeMS() {
         return Math.round(deltaTime * 100000f) / 100f;
     }
 
-    /**
-     * @return The time in seconds it took to process the last frame (excluding waiting).
-     */
     public static float getFrameTime() {
         return frameTime;
     }
 
-    /**
-     * @return The time in milliseconds it took to process the last frame (rounded to 2 decimals).
-     */
     public static float getFrameTimeMS() {
         return Math.round(frameTime * 100000f) / 100f;
     }
 
-    public static float getSpareTime() { return spareTime; }
-    public static float getSpareTimeMS() { return Math.round(spareTime * 100000f) / 100f; }
+    public static float getSpareTime() {
+        return spareTime;
+    }
+    public static float getSpareTimeMS() {
+        return Math.round(spareTime * 100000f) / 100f;
+    }
 }
