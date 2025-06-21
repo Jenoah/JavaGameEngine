@@ -1,6 +1,6 @@
 package nl.jenoah.core.rendering;
 
-import nl.jenoah.core.Camera;
+import nl.jenoah.core.entity.Camera;
 import nl.jenoah.core.components.RenderComponent;
 import nl.jenoah.core.debugging.RenderMetrics;
 import nl.jenoah.core.fonts.fontRendering.FontRenderer;
@@ -8,6 +8,9 @@ import nl.jenoah.core.gui.GuiRenderer;
 import nl.jenoah.core.WindowManager;
 import nl.jenoah.core.entity.Scene;
 import nl.jenoah.core.skybox.SkyboxRenderer;
+import nl.jenoah.core.utils.Constants;
+import nl.jenoah.core.utils.DebugEntity;
+import org.joml.Vector3f;
 import org.lwjgl.opengl.GL11;
 
 import static org.lwjgl.opengl.GL11.glViewport;
@@ -20,6 +23,7 @@ public class RenderManager {
     private FontRenderer fontRenderer;
     private FrameBuffer frameBuffer;
     private SkyboxRenderer skyboxRenderer;
+    private DebugRenderer debugRenderer;
     private final RenderMetrics metrics;
     private boolean recordMetrics = false;
     public static float aspectRatio = 1.77f;
@@ -36,8 +40,10 @@ public class RenderManager {
         guiRenderer = new GuiRenderer();
         fontRenderer = new FontRenderer();
         skyboxRenderer = new SkyboxRenderer(new String[]{"textures/skyboxes/clouds1/right.png", "textures/skyboxes/clouds1/left.png", "textures/skyboxes/clouds1/top.png", "textures/skyboxes/clouds1/bottom.png", "textures/skyboxes/clouds1/back.png", "textures/skyboxes/clouds1/front.png"});
+        debugRenderer = new DebugRenderer();
         componentRenderer.init();
         shadowRenderer.init();
+        debugRenderer.init();
         componentRenderer.setShadowMapID(shadowRenderer.getShadowMapID());
 
         regenerateFrameBuffer();
@@ -67,11 +73,13 @@ public class RenderManager {
         //Rendering of scene
         skyboxRenderer.render();
         componentRenderer.render();
+        debugRenderer.render();
 
         frameBuffer.unbindFrameBuffer();
 
         //Post Processing
         PostProcessing.render(frameBuffer.getColourTexture());
+
         //End of 3D rendering
 
         //Overlay
@@ -93,6 +101,7 @@ public class RenderManager {
         fontRenderer.cleanUp();
         skyboxRenderer.cleanUp();
         shadowRenderer.cleanUp();
+        debugRenderer.cleanUp();
     }
 
     private void regenerateFrameBuffer(){
@@ -104,6 +113,14 @@ public class RenderManager {
         shadowRenderer.queue(renderComponent);
     }
 
+    public void debugCube(Vector3f position, Vector3f size){
+        debugRenderer.drawCube(position, size);
+    }
+
+    public void debugCube(Vector3f position){
+        debugRenderer.drawCube(position, Constants.VECTOR3_ONE);
+    }
+
     public void dequeueRender(RenderComponent renderComponent){
         componentRenderer.dequeue(renderComponent);
     }
@@ -112,6 +129,7 @@ public class RenderManager {
         shadowRenderer.setMainCamera(renderCamera);
         componentRenderer.setMainCamera(renderCamera);
         skyboxRenderer.setMainCamera(renderCamera);
+        debugRenderer.setMainCamera(renderCamera);
     }
 
     public void recordMetrics(boolean recordState){
