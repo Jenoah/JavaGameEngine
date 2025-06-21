@@ -18,14 +18,38 @@ public class DebugEntity {
         this.scale = scale;
     }
 
+    public DebugEntity(Vector3f position, Quaternionf rotation){
+        this.position = position;
+        this.rotation = rotation;
+    }
+
+    public DebugEntity(Vector3f position, Quaternionf rotation, Vector3f scale){
+        this.position = position;
+        this.rotation = rotation;
+        this.scale = scale;
+    }
+
     public DebugEntity(Vector3f position, Vector3f scale, DebugShape shape){
         this.position = position;
         this.scale = scale;
         this.shape = shape;
     }
 
+    public DebugEntity(Vector3f position, Quaternionf rotation, Vector3f scale, DebugShape shape){
+        this.position = position;
+        this.rotation = rotation;
+        this.scale = scale;
+        this.shape = shape;
+    }
+
     public DebugEntity(Vector3f position, DebugShape shape){
         this.position = position;
+        this.shape = shape;
+    }
+
+    public DebugEntity(Vector3f position, Quaternionf rotation, DebugShape shape){
+        this.position = position;
+        this.rotation = rotation;
         this.shape = shape;
     }
 

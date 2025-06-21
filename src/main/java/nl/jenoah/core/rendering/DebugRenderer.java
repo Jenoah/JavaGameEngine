@@ -1,13 +1,12 @@
 package nl.jenoah.core.rendering;
 
-import nl.jenoah.core.debugging.Debug;
 import nl.jenoah.core.entity.Camera;
 import nl.jenoah.core.entity.GameObject;
 import nl.jenoah.core.entity.Mesh;
-import nl.jenoah.core.loaders.OBJLoader.OBJLoader;
 import nl.jenoah.core.loaders.PrimitiveLoader;
 import nl.jenoah.core.shaders.DebugShader;
 import nl.jenoah.core.utils.DebugEntity;
+import org.joml.Quaternionf;
 import org.joml.Vector3f;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL20;
@@ -79,8 +78,16 @@ public class DebugRenderer implements IRenderer{
 
     }
 
+    public void drawCube(Vector3f position){
+        debugEntities.add(new DebugEntity(position, DebugEntity.DebugShape.CUBE));
+    }
+
     public void drawCube(Vector3f position, Vector3f size){
         debugEntities.add(new DebugEntity(position, size, DebugEntity.DebugShape.CUBE));
+    }
+
+    public void drawCube(Vector3f position, Quaternionf rotation, Vector3f size){
+        debugEntities.add(new DebugEntity(position, rotation, size, DebugEntity.DebugShape.CUBE));
     }
 
     public void setMainCamera(Camera camera){
