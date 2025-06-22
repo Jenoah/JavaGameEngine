@@ -6,7 +6,7 @@ A simple Java Game engine using LWJGL3 / OpenGL.
 - Instanced rendering
 - Game Object Components
 - PBR lighting
-- Shadows
+- Directional shadows
 - Custom shaders
 - Fog
 - Simple UI
@@ -31,5 +31,7 @@ A simple Java Game engine using LWJGL3 / OpenGL.
 All the above-mentioned included features are shown in the demo scene. The previews below might be outdated.
 This demo scene includes a procedurally generated world. This is done with chunks of [Marching Cubes](https://en.wikipedia.org/wiki/Marching_cubes) that runs on a separate thread to prevent stuttering on generation.
 
-![preview image of render](git-files/images/preview3.png)
-![preview of procedural generation in the Java game engine](git-files/images/world_gen_preview.gif)
+![preview image of render](git-files/images/preview4.png)
+<p align="center">
+<img width='100%' src="git-files/images/preview_proc_gen_lighting_shadow_pbr.gif" alt="preview of procedural generation in the Java game engine" />
+</p>
