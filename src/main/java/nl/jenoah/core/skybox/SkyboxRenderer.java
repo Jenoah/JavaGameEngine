@@ -1,6 +1,6 @@
 package nl.jenoah.core.skybox;
 
-import nl.jenoah.core.Camera;
+import nl.jenoah.core.entity.Camera;
 import nl.jenoah.core.ModelManager;
 import nl.jenoah.core.debugging.RenderMetrics;
 import nl.jenoah.core.entity.Model;

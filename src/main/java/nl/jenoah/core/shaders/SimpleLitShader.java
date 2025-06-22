@@ -1,6 +1,6 @@
 package nl.jenoah.core.shaders;
 
-import nl.jenoah.core.Camera;
+import nl.jenoah.core.entity.Camera;
 import nl.jenoah.core.entity.SceneManager;
 import nl.jenoah.core.lighting.DirectionalLight;
 import nl.jenoah.core.lighting.PointLight;
@@ -63,11 +63,10 @@ public class SimpleLitShader extends Shader {
         glDepthMask(true);
 
         Matrix4f modelMatrix = Transformation.getModelMatrix(meshMaterialSet.getRoot());
-        Matrix4f viewMatrix = Transformation.getViewMatrix(camera);
 
         this.setUniform("material", meshMaterialSet.material);
         this.setUniform("modelMatrix", modelMatrix);
-        this.setUniform("viewMatrix", viewMatrix);
+        this.setUniform("viewMatrix", camera.getViewMatrix());
         this.setUniform("projectionMatrix", window.getProjectionMatrix());
         this.setUniform("fogColor", SceneManager.fogColor);
         this.setUniform("fogDensity", SceneManager.fogDensity);

@@ -1,6 +1,6 @@
 package nl.jenoah.core.rendering;
 
-import nl.jenoah.core.Camera;
+import nl.jenoah.core.entity.Camera;
 import nl.jenoah.core.components.RenderComponent;
 import nl.jenoah.core.debugging.RenderMetrics;
 import nl.jenoah.core.entity.GameObject;
@@ -44,12 +44,12 @@ public class ComponentRenderer implements IRenderer {
         shader.render(camera);
 
         meshMaterialSetList.forEach(meshMaterialSet -> {
-            if (!meshMaterialSet.getRoot().isEnabled()) return;
+            if (!meshMaterialSet.getRoot().isEnabled() || (!camera.isInFrustumAABB(meshMaterialSet.getRoot()) && !meshMaterialSet.mesh.isInstanced())) return;
             if (recordMetrics) metrics.recordStateChange();
+
             bind(meshMaterialSet);
             prepareShadow(meshMaterialSet);
             shader.prepare(meshMaterialSet, camera);
-
 
             if (recordMetrics) metrics.recordDrawCall();
             if(meshMaterialSet.mesh.isInstanced()){
@@ -60,8 +60,6 @@ public class ComponentRenderer implements IRenderer {
             }
 
             unbind();
-
-
         });
         shader.unbind();
     }

@@ -1,6 +1,6 @@
 package nl.jenoah.core.rendering;
 
-import nl.jenoah.core.Camera;
+import nl.jenoah.core.entity.Camera;
 import nl.jenoah.core.WindowManager;
 import nl.jenoah.core.utils.Constants;
 import org.joml.Matrix4f;

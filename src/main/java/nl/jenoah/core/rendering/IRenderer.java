@@ -1,10 +1,9 @@
 package nl.jenoah.core.rendering;
 
-import nl.jenoah.core.Camera;
+import nl.jenoah.core.entity.Camera;
 import nl.jenoah.core.entity.GameObject;
-import nl.jenoah.core.entity.Model;
 
-public interface IRenderer<T>{
+public interface IRenderer{
 
     public void init() throws Exception;
 

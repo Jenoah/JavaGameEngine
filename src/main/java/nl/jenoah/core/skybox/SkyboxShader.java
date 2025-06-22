@@ -1,9 +1,8 @@
 package nl.jenoah.core.skybox;
 
-import nl.jenoah.core.Camera;
+import nl.jenoah.core.entity.Camera;
 import nl.jenoah.core.entity.SceneManager;
 import nl.jenoah.core.shaders.Shader;
-import nl.jenoah.core.utils.Transformation;
 import nl.jenoah.core.utils.Utils;
 import org.joml.Matrix4f;
 
@@ -29,7 +28,7 @@ public class SkyboxShader extends Shader {
     }
 
     public void prepare(Camera camera) {
-        Matrix4f viewMatrix = Transformation.getViewMatrix(camera);
+        Matrix4f viewMatrix = new Matrix4f(camera.getViewMatrix());
         viewMatrix.m30(0);
         viewMatrix.m31(0);
         viewMatrix.m32(0);

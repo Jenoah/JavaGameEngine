@@ -1,6 +1,6 @@
 package nl.jenoah.core.shaders;
 
-import nl.jenoah.core.Camera;
+import nl.jenoah.core.entity.Camera;
 import nl.jenoah.core.WindowManager;
 import nl.jenoah.core.debugging.Debug;
 import nl.jenoah.core.entity.Material;

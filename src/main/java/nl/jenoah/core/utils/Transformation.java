@@ -1,6 +1,5 @@
 package nl.jenoah.core.utils;
 
-import nl.jenoah.core.Camera;
 import nl.jenoah.core.entity.GameObject;
 import org.joml.Matrix4f;
 import org.joml.Quaternionf;
@@ -24,12 +23,6 @@ public class Transformation {
                 .scale(scale);
     }
 
-    public static Matrix4f getViewMatrix(Camera camera){
-        return new Matrix4f()
-                .identity()
-                .rotate(camera.getRotation())
-                .translate(-camera.getPosition().x, -camera.getPosition().y, -camera.getPosition().z);
-    }
 
     public static Vector3f rotateDirection(Vector3f input, Vector3f rotation){
         float yaw = (float) Math.toRadians(rotation.y);

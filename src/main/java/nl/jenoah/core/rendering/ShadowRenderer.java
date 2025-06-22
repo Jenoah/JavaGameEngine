@@ -1,6 +1,6 @@
 package nl.jenoah.core.rendering;
 
-import nl.jenoah.core.Camera;
+import nl.jenoah.core.entity.Camera;
 import nl.jenoah.core.components.RenderComponent;
 import nl.jenoah.core.debugging.Debug;
 import nl.jenoah.core.debugging.RenderMetrics;
