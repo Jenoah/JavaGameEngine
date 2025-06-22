@@ -19,7 +19,7 @@ public class Mesh {
     private Vector3f[] normals;
     private Vector3f[] tangents;
     private Vector3f[] bitangents;
-    private Vector2f[] uvs;
+    private float[] uvs;
     private int[] triangles;
     private int dimension = 3;
 
@@ -41,7 +41,7 @@ public class Mesh {
 
     public Mesh(Mesh mesh){
         float[] verticesStripped = Conversion.toFloatArray(mesh.vertices);
-        float[] uvFloatArray = mesh.uvs != null ? Conversion.toFloatArray(mesh.uvs) : null;
+        float[] uvFloatArray = mesh.uvs != null ? mesh.uvs : null;
         float[] normalFloatArray = mesh.normals != null ? Conversion.toFloatArray(mesh.normals) : null;
 
         load(verticesStripped, uvFloatArray, mesh.triangles, normalFloatArray, mesh.vertices);
@@ -75,7 +75,7 @@ public class Mesh {
     }
     public Mesh(Vector3f[] vertices, Vector2f[] uvs, int[] triangles){
         this.vertices = vertices;
-        this.uvs = uvs;
+        this.uvs = Conversion.toFloatArray(uvs);
         this.triangles = triangles;
 
         float[] verticesStripped = Conversion.toFloatArray(vertices);
@@ -136,9 +136,9 @@ public class Mesh {
 
         if(uvFloatArray != null){
             uvVBOID = storeDataInAttributeList(1, 2, uvFloatArray);
-            if(this.uvs == null){
-                this.uvs = Conversion.floatArrayToVector2Array(uvFloatArray);
-            }
+//            if(this.uvs == null){
+//                this.uvs = Conversion.floatArrayToVector2Array(uvFloatArray);
+//            }
         }
 
         if(normals != null) {
@@ -239,15 +239,19 @@ public class Mesh {
             Vector3f v1 = vertices[i1];
             Vector3f v2 = vertices[i2];
 
-            Vector2f uv0 = uvs[i0];
-            Vector2f uv1 = uvs[i1];
-            Vector2f uv2 = uvs[i2];
+            Vector2f uv0 = ObjectPool.VECTOR2F_POOL.obtain().set(uvs[i0 * 2], uvs[i0 * 2 + 1]);
+            Vector2f uv1 = ObjectPool.VECTOR2F_POOL.obtain().set(uvs[i1 * 2], uvs[i1 * 2 + 1]);
+            Vector2f uv2 = ObjectPool.VECTOR2F_POOL.obtain().set(uvs[i2 * 2], uvs[i2 * 2 + 1]);
 
-            Vector3f deltaPos1 = Calculus.subtractVectors(v1, v0);
-            Vector3f deltaPos2 = Calculus.subtractVectors(v2, v0);
+            Vector3f deltaPos1 = ObjectPool.VECTOR3F_POOL.obtain().set(v1).sub(v0);
+            Vector3f deltaPos2 = ObjectPool.VECTOR3F_POOL.obtain().set(v2).sub(v0);
 
             Vector2f deltaUV1 = Calculus.subtractVectors(uv1, uv0);
             Vector2f deltaUV2 = Calculus.subtractVectors(uv2, uv0);
+
+            ObjectPool.VECTOR2F_POOL.free(uv0);
+            ObjectPool.VECTOR2F_POOL.free(uv1);
+            ObjectPool.VECTOR2F_POOL.free(uv2);
 
             float r = (deltaUV1.x * deltaUV2.y - deltaUV1.y * deltaUV2.x);
             if (r == 0.0f) r = 1.0f; // Prevent division by zero
@@ -265,6 +269,9 @@ public class Mesh {
                     f * (-deltaUV2.x * deltaPos1.y + deltaUV1.x * deltaPos2.y),
                     f * (-deltaUV2.x * deltaPos1.z + deltaUV1.x * deltaPos2.z)
             );
+
+            ObjectPool.VECTOR3F_POOL.free(deltaPos1);
+            ObjectPool.VECTOR3F_POOL.free(deltaPos2);
 
             tangents[i0] = tangents[i0].add(tangent);
             tangents[i1] = tangents[i1].add(tangent);
@@ -323,7 +330,7 @@ public class Mesh {
     }
 
     public void generateUVs(){
-        uvs = new Vector2f[vertices.length];
+        uvs = new float[vertices.length * 2];
 
         for (int i = 0; i < triangles.length - 2; i += 3) {
             Vector3f norm = new Vector3f(normals[triangles[i]]); // This may also need fixing, see below
@@ -337,26 +344,28 @@ public class Mesh {
                 if (triangleIndex < 0 || triangleIndex >= vertices.length) continue; // Safety check
 
                 if (dotX > dotY && dotX > dotZ) {
-                    uvs[triangleIndex] = new Vector2f(vertices[triangleIndex].z, vertices[triangleIndex].y);
+                    uvs[triangleIndex * 2]     = vertices[triangleIndex].z;
+                    uvs[triangleIndex * 2 + 1] = vertices[triangleIndex].y;
                 } else if (dotY > dotX && dotY > dotZ) {
-                    uvs[triangleIndex] = new Vector2f(vertices[triangleIndex].x, vertices[triangleIndex].z);
+                    uvs[triangleIndex * 2]     = vertices[triangleIndex].x;
+                    uvs[triangleIndex * 2 + 1] = vertices[triangleIndex].z;
                 } else {
-                    uvs[triangleIndex] = new Vector2f(vertices[triangleIndex].x, vertices[triangleIndex].y);
+                    uvs[triangleIndex * 2]     = vertices[triangleIndex].x;
+                    uvs[triangleIndex * 2 + 1] = vertices[triangleIndex].y;
                 }
             }
         }
 
-        float[] uvFloatArray = Conversion.toFloatArray(uvs);
         if(uvVBOID == -1){
             GL30.glBindVertexArray(vaoID);
-            uvVBOID = storeDataInAttributeList(1, 2, uvFloatArray);
+            uvVBOID = storeDataInAttributeList(1, 2, uvs);
             unbind();
         }else {
             GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, uvVBOID);
 
             try (MemoryStack stack = MemoryStack.stackPush()) {
-                FloatBuffer buffer = stack.mallocFloat(uvFloatArray.length);
-                buffer.put(uvFloatArray);
+                FloatBuffer buffer = stack.mallocFloat(uvs.length);
+                buffer.put(uvs);
                 buffer.flip();
                 GL15.glBufferData(GL15.GL_ARRAY_BUFFER, buffer, GL15.GL_STATIC_DRAW);
             }
@@ -368,16 +377,14 @@ public class Mesh {
 
 //    Setters
 
-    public void setUvs(Vector2f[] uvs){
-        this.uvs = uvs;
-    }
+    public void setUvs(Vector2f[] uvs){ this.uvs = Conversion.toFloatArray(uvs); }
     public void setUVScale(float uvScale){
         if(uvVBOID == -1){
             Debug.Log("Texture coordinates not set");
             return;
         }
 
-        float[] updatedUVs = Conversion.toFloatArray(uvs);
+        float[] updatedUVs = uvs;
         for (int i = 0; i < updatedUVs.length; i++) {
             updatedUVs[i] *= uvScale;
         }
@@ -388,7 +395,7 @@ public class Mesh {
         GL20.glVertexAttribPointer(1, vertexCount, GL11.GL_FLOAT, false, 0, 0);
         GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, 0);
 
-        this.uvs = Conversion.floatArrayToVector2Array(updatedUVs);
+        this.uvs = updatedUVs;
     }
 
     public void setNormals(Vector3f[] normals){
@@ -417,9 +424,7 @@ public class Mesh {
     public final int[] getTriangles() {
         return triangles;
     }
-    public final Vector2f[] getUVs() {
-        return uvs;
-    }
+    public final Vector2f[] getUVs() { return Conversion.floatArrayToVector2Array(uvs); }
     public final Vector3f[] getNormals() {
         return normals;
     }
