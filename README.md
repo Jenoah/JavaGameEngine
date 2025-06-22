@@ -1,4 +1,4 @@
-# JavaGameEngine
+# Lagspike Engine
 A simple Java Game engine using LWJGL3 / OpenGL.
 
 ## Included features
