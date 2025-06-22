@@ -12,6 +12,7 @@ A simple Java Game engine using LWJGL3 / OpenGL.
 - Simple UI
 - Text rendering (Credits to [Thin Matrix's font rendering tutorial](https://www.youtube.com/watch?v=mnIQEQoHHCU))
 - Post-processing
+- Debug boxes
 - Marching cubes, multi-threaded terrain generation with surface features (foliage etc...)
 
 ## Planned features
@@ -21,7 +22,7 @@ A simple Java Game engine using LWJGL3 / OpenGL.
 - Reflections
 - Expanding UI to buttons
 - Audio
-- Frustum (and Occlusion) culling
+- Occlusion culling
 
 ## How to run
 - Run the 'Demo/DemoLauncher.java'
