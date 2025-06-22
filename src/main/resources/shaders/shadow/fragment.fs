@@ -2,8 +2,6 @@
 
 out vec4 out_color;
 
-//uniform sampler2D modelTexture;
-
 void main(void){
     gl_FragDepth = gl_FragCoord.z;
 }

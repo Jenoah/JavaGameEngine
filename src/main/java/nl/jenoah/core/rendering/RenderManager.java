@@ -9,7 +9,7 @@ import nl.jenoah.core.WindowManager;
 import nl.jenoah.core.entity.Scene;
 import nl.jenoah.core.skybox.SkyboxRenderer;
 import nl.jenoah.core.utils.Constants;
-import nl.jenoah.core.utils.DebugEntity;
+import org.joml.Quaternionf;
 import org.joml.Vector3f;
 import org.lwjgl.opengl.GL11;
 
@@ -117,8 +117,16 @@ public class RenderManager {
         debugRenderer.drawCube(position, size);
     }
 
+    public void debugCube(Vector3f position, Quaternionf rotation, Vector3f size){
+        debugRenderer.drawCube(position, rotation, size);
+    }
+
     public void debugCube(Vector3f position){
         debugRenderer.drawCube(position, Constants.VECTOR3_ONE);
+    }
+
+    public void debugCube(Vector3f position, Quaternionf rotation){
+        debugRenderer.drawCube(position, rotation, Constants.VECTOR3_ONE);
     }
 
     public void dequeueRender(RenderComponent renderComponent){

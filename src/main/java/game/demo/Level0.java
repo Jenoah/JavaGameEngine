@@ -103,7 +103,7 @@ public class Level0 extends Scene {
         groundBlockEntity.addComponent(new RenderComponent(groundBlock.mesh, groundBlock.material));
         addEntity(groundBlockEntity);
 
-        GameObject lightProxy = new GameObject().setPosition(new Vector3f(0, 6f, -7f)).setScale(0.1f);
+        GameObject lightProxy = new GameObject().setPosition(new Vector3f(0, 6f, -7f)).setScale(0.5f);
         Material billboardMaterial = new Material(ShaderManager.billboardShader);
         billboardMaterial.setAlbedoTexture(new Texture("textures/Prozac.jpeg", false, false));
         lightProxy.addComponent(new RenderComponent(PrimitiveLoader.getQuad().getMesh(), billboardMaterial));
