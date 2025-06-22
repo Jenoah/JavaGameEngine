@@ -1,4 +1,4 @@
-# JavaGameEngine
+# Frame Gengine
 A simple Java Game engine using LWJGL3 / OpenGL.
 
 ## Included features
@@ -22,7 +22,6 @@ A simple Java Game engine using LWJGL3 / OpenGL.
 - Expanding UI to buttons
 - Audio
 - Frustum (and Occlusion) culling
-- An actual name for the engine
 
 ## How to run
 - Run the 'Demo/DemoLauncher.java'
