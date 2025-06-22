@@ -147,11 +147,13 @@ public class RenderManager {
             shadowRenderer.setMetrics(this.metrics);
             guiRenderer.setMetrics(this.metrics);
             fontRenderer.setMetrics(this.metrics);
+            skyboxRenderer.setMetrics(this.metrics);
         }
         componentRenderer.recordMetrics(recordMetrics);
         shadowRenderer.recordMetrics(recordMetrics);
         guiRenderer.recordMetrics(recordMetrics);
         fontRenderer.recordMetrics(recordMetrics);
+        skyboxRenderer.setMetrics(this.metrics);
     }
 
     public String getMetrics() {

@@ -1,10 +1,7 @@
 package nl.jenoah.core.entity;
 
-import game.demo.DemoLauncher;
 import nl.jenoah.core.WindowManager;
-import nl.jenoah.core.debugging.Debug;
 import nl.jenoah.core.rendering.FrustumPlane;
-import nl.jenoah.core.rendering.MeshMaterialSet;
 import nl.jenoah.core.utils.AABB;
 import nl.jenoah.core.utils.ObjectPool;
 import org.joml.Matrix4f;

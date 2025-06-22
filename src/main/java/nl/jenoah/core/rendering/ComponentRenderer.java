@@ -30,12 +30,8 @@ public class ComponentRenderer implements IRenderer {
     public void render() {
         if (sortedRenderObjects.isEmpty() && sortedTransparentRenderObjects.isEmpty() || mainCamera == null) return;
 
-        sortedRenderObjects.forEach((renderObjectShader, meshMaterialSetList) -> {
-            RenderPass(mainCamera, renderObjectShader, meshMaterialSetList);
-        });
-        sortedTransparentRenderObjects.forEach((renderObjectShader, meshMaterialSetList) -> {
-            RenderPass(mainCamera, renderObjectShader, meshMaterialSetList);
-        });
+        sortedRenderObjects.forEach((renderObjectShader, meshMaterialSetList) -> RenderPass(mainCamera, renderObjectShader, meshMaterialSetList));
+        sortedTransparentRenderObjects.forEach((renderObjectShader, meshMaterialSetList) -> RenderPass(mainCamera, renderObjectShader, meshMaterialSetList));
     }
 
     private void RenderPass(Camera camera, Shader shader, List<MeshMaterialSet> meshMaterialSetList){
