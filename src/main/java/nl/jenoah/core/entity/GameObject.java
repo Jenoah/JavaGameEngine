@@ -4,6 +4,7 @@ import nl.jenoah.core.MouseInput;
 import nl.jenoah.core.components.Component;
 import nl.jenoah.core.components.RenderComponent;
 import nl.jenoah.core.debugging.Debug;
+import nl.jenoah.core.utils.AABB;
 import nl.jenoah.core.utils.Constants;
 import nl.jenoah.core.utils.ObjectPool;
 import org.joml.*;
@@ -18,6 +19,9 @@ public class GameObject {
     private final Vector3f localPosition = new Vector3f();
     private final Quaternionf localRotation = new Quaternionf();
     private final Vector3f scale = new Vector3f(1f);
+    private float radius = 1f;
+    private AABB aabb;
+    private final Vector3f center = new Vector3f(0);
 
     private final List<GameObject> children;
     private GameObject parent;
@@ -52,16 +56,19 @@ public class GameObject {
 
     public GameObject setPosition(Vector3f position) {
         this.localPosition.set(position);
+        OnUpdateTransform();
         return this;
     }
 
     public GameObject setPosition(float x, float y) {
         this.localPosition.set(x, y, 0);
+        OnUpdateTransform();
         return this;
     }
 
     public GameObject setPosition(float x, float y, float z) {
         this.localPosition.set(x, y, z);
+        OnUpdateTransform();
         return this;
     }
 
@@ -78,10 +85,12 @@ public class GameObject {
             setPosition(relativePos);
             ObjectPool.VECTOR3F_POOL.free(relativePos);
         }
+        OnUpdateTransform();
     }
 
     public GameObject translateLocal(Vector3f position){
         this.localPosition.add(position);
+        OnUpdateTransform();
         return this;
     }
 
@@ -125,6 +134,7 @@ public class GameObject {
 
     public GameObject setRotation(Quaternionf rotation){
         this.localRotation.set(rotation);
+        OnUpdateTransform();
         return this;
     }
 
@@ -139,7 +149,7 @@ public class GameObject {
             setRotation(localRot);
             ObjectPool.QUATERNIONF_OBJECT_POOL.free(localRot);
         }
-
+        OnUpdateTransform();
         return this;
     }
 
@@ -147,6 +157,7 @@ public class GameObject {
         Vector3f radians = ObjectPool.VECTOR3F_POOL.obtain().set(rotation).mul((float) Math.toRadians(1));
         localRotation.identity().rotateXYZ(radians.x, radians.y, radians.z).normalize();
         ObjectPool.VECTOR3F_POOL.free(radians);
+        OnUpdateTransform();
         return this;
     }
 
@@ -159,11 +170,13 @@ public class GameObject {
                         radians.y,
                         radians.z
                 )).normalize();
+        OnUpdateTransform();
         return this;
     }
 
     public GameObject addRotation(Quaternionf rotation){
         localRotation.mul(rotation).normalize();
+        OnUpdateTransform();
         return this;
     }
 
@@ -177,12 +190,14 @@ public class GameObject {
         setRotation(quaternion);
         ObjectPool.VECTOR3F_POOL.free(forward);
         ObjectPool.QUATERNIONF_OBJECT_POOL.free(quaternion);
+        OnUpdateTransform();
         return this;
     }
 
     public void lookAtDirection(Vector3f direction) {
         direction.normalize();
         setRotation(new Quaternionf().rotateTo(new Vector3f(Constants.VECTOR3_FORWARD), direction));
+        OnUpdateTransform();
     }
 
     public Vector3f getScale() {
@@ -191,21 +206,25 @@ public class GameObject {
 
     public GameObject setScale(float scale) {
         this.scale.set(scale);
+        OnUpdateTransform();
         return this;
     }
 
     public GameObject setScale(Vector3f scale) {
         this.scale.set(scale);
+        OnUpdateTransform();
         return this;
     }
 
     public GameObject setScale(float x, float y, float z) {
         this.scale.set(x, y, z);
+        OnUpdateTransform();
         return this;
     }
 
     public GameObject setScale(float x, float y) {
         this.scale.set(x, y, 0);
+        OnUpdateTransform();
         return this;
     }
 
@@ -314,5 +333,33 @@ public class GameObject {
 
     public String ToString(){
         return this.getClass().getSimpleName();
+    }
+
+    protected void OnUpdateTransform(){
+        children.forEach(GameObject::OnUpdateTransform);
+    }
+
+    public final float getRadius(){
+        return radius;
+    }
+
+    public void setRadius(float radius){
+        this.radius = radius;
+    }
+
+    public final Vector3f getCenter() {
+        return center;
+    }
+
+    public void setCenter(Vector3f center) {
+        this.center.set(center);
+    }
+
+    public AABB getAabb() {
+        return aabb;
+    }
+
+    public void setAabb(AABB aabb) {
+        this.aabb = aabb;
     }
 }
