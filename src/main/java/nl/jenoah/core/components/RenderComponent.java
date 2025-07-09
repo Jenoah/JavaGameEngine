@@ -1,6 +1,6 @@
 package nl.jenoah.core.components;
 
-import game.demo.DemoLauncher;
+import nl.jenoah.core.EngineManager;
 import nl.jenoah.core.entity.*;
 import nl.jenoah.core.rendering.MeshMaterialSet;
 import nl.jenoah.core.shaders.ShaderManager;
@@ -71,11 +71,11 @@ public class RenderComponent extends Component {
     }
 
     private void queueRender() {
-        DemoLauncher.getGame().getRenderer().queueRender(this);
+        EngineManager.getGameLogic().getRenderer().queueRender(this);
     }
 
     private void dequeueRender() {
-        DemoLauncher.getGame().getRenderer().dequeueRender(this);
+        EngineManager.getGameLogic().getRenderer().dequeueRender(this);
     }
 
     private void calculateRadius() {

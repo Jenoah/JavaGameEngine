@@ -7,26 +7,20 @@ import nl.jenoah.core.utils.Constants;
 import org.lwjgl.Version;
 
 public class DemoLauncher {
-    private static WindowManager window;
     private static DemoGame game;
 
     public static void main(String[] args){
         System.out.println(Version.getVersion());
 
-        WindowManager.createInstance(Constants.TITLE, 1280, 720, Settings.isUseVSync());
-        window = WindowManager.getInstance();
+        WindowManager.createInstance(Constants.TITLE, 1280, 720, Settings.isUseVSync(), true);
         game = new DemoGame();
         EngineManager engine = new EngineManager();
 
         try{
-            engine.start(game);
+            engine.start(game, true);
         } catch (Exception e) {
             e.printStackTrace();
         }
-    }
-
-    public static WindowManager getWindow(){
-        return window;
     }
 
     public static DemoGame getGame() {

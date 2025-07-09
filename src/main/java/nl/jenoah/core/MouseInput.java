@@ -19,16 +19,16 @@ public class MouseInput {
         currentPosition = new Vector2d(0, 0);
         mouseDelta = new Vector2f();
         window = WindowManager.getInstance();
-        windowLong = window.getWindow();
+        windowLong = GLFW.glfwGetCurrentContext();
     }
 
     public void init(){
-        GLFW.glfwSetCursorPosCallback(window.getWindow(), (window, xPos, yPos) -> {
+        GLFW.glfwSetCursorPosCallback(windowLong, (window, xPos, yPos) -> {
             currentPosition.x = xPos;
             currentPosition.y = yPos;
         });
 
-        GLFW.glfwSetMouseButtonCallback(window.getWindow(), (window, button, action, mods) -> {
+        GLFW.glfwSetMouseButtonCallback(windowLong, (window, button, action, mods) -> {
             lbDown = button == GLFW.GLFW_MOUSE_BUTTON_1 && action == GLFW.GLFW_PRESS;
             rbDown = button == GLFW.GLFW_MOUSE_BUTTON_2 && action == GLFW.GLFW_PRESS;
         });

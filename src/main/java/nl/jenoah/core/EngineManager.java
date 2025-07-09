@@ -6,14 +6,12 @@ import org.joml.Math;
 import org.lwjgl.glfw.GLFW;
 import org.lwjgl.glfw.GLFWErrorCallback;
 
-import static org.lwjgl.glfw.GLFW.glfwGetTime;
-
 public class EngineManager {
     private boolean running = false;
 
     private WindowManager window;
     private GLFWErrorCallback errorCallback;
-    private ILogic gameLogic;
+    private static ILogic gameLogic;
     private MouseInput mouseInput;
 
     // Consider making these instance fields if multiple EngineManagers are possible
@@ -27,15 +25,15 @@ public class EngineManager {
 
     private static final float MIN_DELTA_TIME = 1.0f / 1000f; // 1ms minimum, adjust as needed
 
-    private void init(final ILogic gameLogic) throws Exception {
+    private void init(final ILogic IgameLogic, boolean standaloneWindow) throws Exception {
         errorCallback = GLFWErrorCallback.createPrint(System.err);
         GLFW.glfwSetErrorCallback(errorCallback);
 
         window = WindowManager.getInstance();
-        this.gameLogic = gameLogic;
-        mouseInput = new MouseInput();
-
+        gameLogic = IgameLogic;
         window.init();
+
+        mouseInput = new MouseInput();
         gameLogic.init();
         mouseInput.init();
         SceneManager.getInstance().getCurrentScene().postStart();
@@ -43,33 +41,42 @@ public class EngineManager {
         lastLoopTime = getCurrentTime();
     }
 
-    public void start(final ILogic gameLogic) throws Exception {
+    public void start(final ILogic gameLogic, boolean standaloneWindow) throws Exception {
         if (running) return;
-        init(gameLogic);
+        init(gameLogic, standaloneWindow);
         Debug.Log("Starting Engine...");
         run();
     }
 
     public void run() {
+        if(!window.isStandalone()){
+            renderSingleFrame();
+            return;
+        }
+
         running = true;
         try {
             while (running) {
-                if (window.windowShouldClose()) stop();
-
-                double frameStart = getCurrentTime();
-
-                updateDeltaTime();
-                handleInput();
-                updateGame();
-                renderFrame();
-
-                double frameEnd = getCurrentTime();
-                frameTime = (float)(frameEnd - frameStart);
-                spareTime = Math.max(0f, getDeltaTime() - frameTime); // Ensure spare time is non-negative
+                renderSingleFrame();
             }
         } finally {
             cleanup();
         }
+    }
+
+    private void renderSingleFrame(){
+        if (window.windowShouldClose()) stop();
+
+        double frameStart = getCurrentTime();
+
+        updateDeltaTime();
+        handleInput();
+        updateGame();
+        renderFrame();
+
+        double frameEnd = getCurrentTime();
+        frameTime = (float)(frameEnd - frameStart);
+        spareTime = Math.max(0f, getDeltaTime() - frameTime); // Ensure spare time is non-negative
     }
 
     public void stop() {
@@ -142,5 +149,9 @@ public class EngineManager {
     }
     public static float getSpareTimeMS() {
         return Math.round(spareTime * 100000f) / 100f;
+    }
+
+    public static ILogic getGameLogic(){
+        return gameLogic;
     }
 }
