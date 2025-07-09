@@ -35,6 +35,7 @@ import java.util.Set;
 public class Level0 extends Scene {
 
     private GameObject monkeyEntity;
+    private GameObject treeSurfaceFeature;
 
     private RenderManager renderManager;
 
@@ -58,7 +59,7 @@ public class Level0 extends Scene {
     @Override public void init() {
         super.init();
         levelName = "Level 0";
-        renderManager = DemoLauncher.getGame().getRenderer();
+        renderManager = EngineManager.getGameLogic().getRenderer();
 
         terrainGeneration = new TerrainGeneration(renderDistance);
         terrainGenerationThread = new Thread(terrainGeneration);
@@ -112,11 +113,9 @@ public class Level0 extends Scene {
 
         Set<MeshMaterialSet> treeMeshMaterialSet = OBJLoader.loadOBJModel("/models/birch.obj");
         treeMeshMaterialSet.forEach((meshMaterialSet -> meshMaterialSet.mesh.generateUVs()));
-        GameObject tree = new GameObject().setPosition(5, 5f, -2);
-        tree.setStatic(true);
-        tree.addComponent(new RenderComponent(treeMeshMaterialSet));
-
-        terrainGeneration.setSurfaceFeature(tree);
+        treeSurfaceFeature = new GameObject().setPosition(5, 5f, -2);
+        treeSurfaceFeature.setStatic(true);
+        treeSurfaceFeature.addComponent(new RenderComponent(treeMeshMaterialSet));
 
         //Lighting
         //Directional Light
@@ -229,7 +228,6 @@ public class Level0 extends Scene {
         }
 
         int processed = 0;
-        boolean hasAddedChunks = false;
 
         Iterator<MarchingChunk> it = marchingQueue.iterator();
         while (it.hasNext() && processed < maxChunksPerFrame) {
@@ -243,9 +241,8 @@ public class Level0 extends Scene {
             chunk.publishChunk();
             if (!ChunkCoord.compareToVector(chunk.chunkPosition, new Vector3f(0, 0, -10)) &&
                     !ChunkCoord.compareToVector(chunk.chunkPosition, new Vector3f(-1, 0, -10))) {
-                terrainGeneration.addSurfaceFeatures(chunk);
+                chunk.addSurfaceFeatures(treeSurfaceFeature);
             }
-            hasAddedChunks = true;
 
             GameObject chunkEntity = chunk.getChunkEntity();
             if (chunkEntity != null) {
@@ -259,11 +256,6 @@ public class Level0 extends Scene {
             it.remove(); // Remove from marchingQueue
             if(!it.hasNext()) terrainGeneration.restockQueue();
         }
-
-        if(hasAddedChunks) {
-            terrainGeneration.updateSurfaceFeatures();
-        }
-
     }
 
     @Override
