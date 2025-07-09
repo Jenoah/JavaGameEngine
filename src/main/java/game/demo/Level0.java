@@ -80,7 +80,6 @@ public class Level0 extends Scene {
         GameObject barn = new GameObject("Barn").setPosition(new Vector3f(0, 5f, -10f));
         barn.addComponent(new RenderComponent(barnMeshMaterialSets));
         addEntity(barn);
-        barn.setDrawDebugWireframe(true);
 
         Set<MeshMaterialSet> monkMeshMaterialSets = OBJLoader.loadOBJModel("/models/monk.obj", blockPaletteTexture);
         monkeyEntity = new GameObject("Monkey").setPosition(new Vector3f(0, 6.5f, -10f));
