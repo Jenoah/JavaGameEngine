@@ -1,3 +1,7 @@
+<p align="center">
+<img width='50%' src="git-files/images/FrameGengine.png" alt="Logo of Java Game Engine called Frame Gengine" />
+</p>
+
 # Frame Gengine
 A simple Java Game engine using LWJGL3 / OpenGL.
 
