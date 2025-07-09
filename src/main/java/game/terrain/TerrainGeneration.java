@@ -2,19 +2,15 @@ package game.terrain;
 
 import game.utils.ChunkCoord;
 import game.utils.ChunkUtils;
-import nl.jenoah.core.components.RenderComponent;
 import nl.jenoah.core.debugging.Debug;
-import nl.jenoah.core.entity.GameObject;
 import nl.jenoah.core.utils.*;
 import org.joml.Math;
-import org.joml.Matrix4f;
-import org.joml.Quaternionf;
 import org.joml.Vector3f;
 
 import java.util.*;
 
 public class TerrainGeneration implements Runnable{
-    private HashMap<ChunkCoord, MarchingChunk> chunks = new HashMap<ChunkCoord, MarchingChunk>();
+    private final HashMap<ChunkCoord, MarchingChunk> chunks;
     private final Set<ChunkCoord> chunkGenerationQueue;
     private final Set<ChunkCoord> previousRenderQueue;
     private final Set<ChunkCoord> activeChunks;
