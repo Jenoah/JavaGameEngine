@@ -1,8 +1,12 @@
 package nl.jenoah.core;
 
+import imgui.ImGui;
+import nl.jenoah.core.debugging.Debug;
 import org.joml.Vector2d;
 import org.joml.Vector2f;
 import org.lwjgl.glfw.GLFW;
+import org.lwjgl.glfw.GLFWCursorPosCallback;
+import org.lwjgl.glfw.GLFWMouseButtonCallback;
 
 public class MouseInput {
 
@@ -23,14 +27,23 @@ public class MouseInput {
     }
 
     public void init(){
-        GLFW.glfwSetCursorPosCallback(windowLong, (window, xPos, yPos) -> {
-            currentPosition.x = xPos;
-            currentPosition.y = yPos;
+        GLFWCursorPosCallback imguiCursorPosCallback = GLFW.glfwSetCursorPosCallback(this.window.getWindow(), null);
+        GLFWMouseButtonCallback imguiMouseButtonCallback = GLFW.glfwSetMouseButtonCallback(this.window.getWindow(), null);
+
+        GLFW.glfwSetCursorPosCallback(this.window.getWindow(), (window, xPos, yPos) -> {
+            if(this.window.getFocus()) {
+                currentPosition.x = xPos;
+                currentPosition.y = yPos;
+            }
+            if (imguiCursorPosCallback != null) imguiCursorPosCallback.invoke(window, xPos, yPos);
         });
 
-        GLFW.glfwSetMouseButtonCallback(windowLong, (window, button, action, mods) -> {
-            lbDown = button == GLFW.GLFW_MOUSE_BUTTON_1 && action == GLFW.GLFW_PRESS;
-            rbDown = button == GLFW.GLFW_MOUSE_BUTTON_2 && action == GLFW.GLFW_PRESS;
+        GLFW.glfwSetMouseButtonCallback(this.window.getWindow(), (window, button, action, mods) -> {
+            if(this.window.getFocus()) {
+                lbDown = button == GLFW.GLFW_MOUSE_BUTTON_1 && action == GLFW.GLFW_PRESS;
+                rbDown = button == GLFW.GLFW_MOUSE_BUTTON_2 && action == GLFW.GLFW_PRESS;
+            }
+            if (imguiMouseButtonCallback != null) imguiMouseButtonCallback.invoke(window, button, action, mods);
         });
     }
 

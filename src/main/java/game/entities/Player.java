@@ -16,10 +16,14 @@ public class Player extends GameObject {
     private final PlayerMovement playerMovement;
 
     public Player(){
+        setName("Player");
+
         this.camera = new Camera();
         this.camera.setParent(this);
 
-        GameObject feet = new GameObject().setPosition(new Vector3f(0, -1f, 0)).setScale(0.1f);
+        this.camera.setName("Camera");
+
+        GameObject feet = new GameObject("Feet").setPosition(new Vector3f(0, -1f, 0)).setScale(0.1f);
         Material feetMaterial = new Material(ShaderManager.unlitShader).setAmbientColor(new Vector4f(1, .5f, 1, 1));
         feet.addComponent(new RenderComponent(PrimitiveLoader.getCube().getMesh(), feetMaterial));
 

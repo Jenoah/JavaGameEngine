@@ -12,12 +12,16 @@ import nl.jenoah.core.gui.GuiObject;
 import nl.jenoah.core.lighting.DirectionalLight;
 import nl.jenoah.core.lighting.PointLight;
 import nl.jenoah.core.lighting.SpotLight;
+import nl.jenoah.core.rendering.RenderManager;
 import org.joml.Vector3f;
 
 import java.util.*;
 
 public class Scene {
+    protected RenderManager renderManager;
+
     private final List<GameObject> gameObjects;
+    private final List<GameObject> rootGameObjects;
     private final List<GuiObject> guiObjects;
     private final Map<FontType, List<GUIText>> textObjects;
     private Vector3f fogColor = new Vector3f(1);
@@ -38,6 +42,7 @@ public class Scene {
 
     public Scene() {
         this.gameObjects = new ArrayList<>();
+        this.rootGameObjects = new ArrayList<>();
         this.guiObjects = new ArrayList<>();
         this.windowManager = WindowManager.getInstance();
         this.textObjects = new HashMap<>();
@@ -87,6 +92,7 @@ public class Scene {
     public void addGameObject(GameObject gameObject) {
         if (!gameObjects.contains(gameObject)) {
             gameObjects.add(gameObject);
+            if(gameObject.getParent() != null) this.rootGameObjects.add(gameObject);
 
             if (gameObject.getChildren() != null) {
                 for (GameObject child : gameObject.getChildren()) {
@@ -94,6 +100,10 @@ public class Scene {
                 }
             }
         }
+    }
+
+    public void removeFromRoot(GameObject gameObject){
+        this.rootGameObjects.remove(gameObject);
     }
 
     public void addGUI(GuiObject guiObject) {
@@ -234,5 +244,17 @@ public class Scene {
     public void disableFog(){
         this.fogGradient = 100000;
         this.fogDensity = 0;
+    }
+
+    public List<GameObject> getGameObjects() {
+        return gameObjects;
+    }
+
+    public List<GameObject> getRootGameObjects() {
+        return gameObjects;
+    }
+
+    public RenderManager getRenderManager() {
+        return renderManager;
     }
 }

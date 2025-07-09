@@ -190,7 +190,7 @@ public class MarchingChunk {
 
         Model chunkModel = ModelManager.loadModel(Arrays.copyOf(vertices, vertexCount), null, Arrays.copyOf(triangles, triangleCount), normals);
         chunkModel.getMesh().generateUVs();
-        chunkEntity = new GameObject().setPosition(chunkPosition.toVector3());
+        chunkEntity = new GameObject("Chunk - " + chunkPosition).setPosition(chunkPosition.toVector3());
         chunkEntity.addComponent(new RenderComponent(chunkModel.getMesh(), chunkModel.getMaterial()));
     }
 

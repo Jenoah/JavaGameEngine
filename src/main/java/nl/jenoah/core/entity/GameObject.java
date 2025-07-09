@@ -4,6 +4,8 @@ import nl.jenoah.core.MouseInput;
 import nl.jenoah.core.components.Component;
 import nl.jenoah.core.components.RenderComponent;
 import nl.jenoah.core.debugging.Debug;
+import nl.jenoah.core.rendering.DebugRenderer;
+import nl.jenoah.core.rendering.RenderManager;
 import nl.jenoah.core.utils.AABB;
 import nl.jenoah.core.utils.Constants;
 import nl.jenoah.core.utils.ObjectPool;
@@ -28,9 +30,18 @@ public class GameObject {
     protected boolean isEnabled = true;
     protected boolean isStatic = false;
 
+    private boolean drawDebugWireframe = false;
+
     private final Set<Component> components = new HashSet<>();
 
+    private String name = "GameObject";
+
     public GameObject() {
+        this.children = new ArrayList<>();
+    }
+
+    public GameObject(String name){
+        this.name = name;
         this.children = new ArrayList<>();
     }
 
@@ -234,6 +245,7 @@ public class GameObject {
         }
         child.parent = this;
         this.children.add(child);
+        if(SceneManager.getInstance() != null && SceneManager.getInstance().getCurrentScene() != null) SceneManager.getInstance().getCurrentScene().removeFromRoot(child);
         return this;
     }
 
@@ -252,6 +264,9 @@ public class GameObject {
         this.parent = parent;
         if (parent != null) {
             parent.children.add(this);
+            if(SceneManager.getInstance() != null && SceneManager.getInstance().getCurrentScene() != null) SceneManager.getInstance().getCurrentScene().removeFromRoot(this);
+        }else{
+            if(SceneManager.getInstance() != null && SceneManager.getInstance().getCurrentScene() != null) SceneManager.getInstance().getCurrentScene().getRootGameObjects().add(this);
         }
         return this;
     }
@@ -261,6 +276,7 @@ public class GameObject {
     }
 
     public void update(MouseInput mouseInput){
+        if(drawDebugWireframe) SceneManager.getInstance().getCurrentScene().getRenderManager().debugCube(getPosition(), aabb.getSize());
         if(!isEnabled || components.isEmpty()) return;
         for(Component component : components) component.update();
     }
@@ -361,5 +377,21 @@ public class GameObject {
 
     public void setAabb(AABB aabb) {
         this.aabb = aabb;
+    }
+
+    public final String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public void setDrawDebugWireframe(boolean drawDebugWireframe) {
+        this.drawDebugWireframe = drawDebugWireframe;
+    }
+
+    public final boolean isDrawDebugWireframe() {
+        return drawDebugWireframe;
     }
 }

@@ -37,8 +37,6 @@ public class Level0 extends Scene {
     private GameObject monkeyEntity;
     private GameObject treeSurfaceFeature;
 
-    private RenderManager renderManager;
-
     //Labels
     private GUIText fpsLabel;
     private GUIText positionLabel;
@@ -80,18 +78,19 @@ public class Level0 extends Scene {
 
         //Models
         Set<MeshMaterialSet> barnMeshMaterialSets = OBJLoader.loadOBJModel("/models/barn.obj");
-        GameObject barn = new GameObject().setPosition(new Vector3f(0, 5f, -10f));
+        GameObject barn = new GameObject("Barn").setPosition(new Vector3f(0, 5f, -10f));
         barn.addComponent(new RenderComponent(barnMeshMaterialSets));
         addEntity(barn);
+        barn.setDrawDebugWireframe(true);
 
         Set<MeshMaterialSet> monkMeshMaterialSets = OBJLoader.loadOBJModel("/models/monk.obj", blockPaletteTexture);
-        monkeyEntity = new GameObject().setPosition(new Vector3f(0, 6.5f, -10f));
+        monkeyEntity = new GameObject("Monkey").setPosition(new Vector3f(0, 6.5f, -10f));
         monkeyEntity.addComponent(new RenderComponent(monkMeshMaterialSets));
         addEntity(monkeyEntity);
 
         Set<MeshMaterialSet> testMeshMaterialSets = OBJLoader.loadOBJModel("/models/monk.obj", blockPaletteTexture);
         testMeshMaterialSets.forEach((meshMaterialSet -> meshMaterialSet.material.setShader(ShaderManager.unlitShader).setAmbientColor(new Vector4f(1, 0, 1, 1))));
-        GameObject testEntity = new GameObject().setPosition(new Vector3f(2, 6.5f, -3f)).setScale(0.3f).lookAt(player.getPosition());
+        GameObject testEntity = new GameObject("Test entity").setPosition(new Vector3f(2, 6.5f, -3f)).setScale(0.3f).lookAt(player.getPosition());
         testEntity.addComponent(new RenderComponent(testMeshMaterialSets));
         addEntity(testEntity);
 
@@ -100,11 +99,11 @@ public class Level0 extends Scene {
         groundBlock.material.setNormalMap(new Texture("textures/rock/rock_normal.jpg", false, false, true, true));
         groundBlock.material.setRoughnessMap(new Texture("textures/rock/rock_roughness.jpg", false, false, true, true));
         groundBlock.material.setRoughness(.6f);
-        GameObject groundBlockEntity = new GameObject().setPosition(new Vector3f(0, 2.5f, -10)).setScale(new Vector3f(10, 5, 15));
+        GameObject groundBlockEntity = new GameObject("Ground block").setPosition(new Vector3f(0, 2.5f, -10)).setScale(new Vector3f(10, 5, 15));
         groundBlockEntity.addComponent(new RenderComponent(groundBlock.mesh, groundBlock.material));
         addEntity(groundBlockEntity);
 
-        GameObject lightProxy = new GameObject().setPosition(new Vector3f(0, 6f, -7f)).setScale(0.5f);
+        GameObject lightProxy = new GameObject("Light proxy").setPosition(new Vector3f(0, 6f, -7f)).setScale(0.5f);
         Material billboardMaterial = new Material(ShaderManager.billboardShader);
         billboardMaterial.setAlbedoTexture(new Texture("textures/Prozac.jpeg", false, false));
         lightProxy.addComponent(new RenderComponent(PrimitiveLoader.getQuad().getMesh(), billboardMaterial));
@@ -113,7 +112,7 @@ public class Level0 extends Scene {
 
         Set<MeshMaterialSet> treeMeshMaterialSet = OBJLoader.loadOBJModel("/models/birch.obj");
         treeMeshMaterialSet.forEach((meshMaterialSet -> meshMaterialSet.mesh.generateUVs()));
-        treeSurfaceFeature = new GameObject().setPosition(5, 5f, -2);
+        treeSurfaceFeature = new GameObject("Tree").setPosition(5, 5f, -2);
         treeSurfaceFeature.setStatic(true);
         treeSurfaceFeature.addComponent(new RenderComponent(treeMeshMaterialSet));
 
@@ -142,6 +141,9 @@ public class Level0 extends Scene {
         float spotLightOuterCutOff = org.joml.Math.cos(Math.toRadians(35));
         SpotLight spotLight1 = new SpotLight(new Vector3f(0.4f, 0, 0), new Vector3f(0f), 3f, 1.0f, 0.09f, 0.032f, spotLightConeDirection, spotLightCutoff, spotLightOuterCutOff);
         SpotLight spotLight2 = new SpotLight(new Vector3f(0, 0.4f, 0), new Vector3f(0f), 3f, 1.0f, 0.09f, 0.032f, Calculus.subtractVectors(new Vector3f(0, 0, 0), spotLightConeDirection), spotLightCutoff, spotLightOuterCutOff);
+
+        spotLight1.setName("Spotlight 1");
+        spotLight2.setName("Spotlight 2");
 
         spotLight1.addComponent(new RotateSpotlight(spotLight1, new Vector3f(0, 90f, 0)));
         spotLight2.addComponent(new RotateSpotlight(spotLight2, new Vector3f(0, 90f, 0)));

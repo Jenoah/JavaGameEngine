@@ -8,7 +8,6 @@ import org.lwjgl.glfw.GLFWErrorCallback;
 import org.lwjgl.glfw.GLFWImage;
 import org.lwjgl.glfw.GLFWVidMode;
 import org.lwjgl.opengl.GL;
-import org.lwjgl.stb.STBImage;
 import org.lwjgl.system.MemoryUtil;
 
 import java.nio.ByteBuffer;
@@ -27,6 +26,7 @@ public class WindowManager {
     private final boolean vSync;
     private final Matrix4f projectionMatrix = new Matrix4f();
     private boolean standalone = true;
+    private boolean isInFocus = true;
 
     public WindowManager(String title, int width, int height, boolean vSync, boolean standalone) {
         this.title = title;
@@ -48,9 +48,9 @@ public class WindowManager {
     }
 
     public static WindowManager getInstance() {
-        if (instance == null) {
-            throw new IllegalStateException("WindowManager has not been initialized. Call createInstance() first.");
-        }
+//        if (instance == null) {
+//            throw new IllegalStateException("WindowManager has not been initialized. Call createInstance() first.");
+//        }
         return instance;
     }
 
@@ -123,7 +123,8 @@ public class WindowManager {
     }
 
     public void update(){
-        if(standalone) GLFW.glfwSwapBuffers(window);
+        if(!standalone) return;
+        GLFW.glfwSwapBuffers(window);
         GLFW.glfwPollEvents();
     }
 
@@ -207,5 +208,13 @@ public class WindowManager {
 
     public boolean isStandalone() {
         return standalone;
+    }
+
+    public void setFocus(boolean focus){
+        this.isInFocus = focus;
+    }
+
+    public final boolean getFocus(){
+        return this.isInFocus;
     }
 }

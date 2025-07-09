@@ -5,30 +5,39 @@ import imgui.flag.ImGuiWindowFlags;
 
 public abstract class EditorPanel {
 
-    private final float posX;
-    private final float posY;
-    private final float sizeX;
-    private final float sizeY;
-    private final String windowName;
+    protected final int posX;
+    protected final int posY;
+    protected final int sizeX;
+    protected final int sizeY;
+    protected final String windowName;
+    protected int windowFlags;
+    protected boolean inFocus;
 
 
-    public EditorPanel(float posX, float posY, float sizeX, float sizeY){
+    public EditorPanel(int posX, int posY, int sizeX, int sizeY){
         this.posX = posX;
         this.posY = posY;
         this.sizeX = sizeX;
         this.sizeY = sizeY;
         this.windowName = getClass().getSimpleName();
+        this.windowFlags = ImGuiWindowFlags.NoMove |
+                ImGuiWindowFlags.NoResize |
+                ImGuiWindowFlags.NoCollapse;
     }
 
     public void prepareFrame(){
         ImGui.setNextWindowPos(posX, posY);
         ImGui.setNextWindowSize(sizeX, sizeY);
-        ImGui.begin(windowName, ImGuiWindowFlags.NoMove | ImGuiWindowFlags.NoResize | ImGuiWindowFlags.NoTitleBar);
+        ImGui.begin(windowName, windowFlags);
     }
 
     public abstract void renderFrame();
 
     public void endFrame(){
         ImGui.end();
+    }
+
+    public void addWindowFlag(int windowFlags){
+        this.windowFlags = this.windowFlags | windowFlags;
     }
 }
