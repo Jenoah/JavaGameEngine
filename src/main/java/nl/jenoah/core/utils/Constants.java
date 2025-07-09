@@ -1,7 +1,6 @@
 package nl.jenoah.core.utils;
 
 import org.joml.Vector3f;
-import org.joml.Vector3i;
 import org.joml.Vector4f;
 
 public class Constants {
@@ -31,6 +30,7 @@ public class Constants {
     public static final Vector4f VECTOR4_ZERO = new Vector4f(0, 0, 0, 0);
 
     public static final int CHUNK_SIZE = 16;
+    public static final float CHUNK_ISO_LEVEL = 0.5f;
 
     public static final float SHADOW_DISTANCE = 40;
     public static final float SHADOW_OFFSET = 10;
@@ -44,16 +44,15 @@ public class Constants {
 
     public static final float DEGREES_90_IN_RADIANS = 1.57f;
 
-    public static final Vector3i[] cornerTable = new Vector3i[] {
-
-            new Vector3i(0, 0, 0),
-            new Vector3i(1, 0, 0),
-            new Vector3i(1, 1, 0),
-            new Vector3i(0, 1, 0),
-            new Vector3i(0, 0, 1),
-            new Vector3i(1, 0, 1),
-            new Vector3i(1, 1, 1),
-            new Vector3i(0, 1, 1),
+    public static final Vector3f[] cornerTable = new Vector3f[] {
+            new Vector3f(0, 0, 0),
+            new Vector3f(1, 0, 0),
+            new Vector3f(1, 1, 0),
+            new Vector3f(0, 1, 0),
+            new Vector3f(0, 0, 1),
+            new Vector3f(1, 0, 1),
+            new Vector3f(1, 1, 1),
+            new Vector3f(0, 1, 1),
     };
 
     public static final int[][] edgeIndexes = new int[][] {
