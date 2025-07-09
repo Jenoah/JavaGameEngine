@@ -40,7 +40,7 @@ public class ComponentRenderer implements IRenderer {
         shader.render(camera);
 
         meshMaterialSetList.forEach(meshMaterialSet -> {
-            if (!meshMaterialSet.getRoot().isEnabled() || (!camera.isInFrustumAABB(meshMaterialSet.getRoot()) && !meshMaterialSet.mesh.isInstanced())) return;
+            if (!meshMaterialSet.getRoot().isEnabled() || !camera.isInFrustumAABB(meshMaterialSet.getRoot())) return;
             if (recordMetrics) metrics.recordStateChange();
 
             bind(meshMaterialSet);
