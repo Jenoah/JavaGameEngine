@@ -49,10 +49,7 @@ public class ChunkUtils {
         int configIndex = 0;
         for (int i = 0; i < 8; i++)
         {
-            if (voxelCorners[i] > terrainSurfaceHeight)
-            {
-                configIndex |= 1 << i;
-            }
+            if (voxelCorners[i] > terrainSurfaceHeight) configIndex |= 1 << i;
         }
 
         return configIndex;

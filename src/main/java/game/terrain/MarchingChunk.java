@@ -6,10 +6,13 @@ import nl.jenoah.core.ModelManager;
 import nl.jenoah.core.components.RenderComponent;
 import nl.jenoah.core.debugging.Debug;
 import nl.jenoah.core.entity.GameObject;
+import nl.jenoah.core.entity.Material;
+import nl.jenoah.core.entity.Mesh;
 import nl.jenoah.core.entity.Model;
+import nl.jenoah.core.rendering.MeshMaterialSet;
 import nl.jenoah.core.utils.Constants;
 import nl.jenoah.core.utils.ObjectPool;
-import nl.jenoah.core.utils.Transformation;
+import nl.jenoah.core.utils.Utils;
 import org.joml.Matrix4f;
 import org.joml.Quaternionf;
 import org.joml.Vector3f;
@@ -28,25 +31,25 @@ public class MarchingChunk {
     int[] triangles = new int[MAX_TRIANGLES];
     private int[] edgeVertexIndices;
 
-    int vertexCount = 0;
-    int triangleCount = 0;
+    private int vertexCount = 0;
+    private int triangleCount = 0;
 
-    float[] terrainHeights;
-    Vector3f[] normals;
+    private final float[] terrainHeights;
+    private Vector3f[] normals;
 
-    GameObject chunkEntity;
+    private GameObject chunkEntity;
+    private RenderComponent surfaceFeatureRenderComponent;
 
     public ChunkCoord chunkPosition;
     public boolean isReady = false;
     public boolean isEmpty = false;
 
-    Set<Matrix4f> surfaceFeatureModelMatrices = new HashSet<>();
+    private final Set<Matrix4f> surfaceFeatureModelMatrices = new HashSet<>();
 
     public MarchingChunk(ChunkCoord chunkPosition){
         this.chunkPosition = chunkPosition;
         this.terrainHeights = new float[(CHUNK_SIZE + 1) * (CHUNK_SIZE + 1)];
         init();
-
     }
 
     private void init(){
@@ -260,16 +263,57 @@ public class MarchingChunk {
     public void setActive(boolean active){
         if(chunkEntity == null) return;
         chunkEntity.setEnabled(active);
+        if(surfaceFeatureRenderComponent != null) surfaceFeatureRenderComponent.isEnabled = active;
     }
 
     //REGION Surface features
 
-    public void addSurfaceFeature(Matrix4f modelMatrix){
-        surfaceFeatureModelMatrices.add(modelMatrix);
-    }
+    public void addSurfaceFeatures(GameObject surfaceFeatureEntity) {
+        if (surfaceFeatureEntity == null) return;
 
-    public void addSurfaceFeature(Vector3f position, Quaternionf rotation, Vector3f scale){
-        surfaceFeatureModelMatrices.add(Transformation.toModelMatrix(position, rotation, scale));
+        if(surfaceFeatureRenderComponent == null) {
+            Set<MeshMaterialSet> localMMS = new HashSet<>();
+            surfaceFeatureEntity.getComponent(RenderComponent.class).getMeshMaterialSets().forEach(mms -> {
+                localMMS.add(new MeshMaterialSet(new Mesh(mms.mesh), new Material(mms.material)));
+            });
+            this.surfaceFeatureRenderComponent = new RenderComponent(localMMS);
+            this.surfaceFeatureRenderComponent.setRoot(chunkEntity);
+            this.surfaceFeatureRenderComponent.initiate();
+        }
+
+        float stepSize = (float) Constants.CHUNK_SIZE / TerrainGeneration.surfaceFeatureSamples;
+
+        for (int x = 0; x < TerrainGeneration.surfaceFeatureSamples; x++) {
+            for (int z = 0; z < TerrainGeneration.surfaceFeatureSamples; z++) {
+                float localPositionX = (float) x * stepSize;
+                float localPositionZ = (float) z * stepSize;
+                float noiseLocationX = chunkPosition.x + localPositionX;
+                float noiseLocationZ = chunkPosition.z + localPositionZ;
+                float spawnChance = Utils.fastNoise.GetNoise(noiseLocationX, noiseLocationZ) + 1f / 2f;
+
+                if (spawnChance > TerrainGeneration.surfaceFeatureDensity) {
+                    float sampleLocationX = noiseLocationX - chunkPosition.x;
+                    float sampleLocationZ = noiseLocationZ - chunkPosition.z;
+                    float spawnHeight = getHeightAt(sampleLocationX, sampleLocationZ);
+                    float rotationY = (spawnChance - TerrainGeneration.surfaceFeatureDensity) * 360f / (1f - TerrainGeneration.surfaceFeatureDensity);
+
+                    Quaternionf normalUp = new Quaternionf().rotationTo(Constants.VECTOR3_UP, getNormalAt(sampleLocationX, sampleLocationZ));
+                    normalUp.rotateY(rotationY);
+
+                    Matrix4f transform = new Matrix4f().translation(noiseLocationX, spawnHeight, noiseLocationZ)
+                            .rotate(normalUp)
+                            .scale(Constants.VECTOR3_ONE);
+
+                    surfaceFeatureModelMatrices.add(transform);
+                }
+            }
+        }
+
+        surfaceFeatureRenderComponent.getMeshMaterialSets().forEach(mms -> {
+            mms.mesh.addInstanceOffset(getSurfaceFeatureMatrices());
+            mms.mesh.updateInstanceVBO();
+        });
+
     }
 
     public final Set<Matrix4f> getSurfaceFeatureMatrices(){

@@ -21,7 +21,6 @@ public class TerrainGeneration implements Runnable{
     private final Set<MarchingChunk> marchingChunksQueue = new HashSet<>();
     private final Set<MarchingChunk> marchingChunkRequeue = new HashSet<>();
 
-
     private final int renderDistance;
     private final int verticalRenderDistance;
     private ChunkCoord previousPlayerChunkCoord;
@@ -30,10 +29,8 @@ public class TerrainGeneration implements Runnable{
     public static long waitTime = 500;
     private Vector3f playerPosition = new Vector3f(0);
 
-    private float surfaceFeatureDensity = .4f;
-    private int surfaceFeatureSamples = 16;
-    private GameObject surfaceFeatureEntity = null;
-    private RenderComponent surfaceFeatureRenderComponent;
+    public static float surfaceFeatureDensity = .4f;
+    public static int surfaceFeatureSamples = 16;
 
     public TerrainGeneration(int renderDistance){
         this.renderDistance = renderDistance;
@@ -65,12 +62,6 @@ public class TerrainGeneration implements Runnable{
                 }
             }
         }
-    }
-
-    public void setSurfaceFeature(GameObject surfaceFeatureEntity){
-        this.surfaceFeatureEntity = surfaceFeatureEntity;
-        this.surfaceFeatureRenderComponent = this.surfaceFeatureEntity.getComponent(RenderComponent.class);
-        surfaceFeatureRenderComponent.initiate();
     }
 
     public void end(){
@@ -156,47 +147,10 @@ public class TerrainGeneration implements Runnable{
     }
 
     public void setSurfaceFeatureDensity(float surfaceFeatureDensity){
-        this.surfaceFeatureDensity = surfaceFeatureDensity;
+        TerrainGeneration.surfaceFeatureDensity = surfaceFeatureDensity;
     }
 
     public void setSurfaceFeatureSamples(int surfaceFeatureSamples){
-        this.surfaceFeatureSamples = surfaceFeatureSamples;
-    }
-
-    public void addSurfaceFeatures(MarchingChunk chunk) {
-        if (surfaceFeatureEntity == null) return;
-
-        float stepSize = (float) Constants.CHUNK_SIZE / surfaceFeatureSamples;
-
-        for (int x = 0; x < surfaceFeatureSamples; x++) {
-            for (int z = 0; z < surfaceFeatureSamples; z++) {
-                float localPositionX = (float) x * stepSize;
-                float localPositionZ = (float) z * stepSize;
-                float noiseLocationX = chunk.chunkPosition.x + localPositionX;
-                float noiseLocationZ = chunk.chunkPosition.z + localPositionZ;
-                float spawnChance = Utils.fastNoise.GetNoise(noiseLocationX, noiseLocationZ) + 1f / 2f;
-
-                if (spawnChance > surfaceFeatureDensity) {
-                    float sampleLocationX = noiseLocationX - chunk.chunkPosition.x;
-                    float sampleLocationZ = noiseLocationZ - chunk.chunkPosition.z;
-                    float spawnHeight = chunk.getHeightAt(sampleLocationX, sampleLocationZ);
-                    float rotationY = (spawnChance - surfaceFeatureDensity) * 360f / (1f - surfaceFeatureDensity);
-
-                    Quaternionf normalUp = new Quaternionf().rotationTo(Constants.VECTOR3_UP, chunk.getNormalAt(sampleLocationX, sampleLocationZ));
-                    normalUp.rotateY(rotationY);
-
-                    Matrix4f transform = new Matrix4f().translation(noiseLocationX, spawnHeight, noiseLocationZ)
-                            .rotate(normalUp)
-                            .scale(Constants.VECTOR3_ONE);
-
-                    surfaceFeatureRenderComponent.getMeshMaterialSets().forEach(mms -> mms.mesh.addInstanceOffset(transform));
-                }
-            }
-        }
-    }
-
-    // At the end of your frame, update the VBOs once:
-    public void updateSurfaceFeatures() {
-        surfaceFeatureRenderComponent.getMeshMaterialSets().forEach(mms -> mms.mesh.updateInstanceVBO());
+        TerrainGeneration.surfaceFeatureSamples = surfaceFeatureSamples;
     }
 }
