@@ -20,7 +20,6 @@ public class PPFXHorizontalBlurShader extends Shader {
     @Override
     public void createRequiredUniforms() throws Exception {
         createUniform("targetWidth");
-        //setUniform("targetWidth", 1280);
     }
 
     public void setTargetWidth(int targetWidth){

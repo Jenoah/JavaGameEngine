@@ -49,11 +49,11 @@ public class FrameBuffer {
      * Deletes the frame buffer and its attachments when the game closes.
      */
     public void cleanUp() {
-        GL30.glDeleteFramebuffers(frameBuffer);
-        GL11.glDeleteTextures(colourTexture);
-        GL11.glDeleteTextures(depthTexture);
-        GL30.glDeleteRenderbuffers(depthBuffer);
-        GL30.glDeleteRenderbuffers(colourBuffer);
+        if (frameBuffer != 0) GL30.glDeleteFramebuffers(frameBuffer);
+        if (colourTexture != 0) GL11.glDeleteTextures(colourTexture);
+        if (depthTexture != 0) GL11.glDeleteTextures(depthTexture);
+        if (depthBuffer != 0) GL30.glDeleteRenderbuffers(depthBuffer);
+        if (colourBuffer != 0) GL30.glDeleteRenderbuffers(colourBuffer);
     }
 
 
@@ -92,6 +92,10 @@ public class FrameBuffer {
      * @return The ID of the texture containing the colour buffer of the FBO.
      */
     public int getColourTexture() {
+        if (GL30.glCheckFramebufferStatus(GL30.GL_FRAMEBUFFER) != GL30.GL_FRAMEBUFFER_COMPLETE) {
+            throw new RuntimeException("Framebuffer is not complete!");
+        }
+
         return colourTexture;
     }
 

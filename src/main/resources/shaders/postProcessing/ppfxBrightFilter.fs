@@ -13,6 +13,6 @@ void main(void){
     if(brightness >= threshold){
         color = sceneColor;
     }else{
-        color = vec4(0);
+        color = vec4(0, 0, 0, 1);
     }
 }

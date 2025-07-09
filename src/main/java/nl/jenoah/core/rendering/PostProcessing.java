@@ -102,6 +102,16 @@ public class PostProcessing {
         unbind();
     }
 
+    public static void renderOutput(){
+        bind();
+        outputEffect.render(fxaaEffect.getOutputTexture());
+        unbind();
+    }
+
+    public int getOutputTextureID(){
+        return outputEffect.getOutputTexture();
+    }
+
     public static void cleanUp(){
         horizontalBlurEffectPass1.cleanUp();
         verticalBlurEffectPass1.cleanUp();

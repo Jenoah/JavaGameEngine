@@ -1,5 +1,6 @@
 package nl.jenoah.core.rendering;
 
+import nl.framegengine.engine.EditorWindow;
 import nl.jenoah.core.entity.Camera;
 import nl.jenoah.core.components.RenderComponent;
 import nl.jenoah.core.debugging.RenderMetrics;
@@ -22,6 +23,7 @@ public class RenderManager {
     private GuiRenderer guiRenderer;
     private FontRenderer fontRenderer;
     private FrameBuffer frameBuffer;
+    private FrameBuffer editorBuffer;
     private SkyboxRenderer skyboxRenderer;
     private DebugRenderer debugRenderer;
     private final RenderMetrics metrics;
@@ -51,7 +53,6 @@ public class RenderManager {
     }
 
     public void render(Scene currentScene){
-        clear();
         if (recordMetrics) metrics.frameStart();
 
         if(window.isResize()){
@@ -80,11 +81,19 @@ public class RenderManager {
         //Post Processing
         PostProcessing.render(frameBuffer.getColourTexture());
 
+        if(!window.isStandalone()) {
+            clear();
+            editorBuffer.bindFrameBuffer();
+            PostProcessing.renderOutput();
+        }
+
         //End of 3D rendering
 
         //Overlay
         guiRenderer.render(currentScene.getGuiObjects());
         fontRenderer.render(currentScene.getTextObjects());
+
+        if(!window.isStandalone()) editorBuffer.unbindFrameBuffer();
 
         if (recordMetrics) metrics.frameEnd();
     }
@@ -97,6 +106,7 @@ public class RenderManager {
         PostProcessing.cleanUp();
         componentRenderer.cleanUp();
         frameBuffer.cleanUp();
+        if(!window.isStandalone()) editorBuffer.cleanUp();
         guiRenderer.cleanUp();
         fontRenderer.cleanUp();
         skyboxRenderer.cleanUp();
@@ -106,6 +116,10 @@ public class RenderManager {
 
     private void regenerateFrameBuffer(){
         frameBuffer = new FrameBuffer(window.getWidth(), window.getHeight(), FrameBuffer.DEPTH_RENDER_BUFFER);
+        if(!window.isStandalone()){
+            editorBuffer = new FrameBuffer(window.getWidth(), window.getHeight(), FrameBuffer.DEPTH_RENDER_BUFFER);
+            EditorWindow.getInstance().setGameFBOID(editorBuffer.getColourTexture());
+        }
     }
 
     public void queueRender(RenderComponent renderComponent){

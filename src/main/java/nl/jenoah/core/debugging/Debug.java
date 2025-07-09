@@ -1,6 +1,12 @@
 package nl.jenoah.core.debugging;
 
+
+import java.util.ArrayList;
+import java.util.List;
+
 public class Debug {
+
+    private static final List<LogEntry> logHistory = new ArrayList<>();
 
     public static void Log(String message){
         StackTraceElement[] stackTrace = Thread.currentThread().getStackTrace();
@@ -12,7 +18,10 @@ public class Debug {
         String className = caller.getClassName();
         int lineNumber = caller.getLineNumber();
 
-        System.out.println("\u001B[35m" + "[Log] " + "\u001B[90m" + className + ":" + lineNumber + " \u001B[0m" + message);
+        String debugMessage = "\u001B[35m" + "[Log] " + "\u001B[90m" + className + ":" + lineNumber + " \u001B[0m" + message;
+
+        logHistory.add(new LogEntry(ConsoleColors.parseAnsi(debugMessage)));
+        System.out.println(debugMessage);
     }
 
     public static void LogError(String message){
@@ -23,6 +32,22 @@ public class Debug {
         String className = caller.getClassName();
         int lineNumber = caller.getLineNumber();
 
-        System.out.println("\u001B[35m" + "[Log] " + "\u001B[90m" + className + ":" + lineNumber + " \u001B[31m" + message);
+        String debugMessage = "\u001B[35m" + "[Log] " + "\u001B[90m" + className + ":" + lineNumber + " \u001B[31m" + message;
+
+        logHistory.add(new LogEntry(ConsoleColors.parseAnsi(debugMessage)));
+        System.out.println(debugMessage);
     }
+
+    public static List<LogEntry> GetLog(){
+        return logHistory;
+    }
+
+    public static class LogEntry {
+        public final List<ConsoleColors> segments;
+
+        public LogEntry(List<ConsoleColors> segments) {
+            this.segments = segments;
+        }
+    }
+
 }
