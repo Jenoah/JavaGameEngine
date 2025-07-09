@@ -9,8 +9,8 @@ import nl.jenoah.core.utils.Constants;
 public class EditorGameLauncher {
     private EngineManager engine;
 
-    public void run() {
-        WindowManager.createInstance(Constants.TITLE, 1200, 720, Settings.isUseVSync(), false);
+    public void run(int width, int height) {
+        WindowManager.createInstance(Constants.TITLE, width, height, Settings.isUseVSync(), false);
         DemoGame game = new DemoGame();
         engine = new EngineManager();
 

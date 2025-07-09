@@ -86,8 +86,8 @@ public class EditorWindow {
         glClearColor(.2f, 0.2f, 0.2f, 1);
         glClear(GL_COLOR_BUFFER_BIT);
 
-        imGuiImplGl3.newFrame();
         imGuiGlfw.newFrame();
+        imGuiImplGl3.newFrame();
 
         ImGui.newFrame();
     }

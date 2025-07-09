@@ -4,8 +4,6 @@ import nl.jenoah.core.MouseInput;
 import nl.jenoah.core.components.Component;
 import nl.jenoah.core.components.RenderComponent;
 import nl.jenoah.core.debugging.Debug;
-import nl.jenoah.core.rendering.DebugRenderer;
-import nl.jenoah.core.rendering.RenderManager;
 import nl.jenoah.core.utils.AABB;
 import nl.jenoah.core.utils.Constants;
 import nl.jenoah.core.utils.ObjectPool;

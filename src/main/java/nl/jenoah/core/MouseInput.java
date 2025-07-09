@@ -1,7 +1,5 @@
 package nl.jenoah.core;
 
-import imgui.ImGui;
-import nl.jenoah.core.debugging.Debug;
 import org.joml.Vector2d;
 import org.joml.Vector2f;
 import org.lwjgl.glfw.GLFW;

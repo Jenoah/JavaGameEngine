@@ -19,7 +19,6 @@ import nl.jenoah.core.loaders.OBJLoader.OBJLoader;
 import nl.jenoah.core.loaders.PrimitiveLoader;
 import nl.jenoah.core.loaders.TextureLoader;
 import nl.jenoah.core.rendering.MeshMaterialSet;
-import nl.jenoah.core.rendering.RenderManager;
 import nl.jenoah.core.shaders.ShaderManager;
 import nl.jenoah.core.utils.*;
 import org.joml.Math;
