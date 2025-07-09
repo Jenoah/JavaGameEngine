@@ -7,21 +7,26 @@ import nl.jenoah.core.debugging.Debug;
 
 public class ConsolePanel extends EditorPanel {
 
-    public ConsolePanel(float posX, float posY, float sizeX, float sizeY) {
+    private int previousLogEntriesCount = 0;
+
+    public ConsolePanel(int posX, int posY, int sizeX, int sizeY) {
         super(posX, posY, sizeX, sizeY);
     }
 
     @Override
     public void renderFrame() {
-        ImGui.text("Console Panel");
-        ImGui.setWindowFontScale(1.5f);
+        ImGui.setWindowFontScale(1.2f);
         for (Debug.LogEntry entry : Debug.GetLog()) {
             for (ConsoleColors seg : entry.segments) {
                 ImGui.textColored(seg.color[0], seg.color[1], seg.color[2], seg.color[3], seg.text);
-                ImGui.sameLine(0, 0); // No spacing between segments
+                ImGui.sameLine(0, 0);
             }
             ImGui.newLine();
         }
-        ImGui.setScrollHereY(1.0f);
+        if(previousLogEntriesCount != Debug.GetLog().size()){
+            ImGui.setScrollHereY(1.0f);
+            previousLogEntriesCount = Debug.GetLog().size();
+        }
+
     }
 }
