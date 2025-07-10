@@ -274,7 +274,7 @@ public class GameObject {
     }
 
     public void update(MouseInput mouseInput){
-        if(drawDebugWireframe) SceneManager.getInstance().getCurrentScene().getRenderManager().debugCube(getPosition(), aabb.getSize());
+        if(drawDebugWireframe && aabb != null) SceneManager.getInstance().getCurrentScene().getRenderManager().debugCube(getPosition(), aabb.getSize());
         if(!isEnabled || components.isEmpty()) return;
         for(Component component : components) component.update();
     }
