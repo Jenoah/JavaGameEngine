@@ -113,7 +113,7 @@ public class SimpleLitShader extends Shader {
             setUniform("pointLights", pointLights[i], i);
         }
 
-        setUniform("directionalLight", directionalLight);
+        if(directionalLight != null) setUniform("directionalLight", directionalLight);
     }
 
     //Create uniforms
