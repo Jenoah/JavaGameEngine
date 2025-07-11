@@ -28,6 +28,9 @@ dependencies {
     implementation "org.lwjgl:lwjgl-stb"
     implementation "org.lwjgl:lwjgl-vulkan"
 
+    implementation 'javax.json:javax.json-api:1.1.4'
+    implementation 'org.glassfish:javax.json:1.1.4'
+
     runtimeOnly "org.lwjgl:lwjgl::$lwjglNatives"
     runtimeOnly "org.lwjgl:lwjgl-assimp::$lwjglNatives"
     runtimeOnly "org.lwjgl:lwjgl-bgfx::$lwjglNatives"
@@ -41,6 +44,8 @@ dependencies {
     runtimeOnly "org.lwjgl:lwjgl-vulkan::$lwjglNatives"
 
     implementation "org.joml:joml:${jomlVersion}"
+
+
 
     //ImGUI
     implementation fileTree("libs") { include '*.jar' }
