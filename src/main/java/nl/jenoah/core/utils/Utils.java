@@ -2,10 +2,7 @@ package nl.jenoah.core.utils;
 
 import org.lwjgl.system.MemoryUtil;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
+import java.io.*;
 import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
 import java.nio.charset.StandardCharsets;
@@ -57,5 +54,10 @@ public class Utils {
         }
 
         return list;
+    }
+
+    public static String getFileName(String filePath) {
+        String fileName = new File(filePath).getName();
+        return fileName.substring(0, fileName.lastIndexOf('.'));
     }
 }
