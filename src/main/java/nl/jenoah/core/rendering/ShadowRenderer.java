@@ -47,7 +47,7 @@ public class ShadowRenderer implements IRenderer{
     }
 
     public void render(Scene currentScene) {
-        if(shadowSets.isEmpty()) return;
+        if(shadowSets.isEmpty() || currentScene.getDirectionalLight() == null) return;
 
         prepare(currentScene.getDirectionalLight().getForward(), shadowFrustum);
 
