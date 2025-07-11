@@ -1,6 +1,7 @@
 package nl.jenoah.core.entity;
 
 import game.entities.Player;
+import nl.jenoah.core.EngineManager;
 import nl.jenoah.core.ModelManager;
 import nl.jenoah.core.MouseInput;
 import nl.jenoah.core.WindowManager;
@@ -52,12 +53,16 @@ public class Scene {
     }
 
     public void init() {
+        renderManager = EngineManager.getGameLogic().getRenderer();
+        renderManager.setRenderCamera(player.getCamera());
+        renderManager.shadowRenderer.setMainCamera(player.getCamera());
     }
 
     public void postStart() {
 //        for(GameObject gameObject: gameObjects){
 //            gameObject.initiate();
 //        }
+        addGameObject(player);
     }
 
     public void update(MouseInput mouseInput) {
@@ -256,5 +261,9 @@ public class Scene {
 
     public RenderManager getRenderManager() {
         return renderManager;
+    }
+
+    public void setLevelName(String levelName) {
+        this.levelName = levelName;
     }
 }

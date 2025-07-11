@@ -56,7 +56,6 @@ public class Level0 extends Scene {
     @Override public void init() {
         super.init();
         levelName = "Level 0";
-        renderManager = EngineManager.getGameLogic().getRenderer();
 
         terrainGeneration = new TerrainGeneration(renderDistance);
         terrainGenerationThread = new Thread(terrainGeneration);
@@ -66,7 +65,6 @@ public class Level0 extends Scene {
 
         Utils.setNoiseSeed(123);
         player.setPosition(0, 6.5f, 0);
-        renderManager.setRenderCamera(player.getCamera());
 
         setFogColor(new Vector3f(0.7f, 0.75f, .8f));
         setFogDensity(.025f);
@@ -154,8 +152,6 @@ public class Level0 extends Scene {
         addSpotLight(spotLight1);
         addSpotLight(spotLight2);
 
-        addGameObject(player);
-
         //UI
         GuiObject testSprite = new GuiObject(new Vector2f(-.7125f, .65f), new Vector2f(.25f, .3f));
         testSprite.setColor(new Vector4f(0.1f, 0.1f, 0.1f, 0.7f));
@@ -202,7 +198,6 @@ public class Level0 extends Scene {
         super.postStart();
         terrainGenerationThread.start();
         terrainGeneration.setUpdatePosition(player.getPosition());
-        renderManager.shadowRenderer.setMainCamera(player.getCamera());
     }
 
     @Override
