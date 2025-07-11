@@ -1,9 +1,14 @@
 package nl.jenoah.core.utils;
 
+import org.joml.Quaternionf;
 import org.joml.Vector2f;
 import org.joml.Vector3f;
 import org.joml.Vector3i;
 
+import javax.json.JsonNumber;
+import javax.json.JsonObject;
+import javax.json.JsonString;
+import javax.json.JsonValue;
 import java.util.List;
 
 public class Conversion {
@@ -122,4 +127,38 @@ public class Conversion {
         return new Vector3f(a.x, a.y, a.z);
     }
 
+    public static float jsonToFloat(JsonObject obj, String key, float defaultValue) {
+        if (!obj.containsKey(key) || obj.isNull(key)) return defaultValue;
+
+        JsonValue value = obj.get(key);
+
+        switch (value.getValueType()) {
+            case NUMBER:
+                return (float) ((JsonNumber) value).doubleValue();
+            case STRING:
+                String s = ((JsonString) value).getString().replace("f", "");
+                try {
+                    return Float.parseFloat(s);
+                } catch (NumberFormatException e) {
+                    return defaultValue;
+                }
+            default:
+                return defaultValue;
+        }
+    }
+
+    public static Vector3f jsonToVector3f(JsonObject obj) {
+        float x = jsonToFloat(obj, "x", 0.0f);
+        float y = jsonToFloat(obj, "y", 0.0f);
+        float z = jsonToFloat(obj, "z", 0.0f);
+        return new Vector3f(x, y, z);
+    }
+
+    public static Quaternionf jsonToQuaternionf(JsonObject obj) {
+        float x = jsonToFloat(obj, "x", 0.0f);
+        float y = jsonToFloat(obj, "y", 0.0f);
+        float z = jsonToFloat(obj, "z", 0.0f);
+        float w = jsonToFloat(obj, "w", 1.0f);
+        return new Quaternionf(x, y, z, w);
+    }
 }
