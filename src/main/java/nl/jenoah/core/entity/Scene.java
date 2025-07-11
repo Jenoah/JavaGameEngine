@@ -266,4 +266,8 @@ public class Scene {
     public void setLevelName(String levelName) {
         this.levelName = levelName;
     }
+
+    public GameObject getGameObjectByGUID(String guid){
+        return gameObjects.stream().filter(go -> guid.equals(go.getGuid())).findAny().orElse(null);
+    }
 }

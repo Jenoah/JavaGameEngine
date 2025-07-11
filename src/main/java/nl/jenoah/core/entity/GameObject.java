@@ -22,6 +22,7 @@ public class GameObject {
     private float radius = 1f;
     private AABB aabb;
     private final Vector3f center = new Vector3f(0);
+    private String guid;
 
     private final List<GameObject> children;
     private GameObject parent;
@@ -36,11 +37,13 @@ public class GameObject {
 
     public GameObject() {
         this.children = new ArrayList<>();
+        setGuid();
     }
 
     public GameObject(String name){
         this.name = name;
         this.children = new ArrayList<>();
+        setGuid();
     }
 
     public void initiate(){
@@ -402,5 +405,17 @@ public class GameObject {
 
     public final boolean isDrawDebugWireframe() {
         return drawDebugWireframe;
+    }
+
+    public String getGuid() {
+        return guid;
+    }
+
+    public void setGuid(){
+        setGuid(String.valueOf(java.util.UUID.randomUUID()));
+    }
+
+    public void setGuid(String guid) {
+        this.guid = guid;
     }
 }
