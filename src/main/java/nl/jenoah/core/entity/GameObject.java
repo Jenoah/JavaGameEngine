@@ -205,7 +205,18 @@ public class GameObject {
 
     public void lookAtDirection(Vector3f direction) {
         direction.normalize();
+        if(direction.lengthSquared() <= 0.01) direction.set(0, 0, -1);
         setRotation(new Quaternionf().rotateTo(new Vector3f(Constants.VECTOR3_FORWARD), direction));
+        OnUpdateTransform();
+    }
+
+    public void lookAtDirection(Quaternionf direction) {
+        direction.normalize();
+        Vector3f targetRotation = ObjectPool.VECTOR3F_POOL.obtain();
+        direction.getEulerAnglesXYZ(targetRotation);
+        if(targetRotation.lengthSquared() <= 0.01) targetRotation.set(0, 0, -1);
+        setRotation(new Quaternionf().rotateTo(new Vector3f(Constants.VECTOR3_FORWARD), targetRotation));
+        ObjectPool.VECTOR3F_POOL.free(targetRotation);
         OnUpdateTransform();
     }
 
