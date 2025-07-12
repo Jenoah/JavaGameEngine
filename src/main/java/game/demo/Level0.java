@@ -132,11 +132,12 @@ public class Level0 extends Scene {
 
         addPointLight(pointLight);
 
-        Vector3f spotLightConeDirection = new Vector3f(0f, 0.0f, -1f);
         float spotLightCutoff = org.joml.Math.cos(Math.toRadians(30));
         float spotLightOuterCutOff = org.joml.Math.cos(Math.toRadians(35));
-        SpotLight spotLight1 = new SpotLight(new Vector3f(0.4f, 0, 0), new Vector3f(0f), 3f, 1.0f, 0.09f, 0.032f, spotLightConeDirection, spotLightCutoff, spotLightOuterCutOff);
-        SpotLight spotLight2 = new SpotLight(new Vector3f(0, 0.4f, 0), new Vector3f(0f), 3f, 1.0f, 0.09f, 0.032f, Calculus.subtractVectors(new Vector3f(0, 0, 0), spotLightConeDirection), spotLightCutoff, spotLightOuterCutOff);
+        SpotLight spotLight1 = new SpotLight(new Vector3f(0.4f, 0, 0), new Vector3f(0f), 3f, 1.0f, 0.09f, 0.032f, spotLightCutoff, spotLightOuterCutOff);
+        SpotLight spotLight2 = new SpotLight(new Vector3f(0, 0.4f, 0), new Vector3f(0f), 3f, 1.0f, 0.09f, 0.032f, spotLightCutoff, spotLightOuterCutOff);
+        spotLight1.lookAtDirection(new Vector3f(0, 0, -1));
+        spotLight2.lookAtDirection(new Vector3f(0, 0, 1));
 
         spotLight1.setName("Spotlight 1");
         spotLight2.setName("Spotlight 2");

@@ -3,7 +3,7 @@ package game.components;
 import nl.jenoah.core.EngineManager;
 import nl.jenoah.core.components.Component;
 import nl.jenoah.core.lighting.SpotLight;
-import nl.jenoah.core.utils.Transformation;
+import nl.jenoah.core.utils.ObjectPool;
 import org.joml.Vector3f;
 
 public class RotateSpotlight extends Component {
@@ -26,6 +26,9 @@ public class RotateSpotlight extends Component {
 
     @Override
     public void update() {
-        spotLight.setConeDirection(Transformation.rotateDirection(spotLight.getConeDirection(), new Vector3f(rotation).mul(EngineManager.getDeltaTime())));
+        Vector3f addedRotation = ObjectPool.VECTOR3F_POOL.obtain().set(rotation);
+        addedRotation.mul(EngineManager.getDeltaTime());
+        root.addRotation(addedRotation);
+        ObjectPool.VECTOR3F_POOL.free(addedRotation);
     }
 }
