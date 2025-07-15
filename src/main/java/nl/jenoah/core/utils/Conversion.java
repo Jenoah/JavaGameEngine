@@ -161,4 +161,27 @@ public class Conversion {
         float w = jsonToFloat(obj, "w", 1.0f);
         return new Quaternionf(x, y, z, w);
     }
+
+    public static Object jsonToObject(JsonValue jsonValue) {
+        switch (jsonValue.getValueType()) {
+            case NUMBER:
+                JsonNumber num = (JsonNumber) jsonValue;
+                // Return as double or int depending on your needs
+                if (num.isIntegral()) {
+                    return num.intValue();
+                } else {
+                    return (float) num.doubleValue();
+                }
+            case STRING:
+                return ((JsonString) jsonValue).getString();
+            case TRUE:
+                return true;
+            case FALSE:
+                return false;
+            case NULL:
+                return null;
+            default:
+                return null;
+        }
+    }
 }
