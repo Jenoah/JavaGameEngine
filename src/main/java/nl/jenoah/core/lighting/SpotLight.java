@@ -7,6 +7,8 @@ public class SpotLight extends Light {
     private float cutOff;
     private float outerCutOff;
 
+    public SpotLight(){ super(); }
+
     public SpotLight(Vector3f color, Vector3f position, float intensity, float constant, float linear, float exponent, float cutOff, float outerCutOff) {
         super(color, position, intensity, constant, linear, exponent);
 

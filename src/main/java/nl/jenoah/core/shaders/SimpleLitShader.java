@@ -171,7 +171,7 @@ public class SimpleLitShader extends Shader {
         setUniform(uniformName + ".constant", spotlight.getConstant());
         setUniform(uniformName + ".linear", spotlight.getLinear());
         setUniform(uniformName + ".exponent", spotlight.getExponent());
-        setUniform(uniformName + ".coneDirection", spotlight.getConeDirection());
+        setUniform(uniformName + ".coneDirection", spotlight.getForward());
         setUniform(uniformName + ".cutOff", spotlight.getCutOff());
         setUniform(uniformName + ".outerCutOff", spotlight.getOuterCutOff());
     }
