@@ -14,7 +14,9 @@ public class Light extends GameObject {
     protected float constant;
     protected float linear;
     protected float exponent;
-    protected GameObject proxy;
+    protected boolean isShowingProxy = false;
+
+    public Light(){}
 
     public Light(Vector3f color, Vector3f position, float intensity, float constant, float linear, float exponent) {
         this.color = color;
@@ -82,23 +84,18 @@ public class Light extends GameObject {
         this.exponent = exponent;
     }
 
-    public GameObject showProxy(){
-        if(proxy == null){
-            Material proxyMaterial = new Material(ShaderManager.unlitShader);
-            proxyMaterial.setTransparent(true);
-            proxyMaterial.setAlbedoTexture(new Texture("textures/lightDirection.png"));
-            proxyMaterial.setDoubleSided(true);
+    public Light showProxy(){
+        if(!isShowingProxy){
+            boolean isPointLight = this instanceof PointLight;
+            Material proxyMaterial = new Material(isPointLight ? ShaderManager.billboardShader : ShaderManager.unlitShader);
+            String texturePath = this instanceof PointLight ? "textures/light.png": "textures/lightDirection.png";
+            proxyMaterial.setAlbedoTexture(new Texture(texturePath, false, !isPointLight)).setDoubleSided(true).setTransparent(true);
             proxyMaterial.setDiffuseColor(new Vector4f(color.x, color.y, color.z, 1f));
-            proxy = new GameObject().setRotation(new Vector3f(0f, 90f, 0f));
-            RenderComponent renderComponent = new RenderComponent(PrimitiveLoader.getQuad().getMesh(), proxyMaterial);
-            proxy.addComponent(renderComponent);
+            RenderComponent renderComponent = new RenderComponent(isPointLight ? PrimitiveLoader.getQuad().getMesh() : PrimitiveLoader.getQuadRotated().getMesh(), proxyMaterial);
+            this.addComponent(renderComponent);
             renderComponent.initiate();
-            proxy.setParent(this);
-            proxy.setName("Proxy");
-
-            return proxy;
         }
 
-        return proxy;
+        return this;
     }
 }

@@ -39,6 +39,39 @@ public class PrimitiveLoader {
         return ModelManager.loadModel(vertices, textureCoords, indices, normals);
     }
 
+    public static Model getQuadRotated(){
+        float[] vertices = new float[]{
+                0.0f,  0.5f, 0.5f, // Top-left
+                0.0f,  0.5f, -0.5f, // Top-right
+                0.0f, -0.5f, -0.5f, // Bottom-right
+                0.0f, -0.5f, 0.5f  // Bottom-left
+        };
+        float[] textureCoords = new float[]{
+                0.0f, 1.0f, // Top-left
+                1.0f, 1.0f, // Top-right
+                1.0f, 0.0f, // Bottom-right
+                0.0f, 0.0f  // Bottom-left
+        };
+        int[] indices = new int[]{
+                0, 1, 2, // First triangle (top-right)
+                0, 2, 3  // Second triangle (bottom-left)
+        };
+        float[] normals = new float[]{
+                0.0f, 0.0f, 1.0f, // Top-left
+                0.0f, 0.0f, 1.0f, // Top-right
+                0.0f, 0.0f, 1.0f, // Bottom-right
+                0.0f, 0.0f, 1.0f  // Bottom-left
+        };
+
+        for (int i = 0; i < textureCoords.length; i++) {
+            textureCoords[i] *= textureScale;
+        }
+
+        textureScale = 1;
+
+        return ModelManager.loadModel(vertices, textureCoords, indices, normals);
+    }
+
     public static Model getQuad(float textureScale){
         PrimitiveLoader.textureScale = textureScale;
         return getQuad();
