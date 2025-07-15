@@ -4,10 +4,12 @@ import imgui.ImGui;
 import imgui.flag.ImGuiConfigFlags;
 import imgui.gl3.ImGuiImplGl3;
 import imgui.glfw.ImGuiImplGlfw;
+import org.lwjgl.BufferUtils;
 import org.lwjgl.glfw.Callbacks;
 import org.lwjgl.glfw.GLFWErrorCallback;
 import org.lwjgl.opengl.GL;
 import org.lwjgl.system.MemoryUtil;
+import java.nio.FloatBuffer;
 
 import static org.lwjgl.glfw.GLFW.*;
 import static org.lwjgl.opengl.GL11.*;
@@ -19,13 +21,17 @@ public class EditorWindow {
 
     private String glslVersion = null;
     private long windowPtr;
-    private final EditorLayout editorLayout;
+    private EditorLayout editorLayout;
     private int gameFBOID = -1;
+
+    public static int referenceWidth = 1920;
+    public static int referenceHeight = 1080;
+    public static float windowScaleX = 1;
+    public static float windowScaleY = 1;
 
     private static EditorWindow instance = null;
 
-    public EditorWindow(EditorLayout editorLayout){
-        this.editorLayout = editorLayout;
+    public EditorWindow(){
         instance = this;
     }
 
@@ -62,7 +68,21 @@ public class EditorWindow {
         glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
         glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
 
-        windowPtr = glfwCreateWindow(1920, 1080, "FrameGengine Editor", MemoryUtil.NULL, MemoryUtil.NULL);
+        // Get content scale for primary monitor
+        FloatBuffer xScale = BufferUtils.createFloatBuffer(1);
+        FloatBuffer yScale = BufferUtils.createFloatBuffer(1);
+        glfwGetMonitorContentScale(glfwGetPrimaryMonitor(), xScale, yScale);
+        windowScaleX = xScale.get(0);
+        windowScaleY = yScale.get(0);
+
+        // Calculate window size in logical pixels
+        int width = (int)(referenceWidth / windowScaleX);
+        int height = (int)(referenceHeight / windowScaleY);
+
+        // Set GLFW hint to scale to monitor
+        glfwWindowHint(GLFW_SCALE_TO_MONITOR, GLFW_TRUE);
+
+        windowPtr = glfwCreateWindow(width, height, "FrameGengine Editor", MemoryUtil.NULL, MemoryUtil.NULL);
 
         if(windowPtr == MemoryUtil.NULL) throw new RuntimeException("Failed to create GLFW window");
         glfwMakeContextCurrent(windowPtr);
@@ -116,5 +136,9 @@ public class EditorWindow {
 
     public void setGameFBOID(int gameFBOID) {
         this.gameFBOID = gameFBOID;
+    }
+
+    public void setEditorLayout(EditorLayout editorLayout){
+        this.editorLayout = editorLayout;
     }
 }

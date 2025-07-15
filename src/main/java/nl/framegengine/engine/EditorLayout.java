@@ -9,10 +9,10 @@ public class EditorLayout {
     private final EditorPanel[] editorPanels = new EditorPanel[4];
 
     public EditorLayout(){
-        editorPanels[0] = new HierarchyPanel(0, 0, 384, 768);
-        editorPanels[1] = new GamePanel(384, 0, 1200, 675);
-        editorPanels[2] = new ConsolePanel(0, 768, 1584, 312);
-        editorPanels[3] = new InfoPanel(1584, 0, 336, 1080);
+        editorPanels[0] = new HierarchyPanel(0, 0, (int)(384 / EditorWindow.windowScaleX), (int)(768 / EditorWindow.windowScaleY));
+        editorPanels[1] = new GamePanel((int)(384 / EditorWindow.windowScaleX), 0, (int)(1200 / EditorWindow.windowScaleX), (int)(675 / EditorWindow.windowScaleY));
+        editorPanels[2] = new ConsolePanel(0, (int)(768 / EditorWindow.windowScaleY), (int)(1584 / EditorWindow.windowScaleX), (int)(312 / EditorWindow.windowScaleY));
+        editorPanels[3] = new InfoPanel((int)(1584 / EditorWindow.windowScaleX), 0, (int)(336 / EditorWindow.windowScaleX), (int)(1080 / EditorWindow.windowScaleY));
 
         ((HierarchyPanel)editorPanels[0]).setInfoPanel(((InfoPanel)editorPanels[3]));
     }
