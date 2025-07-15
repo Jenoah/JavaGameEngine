@@ -14,7 +14,8 @@ public class DemoGame implements ILogic {
     private final SceneManager sceneManager;
 
     public DemoGame(){
-        renderer = new RenderManager();
+        RenderManager.createInstance();
+        renderer = RenderManager.getInstance();
         window = WindowManager.getInstance();
         sceneManager = SceneManager.getInstance();
 

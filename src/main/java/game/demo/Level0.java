@@ -19,6 +19,7 @@ import nl.jenoah.core.loaders.OBJLoader.OBJLoader;
 import nl.jenoah.core.loaders.PrimitiveLoader;
 import nl.jenoah.core.loaders.TextureLoader;
 import nl.jenoah.core.rendering.MeshMaterialSet;
+import nl.jenoah.core.rendering.RenderManager;
 import nl.jenoah.core.shaders.ShaderManager;
 import nl.jenoah.core.utils.*;
 import org.joml.Math;
@@ -191,7 +192,7 @@ public class Level0 extends Scene {
         ShaderManager.triplanarShader.setLights(getDirectionalLight(), getPointLights(), getSpotLights());
         ShaderManager.pbrShader.setLights(getDirectionalLight(), getPointLights(), getSpotLights());
 
-        renderManager.recordMetrics(true);
+        RenderManager.getInstance().recordMetrics(true);
     }
 
     @Override
@@ -212,33 +213,9 @@ public class Level0 extends Scene {
         fpsLabel.setText("FPS: " + EngineManager.getFps());
         positionLabel.setText("Position: " + Conversion.V3ToString(player.getPosition()));
         resolutionLabel.setText("Resolution: " + windowManager.getWidth() + " x " + windowManager.getHeight());
-        performanceLabel.setText("Performance: " + renderManager.getMetrics() + " |\nFrame time: " + EngineManager.getFrameTimeMS() + "ms");
-        chunkLabel.setText("Active / total chunks: " + terrainGeneration.getActiveChunkCount() + " / " + terrainGeneration.getTotalChunkCount());
-        updateTerrain();
+        performanceLabel.setText("Performance: " + RenderManager.getInstance().getMetrics() + " |\nFrame time: " + EngineManager.getFrameTimeMS() + "ms");
+        //chunkLabel.setText("Active / total chunks: " + terrainGeneration.getActiveChunkCount() + " / " + terrainGeneration.getTotalChunkCount());
     }
-
-    private void updateTerrain() {
-        terrainGeneration.setUpdatePosition(player.getPosition());
-        if (marchingQueue.isEmpty()) {
-            marchingQueue.addAll(terrainGeneration.getMarchingChunksQueue());
-        }
-
-        int processed = 0;
-
-        Iterator<MarchingChunk> it = marchingQueue.iterator();
-        while (it.hasNext() && processed < maxChunksPerFrame) {
-            MarchingChunk chunk = it.next();
-            if (!chunk.isReady) {
-                terrainGeneration.requeueChunk(chunk);
-                it.remove(); // Remove from marchingQueue
-                continue;
-            }
-
-            chunk.publishChunk();
-            if (!ChunkCoord.compareToVector(chunk.chunkPosition, new Vector3f(0, 0, -10)) &&
-                    !ChunkCoord.compareToVector(chunk.chunkPosition, new Vector3f(-1, 0, -10))) {
-                chunk.addSurfaceFeatures(treeSurfaceFeature);
-            }
 
             GameObject chunkEntity = chunk.getChunkEntity();
             if (chunkEntity != null) {

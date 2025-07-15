@@ -4,6 +4,7 @@ import nl.jenoah.core.MouseInput;
 import nl.jenoah.core.components.Component;
 import nl.jenoah.core.components.RenderComponent;
 import nl.jenoah.core.debugging.Debug;
+import nl.jenoah.core.rendering.RenderManager;
 import nl.jenoah.core.utils.AABB;
 import nl.jenoah.core.utils.Constants;
 import nl.jenoah.core.utils.ObjectPool;
@@ -288,10 +289,11 @@ public class GameObject {
     }
 
     public void update(MouseInput mouseInput){
-        if(drawDebugWireframe && aabb != null){
+        if(drawDebugWireframe && aabb != null && RenderManager.getInstance() != null){
             AABB worldAABB = new AABB(getAabb()).offset(getPosition());
-            SceneManager.getInstance().getCurrentScene().getRenderManager().debugCube(worldAABB.getCenter(), worldAABB.getSize());
+            RenderManager.getInstance().debugCube(worldAABB.getCenter(), getRotation(), worldAABB.getSize());
         }
+
         if(!isEnabled || components.isEmpty()) return;
         for(Component component : components) component.update();
     }

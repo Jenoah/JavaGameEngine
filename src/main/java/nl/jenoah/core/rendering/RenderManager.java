@@ -29,10 +29,25 @@ public class RenderManager {
     private final RenderMetrics metrics;
     private boolean recordMetrics = false;
     public static float aspectRatio = 1.77f;
+    private Camera renderCamera = null;
+
+    private static RenderManager instance = null;
 
     public RenderManager() {
         window = WindowManager.getInstance();
         metrics = new RenderMetrics();
+        instance = this;
+    }
+
+    public static synchronized void createInstance() {
+        if (instance != null) {
+            throw new IllegalStateException("RenderManager already initialized");
+        }
+        instance = new RenderManager();
+    }
+
+    public static RenderManager getInstance() {
+        return instance;
     }
 
     public void init() throws Exception {
