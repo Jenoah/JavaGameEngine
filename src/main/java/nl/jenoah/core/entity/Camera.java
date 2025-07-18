@@ -1,7 +1,9 @@
 package nl.jenoah.core.entity;
 
 import nl.jenoah.core.WindowManager;
+import nl.jenoah.core.debugging.Debug;
 import nl.jenoah.core.rendering.FrustumPlane;
+import nl.jenoah.core.rendering.RenderManager;
 import nl.jenoah.core.utils.AABB;
 import nl.jenoah.core.utils.ObjectPool;
 import org.joml.Matrix4f;
@@ -9,6 +11,8 @@ import org.joml.Quaternionf;
 import org.joml.Vector3f;
 
 public class Camera extends GameObject {
+
+    public static Camera mainCamera = null;
 
     private final Matrix4f viewProjectionMatrix = new Matrix4f();
     private final Matrix4f viewMatrix = new Matrix4f();
@@ -18,6 +22,7 @@ public class Camera extends GameObject {
     public Camera() {
         super();
 
+        if(mainCamera == null) mainCamera = this;
         windowManager = WindowManager.getInstance();
 
         setPosition(new Vector3f(0, 0, 0));
@@ -46,6 +51,7 @@ public class Camera extends GameObject {
 
         updateViewFrustum();
     }
+
     public void updateViewFrustum(){
         Vector3f normal = new Vector3f();
 
@@ -155,11 +161,16 @@ public class Camera extends GameObject {
         return this.viewMatrix;
     }
 
+    public void setAsMain(){
+        mainCamera = this;
+        if(RenderManager.getInstance() != null) RenderManager.getInstance().setRenderCamera(mainCamera);
+    }
+
     @Override
     protected void OnUpdateTransform() {
         super.OnUpdateTransform();
         updateViewMatrix();
         updateViewProjectionMatrix();
+        updateViewFrustum();
     }
-
 }

@@ -79,6 +79,11 @@ public class RenderManager {
             aspectRatio = (float)window.getWidth() / (float)window.getHeight();
         }
 
+        if(renderCamera == null){
+            renderCamera = Camera.mainCamera;
+            setRenderCamera(renderCamera);
+        }
+
         shadowRenderer.render(currentScene);
         componentRenderer.setShadowSpaceMatrix(shadowRenderer.getToShadowMapSpaceMatrix());
 

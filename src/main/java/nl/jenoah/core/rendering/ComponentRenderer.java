@@ -30,22 +30,22 @@ public class ComponentRenderer implements IRenderer {
     public void render() {
         if (sortedRenderObjects.isEmpty() && sortedTransparentRenderObjects.isEmpty() || mainCamera == null) return;
 
-        sortedRenderObjects.forEach((renderObjectShader, meshMaterialSetList) -> RenderPass(mainCamera, renderObjectShader, meshMaterialSetList));
-        sortedTransparentRenderObjects.forEach((renderObjectShader, meshMaterialSetList) -> RenderPass(mainCamera, renderObjectShader, meshMaterialSetList));
+        sortedRenderObjects.forEach(this::RenderPass);
+        sortedTransparentRenderObjects.forEach(this::RenderPass);
     }
 
-    private void RenderPass(Camera camera, Shader shader, List<MeshMaterialSet> meshMaterialSetList){
+    private void RenderPass(Shader shader, List<MeshMaterialSet> meshMaterialSetList){
         if (recordMetrics) metrics.recordShaderBind();
         shader.bind();
-        shader.render(camera);
+        shader.render(mainCamera);
 
         meshMaterialSetList.forEach(meshMaterialSet -> {
-            if (!meshMaterialSet.getRoot().isEnabled() || !camera.isInFrustumAABB(meshMaterialSet.getRoot())) return;
+            if (!meshMaterialSet.getRoot().isEnabled() || !mainCamera.isInFrustumAABB(meshMaterialSet.getRoot())) return;
             if (recordMetrics) metrics.recordStateChange();
 
             bind(meshMaterialSet);
             prepareShadow(meshMaterialSet);
-            shader.prepare(meshMaterialSet, camera);
+            shader.prepare(meshMaterialSet, mainCamera);
 
             if (recordMetrics) metrics.recordDrawCall();
             if(meshMaterialSet.mesh.isInstanced()){
