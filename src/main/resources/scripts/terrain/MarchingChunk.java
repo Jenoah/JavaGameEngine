@@ -1,7 +1,5 @@
-package game.terrain;
+package nl.framegengine.customScripts;
 
-import game.utils.ChunkCoord;
-import game.utils.ChunkUtils;
 import nl.jenoah.core.ModelManager;
 import nl.jenoah.core.components.RenderComponent;
 import nl.jenoah.core.debugging.Debug;
@@ -10,16 +8,22 @@ import nl.jenoah.core.entity.Material;
 import nl.jenoah.core.entity.Mesh;
 import nl.jenoah.core.entity.Model;
 import nl.jenoah.core.rendering.MeshMaterialSet;
+import nl.jenoah.core.shaders.ShaderManager;
 import nl.jenoah.core.utils.Constants;
 import nl.jenoah.core.utils.ObjectPool;
 import nl.jenoah.core.utils.Utils;
 import org.joml.Matrix4f;
 import org.joml.Quaternionf;
 import org.joml.Vector3f;
+import nl.framegengine.customScripts.*;
+import nl.framegengine.customScripts.utils.*;
+import nl.framegengine.customScripts.utils.ChunkUtils;
+import org.joml.Vector4f;
 
-import java.util.*;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
 
-import static nl.jenoah.core.utils.Constants.CHUNK_SIZE;
 import static org.joml.Math.lerp;
 
 public class MarchingChunk {
@@ -48,12 +52,12 @@ public class MarchingChunk {
 
     public MarchingChunk(ChunkCoord chunkPosition){
         this.chunkPosition = chunkPosition;
-        this.terrainHeights = new float[(CHUNK_SIZE + 1) * (CHUNK_SIZE + 1)];
+        this.terrainHeights = new float[(ChunkUtils.CHUNK_SIZE + 1) * (ChunkUtils.CHUNK_SIZE + 1)];
         init();
     }
 
     private void init(){
-        edgeVertexIndices = new int[(CHUNK_SIZE + 1) * (CHUNK_SIZE + 1) * (CHUNK_SIZE + 1) * 12];
+        edgeVertexIndices = new int[(ChunkUtils.CHUNK_SIZE + 1) * (ChunkUtils.CHUNK_SIZE + 1) * (ChunkUtils.CHUNK_SIZE + 1) * 12];
         Arrays.fill(edgeVertexIndices, -1);
 
         populateChunk();
@@ -69,15 +73,15 @@ public class MarchingChunk {
     //REGION Generation
 
     private void populateChunk(){
-        for (int x = 0; x <= CHUNK_SIZE; x++) {
-            for (int z = 0; z <= CHUNK_SIZE; z++) {
-                terrainHeights[x * (CHUNK_SIZE + 1) + z] = ChunkUtils.SampleHeight(chunkPosition.x + x, chunkPosition.z + z) + ChunkUtils.terrainSurfaceHeight;
+        for (int x = 0; x <= ChunkUtils.CHUNK_SIZE; x++) {
+            for (int z = 0; z <= ChunkUtils.CHUNK_SIZE; z++) {
+                terrainHeights[x * (ChunkUtils.CHUNK_SIZE + 1) + z] = ChunkUtils.SampleHeight(chunkPosition.x + x, chunkPosition.z + z) + ChunkUtils.terrainSurfaceHeight;
             }
         }
 
-        for (int x = 0; x < CHUNK_SIZE; x++) {
-            for (int y = 0; y < CHUNK_SIZE; y++) {
-                for (int z = 0; z < CHUNK_SIZE; z++) {
+        for (int x = 0; x < ChunkUtils.CHUNK_SIZE; x++) {
+            for (int y = 0; y < ChunkUtils.CHUNK_SIZE; y++) {
+                for (int z = 0; z < ChunkUtils.CHUNK_SIZE; z++) {
                     marchCube(x, y, z);
                 }
             }
@@ -88,8 +92,8 @@ public class MarchingChunk {
         float[] voxelCorners = new float[8];
         for (int i = 0; i < 8; i++) {
             Vector3f corner = Constants.cornerTable[i];
-            float heightSample = terrainHeights[(int) ((x + corner.x) * (CHUNK_SIZE + 1) + (z + corner.z))];
-            voxelCorners[i] = y + corner.y + chunkPosition.y - heightSample + Constants.CHUNK_ISO_LEVEL;
+            float heightSample = terrainHeights[(int) ((x + corner.x) * (ChunkUtils.CHUNK_SIZE + 1) + (z + corner.z))];
+            voxelCorners[i] = y + corner.y + chunkPosition.y - heightSample + ChunkUtils.CHUNK_ISO_LEVEL;
         }
 
         int configIndex = ChunkUtils.GetVoxelConfiguration(voxelCorners);
@@ -165,7 +169,7 @@ public class MarchingChunk {
     }
 
     private int getFlatEdgeVertexIndex(int x, int y, int z, int edge) {
-        int size = CHUNK_SIZE + 1;
+        int size = ChunkUtils.CHUNK_SIZE + 1;
         return (((x * size + y) * size + z) * 12) + edge;
     }
 
@@ -174,8 +178,8 @@ public class MarchingChunk {
             Debug.LogError("Marching chunk vertexCount exceeds vertex array length");
         }
 
-            vertices[vertexCount++] = v;
-            return vertexCount - 1;
+        vertices[vertexCount++] = v;
+        return vertexCount - 1;
     }
 
     private void addTriangle(int idx) {
@@ -191,6 +195,7 @@ public class MarchingChunk {
         Model chunkModel = ModelManager.loadModel(Arrays.copyOf(vertices, vertexCount), null, Arrays.copyOf(triangles, triangleCount), normals);
         chunkModel.getMesh().generateUVs();
         chunkEntity = new GameObject("Chunk - " + chunkPosition).setPosition(chunkPosition.toVector3());
+        chunkModel.getMaterial().setShader(ShaderManager.triplanarShader);//.setDiffuseColor(new Vector4f(0.5f, 0.0f, 0.5f, 1f));//.setReflectance(64);
         chunkEntity.addComponent(new RenderComponent(chunkModel.getMesh(), chunkModel.getMaterial()));
     }
 
@@ -202,19 +207,19 @@ public class MarchingChunk {
         int z1 = z0 + 1;
 
         // Clamp using (CHUNK_SIZE + 1) for grid points
-        x0 = Math.max(0, Math.min(x0, CHUNK_SIZE));
-        x1 = Math.max(0, Math.min(x1, CHUNK_SIZE));
-        z0 = Math.max(0, Math.min(z0, CHUNK_SIZE));
-        z1 = Math.max(0, Math.min(z1, CHUNK_SIZE));
+        x0 = Math.max(0, Math.min(x0, ChunkUtils.CHUNK_SIZE));
+        x1 = Math.max(0, Math.min(x1, ChunkUtils.CHUNK_SIZE));
+        z0 = Math.max(0, Math.min(z0, ChunkUtils.CHUNK_SIZE));
+        z1 = Math.max(0, Math.min(z1, ChunkUtils.CHUNK_SIZE));
 
         float sx = x - x0;
         float sz = z - z0;
 
         // Use (CHUNK_SIZE + 1) for grid point alignment
-        float h00 = terrainHeights[x0 * (CHUNK_SIZE + 1) + z0];
-        float h10 = terrainHeights[x1 * (CHUNK_SIZE + 1) + z0];
-        float h01 = terrainHeights[x0 * (CHUNK_SIZE + 1) + z1];
-        float h11 = terrainHeights[x1 * (CHUNK_SIZE + 1) + z1];
+        float h00 = terrainHeights[x0 * (ChunkUtils.CHUNK_SIZE + 1) + z0];
+        float h10 = terrainHeights[x1 * (ChunkUtils.CHUNK_SIZE + 1) + z0];
+        float h01 = terrainHeights[x0 * (ChunkUtils.CHUNK_SIZE + 1) + z1];
+        float h11 = terrainHeights[x1 * (ChunkUtils.CHUNK_SIZE + 1) + z1];
 
         return lerp(lerp(h00, h10, sx), lerp(h01, h11, sx), sz);
     }
@@ -235,8 +240,8 @@ public class MarchingChunk {
     }
 
     public Vector3f getNormalAt(float x, float z) {
-        x = Math.max(1, Math.min(x, CHUNK_SIZE - 1));
-        z = Math.max(1, Math.min(z, CHUNK_SIZE - 1));
+        x = Math.max(1, Math.min(x, ChunkUtils.CHUNK_SIZE - 1));
+        z = Math.max(1, Math.min(z, ChunkUtils.CHUNK_SIZE - 1));
 
         // Sample 4-connected neighbors
         float right = getHeightAt(x + 1, z);
@@ -281,7 +286,7 @@ public class MarchingChunk {
             this.surfaceFeatureRenderComponent.initiate();
         }
 
-        float stepSize = (float) Constants.CHUNK_SIZE / TerrainGeneration.surfaceFeatureSamples;
+        float stepSize = (float) ChunkUtils.CHUNK_SIZE / TerrainGeneration.surfaceFeatureSamples;
 
         for (int x = 0; x < TerrainGeneration.surfaceFeatureSamples; x++) {
             for (int z = 0; z < TerrainGeneration.surfaceFeatureSamples; z++) {

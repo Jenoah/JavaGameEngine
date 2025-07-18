@@ -27,7 +27,7 @@ public class DemoGame implements ILogic {
         Debug.Log("Initiating game...");
         renderer.init();
 
-        Scene level = new Level0();
+        Scene level = sceneManager.loadScene("scenes/testLevel.lvl");
 
         window.setClearColor(0, 0, 0, 0);
         window.setWindowIcon("textures/window_icon.png");

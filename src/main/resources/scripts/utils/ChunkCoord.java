@@ -1,7 +1,8 @@
-package game.utils;
+package nl.framegengine.customScripts.utils;
 
-import nl.jenoah.core.utils.Constants;
 import org.joml.Vector3f;
+import nl.framegengine.customScripts.*;
+import nl.framegengine.customScripts.utils.*;
 
 public class ChunkCoord{
     public int x, y, z;
@@ -14,9 +15,9 @@ public class ChunkCoord{
 
     public static ChunkCoord toChunkCoord(Vector3f vector){
         int x, y, z;
-        x = fastfloor((int)vector.x / (float) Constants.CHUNK_SIZE) * Constants.CHUNK_SIZE;
-        y = fastfloor((int)vector.y / (float)Constants.CHUNK_SIZE) * Constants.CHUNK_SIZE;
-        z = fastfloor((int)vector.z / (float)Constants.CHUNK_SIZE) * Constants.CHUNK_SIZE;
+        x = fastfloor((int)vector.x / (float)ChunkUtils.CHUNK_SIZE) * ChunkUtils.CHUNK_SIZE;
+        y = fastfloor((int)vector.y / (float)ChunkUtils.CHUNK_SIZE) * ChunkUtils.CHUNK_SIZE;
+        z = fastfloor((int)vector.z / (float)ChunkUtils.CHUNK_SIZE) * ChunkUtils.CHUNK_SIZE;
 
         return new ChunkCoord(x, y, z);
     }
@@ -39,9 +40,9 @@ public class ChunkCoord{
 
     public static boolean compareToVector(ChunkCoord a, Vector3f b){
 
-        int x = fastfloor((int)b.x / (float)Constants.CHUNK_SIZE) * Constants.CHUNK_SIZE;
-        int y = fastfloor((int)b.y / (float)Constants.CHUNK_SIZE) * Constants.CHUNK_SIZE;
-        int z = fastfloor((int)b.z / (float)Constants.CHUNK_SIZE) * Constants.CHUNK_SIZE;
+        int x = fastfloor((int)b.x / (float)ChunkUtils.CHUNK_SIZE) * ChunkUtils.CHUNK_SIZE;
+        int y = fastfloor((int)b.y / (float)ChunkUtils.CHUNK_SIZE) * ChunkUtils.CHUNK_SIZE;
+        int z = fastfloor((int)b.z / (float)ChunkUtils.CHUNK_SIZE) * ChunkUtils.CHUNK_SIZE;
 
         return a.x == x && a.y == y && a.z == z;
     }

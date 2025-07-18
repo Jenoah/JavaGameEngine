@@ -39,4 +39,6 @@ public class Component {
     public final boolean getEnabled(){
         return isEnabled;
     }
+
+    public void cleanUp(){ }
 }

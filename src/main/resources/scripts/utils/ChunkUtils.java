@@ -1,6 +1,6 @@
-package game.utils;
+package nl.framegengine.customScripts.utils;
 
-
+import nl.jenoah.core.utils.FastNoise;
 import nl.jenoah.core.utils.SimplexNoise;
 import nl.jenoah.core.utils.Utils;
 
@@ -19,6 +19,8 @@ public class ChunkUtils {
     private static final float continetalFrequency = 0.5f;
     private static final float erosionFrequency = .5f;
     private static final float peakAndValleyFrequency = 0.5f;
+    public static final int CHUNK_SIZE = 16;
+    public static final float CHUNK_ISO_LEVEL = 0.5f;
 
     public static float SampleHeight(float x, float z){
         //INTERESTING ARTICLE: https://www.redblobgames.com/maps/terrain-from-noise/

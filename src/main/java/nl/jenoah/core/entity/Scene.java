@@ -1,7 +1,5 @@
 package nl.jenoah.core.entity;
 
-import game.entities.Player;
-import nl.jenoah.core.EngineManager;
 import nl.jenoah.core.ModelManager;
 import nl.jenoah.core.MouseInput;
 import nl.jenoah.core.WindowManager;
@@ -13,14 +11,11 @@ import nl.jenoah.core.gui.GuiObject;
 import nl.jenoah.core.lighting.DirectionalLight;
 import nl.jenoah.core.lighting.PointLight;
 import nl.jenoah.core.lighting.SpotLight;
-import nl.jenoah.core.rendering.RenderManager;
 import org.joml.Vector3f;
 
 import java.util.*;
 
 public class Scene {
-    protected RenderManager renderManager;
-
     private final List<GameObject> gameObjects;
     private final List<GameObject> rootGameObjects;
     private final List<GuiObject> guiObjects;
@@ -28,8 +23,6 @@ public class Scene {
     private Vector3f fogColor = new Vector3f(1);
     private float fogDensity = 0.01f;
     private float fogGradient = 15f;
-
-    protected Player player;
 
     //Lighting
     private Vector3f ambientLight;
@@ -47,35 +40,39 @@ public class Scene {
         this.guiObjects = new ArrayList<>();
         this.windowManager = WindowManager.getInstance();
         this.textObjects = new HashMap<>();
-
-        this.player = new Player();
         init();
     }
 
-    public void init() {
-        renderManager = EngineManager.getGameLogic().getRenderer();
-        renderManager.setRenderCamera(player.getCamera());
-        renderManager.shadowRenderer.setMainCamera(player.getCamera());
-    }
+    public void init() { }
 
-    public void postStart() {
-//        for(GameObject gameObject: gameObjects){
-//            gameObject.initiate();
-//        }
-        addGameObject(player);
-    }
+    public void postStart() { }
 
     public void update(MouseInput mouseInput) {
-        for (GameObject gameObject : gameObjects) {
+        for (GameObject gameObject : gameObjects.stream().toList()) {
             gameObject.update(mouseInput);
         }
     }
 
-    public void handleInput() {
-    }
+    public void handleInput() { }
 
     public void cleanUp() {
         ModelManager.cleanUp();
+        getGameObjects().forEach(gameObject -> gameObject.getComponents().forEach(Component::cleanUp));
+    }
+
+    public void addEntity(GameObject entity, boolean intitiateComponents){
+        if (entity == null) {
+            return;
+        }
+
+        if (entity.getChildren() != null) {
+            for (GameObject child : entity.getChildren()) {
+                addGameObject(child);
+            }
+        }
+
+        addGameObject(entity);
+        if(intitiateComponents && !entity.getComponents().isEmpty()) entity.getComponents().forEach(Component::initiate);
     }
 
     public void addEntity(GameObject entity) {
@@ -95,14 +92,14 @@ public class Scene {
 
 
     public void addGameObject(GameObject gameObject) {
-        if (!gameObjects.contains(gameObject)) {
-            gameObjects.add(gameObject);
-            if(gameObject.getParent() != null) this.rootGameObjects.add(gameObject);
+        if (gameObjects.contains(gameObject)) return;
 
-            if (gameObject.getChildren() != null) {
-                for (GameObject child : gameObject.getChildren()) {
-                    addGameObject(child);
-                }
+        gameObjects.add(gameObject);
+        if(gameObject.getParent() != null) this.rootGameObjects.add(gameObject);
+
+        if (gameObject.getChildren() != null) {
+            for (GameObject child : gameObject.getChildren()) {
+                addGameObject(child);
             }
         }
     }
@@ -183,10 +180,6 @@ public class Scene {
         return levelName;
     }
 
-    public Player getPlayer() {
-        return player;
-    }
-
     public void addText(GUIText textObject) {
         FontType font = textObject.getFont();
         TextMeshData data = font.loadText(textObject);
@@ -257,10 +250,6 @@ public class Scene {
 
     public List<GameObject> getRootGameObjects() {
         return gameObjects;
-    }
-
-    public RenderManager getRenderManager() {
-        return renderManager;
     }
 
     public void setLevelName(String levelName) {

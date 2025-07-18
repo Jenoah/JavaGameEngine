@@ -1,9 +1,11 @@
-package game.components;
+package nl.framegengine.customScripts;
 
 import nl.jenoah.core.EngineManager;
 import nl.jenoah.core.MouseInput;
 import nl.jenoah.core.WindowManager;
 import nl.jenoah.core.components.Component;
+import nl.jenoah.core.debugging.Debug;
+import nl.jenoah.core.entity.Camera;
 import nl.jenoah.core.entity.GameObject;
 import nl.jenoah.core.utils.Constants;
 import nl.jenoah.core.utils.ObjectPool;
@@ -12,37 +14,40 @@ import org.joml.Vector2f;
 import org.joml.Vector3f;
 import org.lwjgl.glfw.GLFW;
 
-public class PlayerMovement extends Component{
-    private final WindowManager windowManager;
-    private final GameObject cameraObject;
+public class PlayerMovement extends Component {
+    private WindowManager windowManager;
+    private GameObject cameraObject;
 
     private final Vector3f moveDelta = new Vector3f();
     private float pitch = 0;
     private float yaw = 0;
+    private float moveSpeed = 3f;
 
-    public PlayerMovement(GameObject cameraObject) {
+    public PlayerMovement() {}
+
+    @Override
+    public void initiate() {
+        if (hasInitiated) return;
+        super.initiate();
+
         this.windowManager = WindowManager.getInstance();
-        this.cameraObject = cameraObject;
+        this.cameraObject = Camera.mainCamera;
     }
 
     @Override
     public void update() {
         super.update();
 
+        if(MouseInput.isRbDown()) rotate(MouseInput.getMouseDelta());
+
         move();
-
-    }
-
-    public void input(MouseInput mouseInput){
-        if(!mouseInput.isRbDown()) return;
-        rotate(mouseInput.getMouseDelta());
     }
 
     private void move(){
         moveDelta.set(0, 0, 0);
         float moveSpeed = windowManager.isKeyPressed(GLFW.GLFW_KEY_LEFT_SHIFT) ?
-                Constants.CAMERA_MOVE_SPEED * EngineManager.getDeltaTime() * 4f :
-                Constants.CAMERA_MOVE_SPEED * EngineManager.getDeltaTime();
+                this.moveSpeed * EngineManager.getDeltaTime() * 4f :
+                this.moveSpeed * EngineManager.getDeltaTime();
 
         //Forwards / Backwards
         if(windowManager.isKeyPressed(GLFW.GLFW_KEY_W)){
@@ -83,6 +88,7 @@ public class PlayerMovement extends Component{
     }
 
     public void rotate(Vector2f mouseDelta){
+        if(cameraObject == null) return;
         pitch += mouseDelta.x * Constants.MOUSE_SENSITIVITY * EngineManager.getDeltaTime();
         yaw += mouseDelta.y * Constants.MOUSE_SENSITIVITY * EngineManager.getDeltaTime();
 

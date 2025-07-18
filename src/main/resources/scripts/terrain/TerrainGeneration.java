@@ -1,13 +1,15 @@
-package game.terrain;
+package nl.framegengine.customScripts;
 
-import game.utils.ChunkCoord;
-import game.utils.ChunkUtils;
 import nl.jenoah.core.debugging.Debug;
-import nl.jenoah.core.utils.*;
+import nl.jenoah.core.utils.Calculus;
 import org.joml.Math;
 import org.joml.Vector3f;
+import nl.framegengine.customScripts.*;
+import nl.framegengine.customScripts.utils.*;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Set;
 
 public class TerrainGeneration implements Runnable{
     private final HashMap<ChunkCoord, MarchingChunk> chunks;
@@ -35,7 +37,7 @@ public class TerrainGeneration implements Runnable{
         chunkGenerationQueue = new HashSet<>();
         previousRenderQueue = new HashSet<>();
         activeChunks = new HashSet<>();
-        verticalRenderDistance = (int)Math.ceil(ChunkUtils.maxTerrainHeight / (float)Constants.CHUNK_SIZE);
+        verticalRenderDistance = (int) Math.ceil(ChunkUtils.maxTerrainHeight / (float)ChunkUtils.CHUNK_SIZE);
     }
 
     @Override
@@ -66,6 +68,7 @@ public class TerrainGeneration implements Runnable{
 
     public void setUpdatePosition(Vector3f updatePosition){
         playerPosition = updatePosition;
+
         if(!ChunkCoord.compareToVector(previousPlayerChunkCoord, playerPosition)){
             previousPlayerChunkCoord = ChunkCoord.toChunkCoord(updatePosition);
             this.canUpdate = true;
@@ -82,7 +85,7 @@ public class TerrainGeneration implements Runnable{
             for (int y = 0; y < verticalRenderDistance; y++){
                 for (int z = -renderDistance; z < renderDistance; z++) {
                     playerPosition.y = 0;
-                    ChunkCoord chunkCoord = ChunkCoord.toChunkCoord(Calculus.addVectors(playerPosition, new Vector3f(x * Constants.CHUNK_SIZE, y * Constants.CHUNK_SIZE, z * Constants.CHUNK_SIZE)));
+                    ChunkCoord chunkCoord = ChunkCoord.toChunkCoord(Calculus.addVectors(playerPosition, new Vector3f(x * ChunkUtils.CHUNK_SIZE, y * ChunkUtils.CHUNK_SIZE, z * ChunkUtils.CHUNK_SIZE)));
                     if (!chunks.containsKey(chunkCoord) && !chunkGenerationQueue.contains(chunkCoord)) {
                         chunkGenerationQueue.add(chunkCoord);
                     } else {

@@ -5,7 +5,7 @@ import org.joml.Vector4f;
 
 public class Constants {
 
-    public static final String TITLE = "Java Game Engine";
+    public static final String TITLE = "Frame Gengine";
 
     public static final float FOV = (float) Math.toRadians(60);
     public static final float Z_NEAR = 0.01f;
@@ -13,7 +13,6 @@ public class Constants {
     public static final float GAMMA = 2.2f;
 
     public static final float SPECULAR_POWER = .5f;
-    public static final float CAMERA_MOVE_SPEED = 3f;
     public static final float MOUSE_SENSITIVITY = 2f;
 
     public static final Vector3f VECTOR3_UP = new Vector3f(0, 1, 0);
@@ -28,9 +27,6 @@ public class Constants {
     public static final Vector4f VECTOR4_BACK = new Vector4f(0, 0, 1, 0);
     public static final Vector4f VECTOR4_ONE = new Vector4f(1, 1, 1, 1);
     public static final Vector4f VECTOR4_ZERO = new Vector4f(0, 0, 0, 0);
-
-    public static final int CHUNK_SIZE = 16;
-    public static final float CHUNK_ISO_LEVEL = 0.5f;
 
     public static final float SHADOW_DISTANCE = 40;
     public static final float SHADOW_OFFSET = 10;
