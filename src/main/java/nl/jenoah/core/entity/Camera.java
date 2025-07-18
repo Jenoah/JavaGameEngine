@@ -1,7 +1,6 @@
 package nl.jenoah.core.entity;
 
 import nl.jenoah.core.WindowManager;
-import nl.jenoah.core.debugging.Debug;
 import nl.jenoah.core.rendering.FrustumPlane;
 import nl.jenoah.core.rendering.RenderManager;
 import nl.jenoah.core.utils.AABB;
