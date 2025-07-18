@@ -8,18 +8,16 @@ import org.lwjgl.glfw.GLFWMouseButtonCallback;
 
 public class MouseInput {
 
-    private final Vector2d previousPosition, currentPosition;
-    private final Vector2f mouseDelta;
+    private static final Vector2d previousPosition = new Vector2d(-1);
+    private static final Vector2d currentPosition = new Vector2d(-1);
+    private static final Vector2f mouseDelta = new Vector2f(0);
 
-    private boolean lbDown = false;
-    private boolean rbDown = false;
-    private final long windowLong;
-    private final WindowManager window;
+    private static boolean lbDown = false;
+    private static boolean rbDown = false;
+    private static long windowLong;
+    private static WindowManager window;
 
     public MouseInput(){
-        previousPosition = new Vector2d(-1, -1);
-        currentPosition = new Vector2d(0, 0);
-        mouseDelta = new Vector2f();
         window = WindowManager.getInstance();
         windowLong = GLFW.glfwGetCurrentContext();
     }
@@ -66,36 +64,36 @@ public class MouseInput {
         previousPosition.y = currentPosition.y;
     }
 
-    public boolean isRbDown() {
+    public static boolean isRbDown() {
         return rbDown;
     }
 
-    public boolean isLbDown() {
+    public static boolean isLbDown() {
         return lbDown;
     }
 
-    public Vector2f getMouseDelta() {
+    public static Vector2f getMouseDelta() {
         return mouseDelta;
     }
 
-    public Vector2d getMousePositionInViewport(){
+    public static Vector2d getMousePositionInViewport(){
         double mousePositionX = 1.0 / window.getWidth() * currentPosition.x;
         double mousePositionY = 1.0 / window.getHeight() * currentPosition.y;
 
         return new Vector2d(mousePositionX, mousePositionY);
     }
 
-    public Vector2d getMousePositionInPixels(){
+    public static Vector2d getMousePositionInPixels(){
         return currentPosition;
     }
 
-    public void hide(){
+    public static void hide(){
         if (GLFW.glfwGetInputMode(windowLong, GLFW.GLFW_CURSOR) != GLFW.GLFW_CURSOR_DISABLED) {
             GLFW.glfwSetInputMode(windowLong, GLFW.GLFW_CURSOR, GLFW.GLFW_CURSOR_DISABLED);
         }
     }
 
-    public void show(){
+    public static void show(){
         if (GLFW.glfwGetInputMode(windowLong, GLFW.GLFW_CURSOR) != GLFW.GLFW_CURSOR_NORMAL) {
             GLFW.glfwSetInputMode(windowLong, GLFW.GLFW_CURSOR, GLFW.GLFW_CURSOR_NORMAL);
         }
