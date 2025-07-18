@@ -1,5 +1,6 @@
 package nl.jenoah.core.entity;
 
+import nl.jenoah.core.utils.Constants;
 import nl.jenoah.core.debugging.Debug;
 import nl.jenoah.core.utils.*;
 import org.joml.Matrix4f;
@@ -11,9 +12,7 @@ import org.lwjgl.system.MemoryUtil;
 
 import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
 
 public class Mesh {
     private float[] vertices;
@@ -545,6 +544,107 @@ public class Mesh {
         previousInstanceCount = instanceCount;
     }
 
+    public void optimize(){
+        removeUnusedVerticesAndTriangles();
+        mergeDuplicatedVerticesAndTriangles();
+    }
+
+    public void mergeDuplicatedVerticesAndTriangles() {
+        int vertexCount = this.vertices.length / dimension;
+
+        Map<VertexKey, Integer> uniqueMap = new HashMap<>();
+        List<Float> newPositions = new ArrayList<>();
+        List<Float> newNormals = new ArrayList<>();
+        List<Float> newUVs = new ArrayList<>();
+        int[] remap = new int[vertexCount];
+        int newIndex = 0;
+
+        for (int i = 0; i < vertexCount; i++) {
+            VertexKey key = new VertexKey(
+                    this.vertices, i * dimension, dimension,
+                    this.normals, i * dimension, dimension,
+                    this.uvs, i * 2, 2,
+                    1e-6f
+            );
+            Integer existing = uniqueMap.get(key);
+            if (existing == null) {
+                uniqueMap.put(key, newIndex);
+                remap[i] = newIndex++;
+                for (int d = 0; d < dimension; d++) newPositions.add(this.vertices[i * dimension + d]);
+                for (int d = 0; d < dimension; d++) newNormals.add(this.normals[i * dimension + d]);
+                if(this.uvs != null && this.uvs.length > 0) for (int d = 0; d < 2; d++) newUVs.add(this.uvs[i * 2 + d]);
+            } else {
+                remap[i] = existing;
+            }
+        }
+
+        List<Integer> newTriangles = new ArrayList<>();
+        for (int i = 0; i < this.triangles.length; i += 3) {
+            int i0 = remap[this.triangles[i]];
+            int i1 = remap[this.triangles[i + 1]];
+            int i2 = remap[this.triangles[i + 2]];
+            if (i0 != i1 && i1 != i2 && i2 != i0) { // Not degenerate
+                newTriangles.add(i0);
+                newTriangles.add(i1);
+                newTriangles.add(i2);
+            }
+        }
+
+        this.vertices = new float[newPositions.size()];
+        for (int i = 0; i < newPositions.size(); i++) this.vertices[i] = newPositions.get(i);
+
+        if (this.normals != null) {
+            this.normals = new float[newNormals.size()];
+            for (int i = 0; i < newNormals.size(); i++) this.normals[i] = newNormals.get(i);
+        }
+
+        if (this.uvs != null) {
+            this.uvs = new float[newUVs.size()];
+            for (int i = 0; i < newUVs.size(); i++) this.uvs[i] = newUVs.get(i);
+        }
+
+        this.triangles = new int[newTriangles.size()];
+        for (int i = 0; i < newTriangles.size(); i++) this.triangles[i] = newTriangles.get(i);
+    }
+
+    public void removeUnusedVerticesAndTriangles(){
+        if(this.vertices == null || this.triangles == null) return;
+
+        int vertexCount = this.vertices.length / dimension;
+
+        boolean[] usedVertices = new boolean[vertexCount];
+        for (int idx : this.triangles) {
+            usedVertices[idx] = true;
+        }
+
+        int[] oldToNewIndex = new int[vertexCount];
+        int newIndex = 0;
+        for (int i = 0; i < vertexCount; i++) {
+            if (usedVertices[i]) {
+                oldToNewIndex[i] = newIndex++;
+            } else {
+                oldToNewIndex[i] = -1;
+            }
+        }
+
+        float[] optimizedVertices = new float[newIndex * dimension];
+        int dest = 0;
+        for (int i = 0; i < vertexCount; i++) {
+            if (usedVertices[i]) {
+                System.arraycopy(this.vertices, i * dimension, optimizedVertices, dest * dimension, dimension);
+                dest++;
+            }
+        }
+
+        int[] optimizedTriangles = new int[this.triangles.length];
+        for (int i = 0; i < this.triangles.length; i++) {
+            optimizedTriangles[i] = oldToNewIndex[this.triangles[i]];
+        }
+
+        this.vertices = optimizedVertices;
+        this.triangles = optimizedTriangles;
+    }
+
     public Set<Matrix4f> getInstanceOffsets(){
         return instanceOffsets;
     }
@@ -555,5 +655,38 @@ public class Mesh {
 
     public boolean isStatic(){
         return isStatic;
+    }
+
+    static class VertexKey {
+        int[] quantized;
+
+        VertexKey(float[] positions, int posOffset, int posDim,
+                  float[] normals, int normOffset, int normDim,
+                  float[] uvs, int uvOffset, int uvDim,
+                  float epsilon) {
+            int totalDim = posDim + normDim + uvDim;
+            quantized = new int[totalDim];
+            int idx = 0;
+            for (int i = 0; i < posDim; i++)
+                quantized[idx++] = Math.round(positions[posOffset + i] / epsilon);
+            if(normals != null) {
+                for (int i = 0; i < normDim; i++)
+                    quantized[idx++] = Math.round(normals[normOffset + i] / epsilon);
+            }
+            if(uvs != null && uvs.length > 0) {
+                for (int i = 0; i < uvDim; i++)
+                    quantized[idx++] = Math.round(uvs[uvOffset + i] / epsilon);
+            }
+        }
+        @Override
+        public boolean equals(Object o) {
+            if (!(o instanceof VertexKey)) return false;
+            return Arrays.equals(quantized, ((VertexKey) o).quantized);
+        }
+
+        @Override
+        public int hashCode() {
+            return Arrays.hashCode(quantized);
+        }
     }
 }
