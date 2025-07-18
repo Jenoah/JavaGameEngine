@@ -29,6 +29,7 @@ public class GameObject {
     private GameObject parent;
     protected boolean isEnabled = true;
     protected boolean isStatic = false;
+    protected boolean willUpdate = false;
 
     private boolean drawDebugWireframe = false;
 
@@ -69,19 +70,19 @@ public class GameObject {
 
     public GameObject setPosition(Vector3f position) {
         this.localPosition.set(position);
-        OnUpdateTransform();
+        callUpdate();
         return this;
     }
 
     public GameObject setPosition(float x, float y) {
         this.localPosition.set(x, y, 0);
-        OnUpdateTransform();
+        callUpdate();
         return this;
     }
 
     public GameObject setPosition(float x, float y, float z) {
         this.localPosition.set(x, y, z);
-        OnUpdateTransform();
+        callUpdate();
         return this;
     }
 
@@ -98,12 +99,12 @@ public class GameObject {
             setPosition(relativePos);
             ObjectPool.VECTOR3F_POOL.free(relativePos);
         }
-        OnUpdateTransform();
+        callUpdate();
     }
 
     public GameObject translateLocal(Vector3f position){
         this.localPosition.add(position);
-        OnUpdateTransform();
+        callUpdate();
         return this;
     }
 
@@ -147,7 +148,7 @@ public class GameObject {
 
     public GameObject setRotation(Quaternionf rotation){
         this.localRotation.set(rotation);
-        OnUpdateTransform();
+        callUpdate();
         return this;
     }
 
@@ -162,7 +163,7 @@ public class GameObject {
             setRotation(localRot);
             ObjectPool.QUATERNIONF_OBJECT_POOL.free(localRot);
         }
-        OnUpdateTransform();
+        callUpdate();
         return this;
     }
 
@@ -170,7 +171,7 @@ public class GameObject {
         Vector3f radians = ObjectPool.VECTOR3F_POOL.obtain().set(rotation).mul((float) Math.toRadians(1));
         localRotation.identity().rotateXYZ(radians.x, radians.y, radians.z).normalize();
         ObjectPool.VECTOR3F_POOL.free(radians);
-        OnUpdateTransform();
+        callUpdate();
         return this;
     }
 
@@ -183,13 +184,13 @@ public class GameObject {
                         radians.y,
                         radians.z
                 )).normalize();
-        OnUpdateTransform();
+        callUpdate();
         return this;
     }
 
     public GameObject addRotation(Quaternionf rotation){
         localRotation.mul(rotation).normalize();
-        OnUpdateTransform();
+        callUpdate();
         return this;
     }
 
@@ -203,7 +204,7 @@ public class GameObject {
         setRotation(quaternion);
         ObjectPool.VECTOR3F_POOL.free(forward);
         ObjectPool.QUATERNIONF_OBJECT_POOL.free(quaternion);
-        OnUpdateTransform();
+        callUpdate();
         return this;
     }
 
@@ -211,7 +212,7 @@ public class GameObject {
         direction.normalize();
         if(direction.lengthSquared() <= 0.01) direction.set(0, 0, -1);
         setRotation(new Quaternionf().rotateTo(new Vector3f(Constants.VECTOR3_FORWARD), direction));
-        OnUpdateTransform();
+        callUpdate();
     }
 
     public void lookAtDirection(Quaternionf direction) {
@@ -221,7 +222,7 @@ public class GameObject {
         if(targetRotation.lengthSquared() <= 0.01) targetRotation.set(0, 0, -1);
         setRotation(new Quaternionf().rotateTo(new Vector3f(Constants.VECTOR3_FORWARD), targetRotation));
         ObjectPool.VECTOR3F_POOL.free(targetRotation);
-        OnUpdateTransform();
+        callUpdate();
     }
 
     public Vector3f getScale() {
@@ -230,25 +231,25 @@ public class GameObject {
 
     public GameObject setScale(float scale) {
         this.scale.set(scale);
-        OnUpdateTransform();
+        callUpdate();
         return this;
     }
 
     public GameObject setScale(Vector3f scale) {
         this.scale.set(scale);
-        OnUpdateTransform();
+        callUpdate();
         return this;
     }
 
     public GameObject setScale(float x, float y, float z) {
         this.scale.set(x, y, z);
-        OnUpdateTransform();
+        callUpdate();
         return this;
     }
 
     public GameObject setScale(float x, float y) {
         this.scale.set(x, y, 0);
-        OnUpdateTransform();
+        callUpdate();
         return this;
     }
 
@@ -366,6 +367,10 @@ public class GameObject {
 
     public String ToString(){
         return this.getClass().getSimpleName();
+    }
+
+    public void callUpdate(){
+        this.willUpdate = true;
     }
 
     protected void OnUpdateTransform(){

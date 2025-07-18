@@ -168,8 +168,10 @@ public class Camera extends GameObject {
     @Override
     protected void OnUpdateTransform() {
         super.OnUpdateTransform();
+        if(!willUpdate) return;
         updateViewMatrix();
         updateViewProjectionMatrix();
         updateViewFrustum();
+        willUpdate = false;
     }
 }

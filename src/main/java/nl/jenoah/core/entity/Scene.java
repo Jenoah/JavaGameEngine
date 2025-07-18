@@ -49,6 +49,7 @@ public class Scene {
 
     public void update(MouseInput mouseInput) {
         for (GameObject gameObject : gameObjects.stream().toList()) {
+            gameObject.OnUpdateTransform();
             gameObject.update(mouseInput);
         }
     }
