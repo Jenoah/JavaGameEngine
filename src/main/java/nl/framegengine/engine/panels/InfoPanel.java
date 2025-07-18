@@ -13,6 +13,7 @@ import java.util.List;
 public class InfoPanel extends EditorPanel {
 
     private GameObject currentlySelectedObject = null;
+    private List<Field> hierarchyObjects = new ArrayList<>();
 
     public InfoPanel(int posX, int posY, int sizeX, int sizeY) {
         super(posX, posY, sizeX, sizeY);
@@ -26,9 +27,7 @@ public class InfoPanel extends EditorPanel {
         ImGui.text(currentlySelectedObject.getName());
         ImGui.newLine();
 
-        List<Field> instanceFields = new ArrayList<>();
-        Utils.getAllProperties(instanceFields, currentlySelectedObject.getClass());
-        for (Field field : instanceFields) {
+        for (Field field : hierarchyObjects) {
             try {
                 field.setAccessible(true);
                 Object value = field.get(currentlySelectedObject);
@@ -37,7 +36,6 @@ public class InfoPanel extends EditorPanel {
             } catch (IllegalAccessException e) {
                 throw new RuntimeException(e);
             }
-
         }
 
         ImGui.pushStyleColor(ImGuiCol.ButtonHovered, 1f, 1f, 0f, 1f);
@@ -58,6 +56,8 @@ public class InfoPanel extends EditorPanel {
 
     public void setCurrentlySelectedObject(GameObject gameObject){
         currentlySelectedObject = gameObject;
+        hierarchyObjects.clear();
+        Utils.getAllProperties(hierarchyObjects, currentlySelectedObject.getClass());
     }
 
     private void drawOption(String title, String content){

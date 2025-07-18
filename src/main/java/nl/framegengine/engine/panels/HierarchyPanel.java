@@ -9,6 +9,8 @@ import nl.framegengine.engine.EditorPanel;
 import nl.jenoah.core.entity.GameObject;
 import nl.jenoah.core.entity.SceneManager;
 
+import java.util.List;
+
 public class HierarchyPanel extends EditorPanel {
     private final ImVec2 buttonSize;
     private final ImVec4 activeButtonTextColor = new ImVec4(1f, 1f, 1f, 1f);
@@ -20,6 +22,9 @@ public class HierarchyPanel extends EditorPanel {
     private InfoPanel infoPanel;
     private GameObject currentlySelectedGameObject = null;
 
+    private int frameCount = 0;
+    private List<GameObject> hierarchyObjects;
+
     public HierarchyPanel(int posX, int posY, int sizeX, int sizeY) {
         super(posX, posY, sizeX, sizeY);
         buttonSize = new ImVec2(sizeX, 20);
@@ -27,13 +32,19 @@ public class HierarchyPanel extends EditorPanel {
 
     @Override
     public void renderFrame() {
+        frameCount++;
+        if(SceneManager.getInstance() == null || SceneManager.getInstance().getCurrentScene() == null) return;
+        if(frameCount > 30){
+            hierarchyObjects = SceneManager.getInstance().getCurrentScene().getRootGameObjects();
+            frameCount = 0;
+        }
+
         ImGui.setWindowFontScale(1.1f);
 
-        if(SceneManager.getInstance() == null || SceneManager.getInstance().getCurrentScene() == null) return;
         ImGui.pushStyleColor(ImGuiCol.Button, standardButtonBackgroundColor);
         ImGui.pushStyleColor(ImGuiCol.ButtonHovered, hoverButtonBackgroundColor);
         ImGui.pushStyleVar(ImGuiStyleVar.ButtonTextAlign, 0f, 0.5f);
-        SceneManager.getInstance().getCurrentScene().getRootGameObjects().forEach(go -> {
+        hierarchyObjects.forEach(go -> {
             if(go.getParent() == null) {
                 if(currentlySelectedGameObject == go){
                     ImGui.pushStyleColor(ImGuiCol.Text, selectedButtonTextColor);
