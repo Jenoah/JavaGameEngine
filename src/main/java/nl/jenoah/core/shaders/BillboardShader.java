@@ -3,8 +3,6 @@ package nl.jenoah.core.shaders;
 import nl.jenoah.core.entity.Camera;
 import nl.jenoah.core.entity.SceneManager;
 import nl.jenoah.core.rendering.MeshMaterialSet;
-import nl.jenoah.core.utils.FileHelper;
-import nl.jenoah.core.utils.Utils;
 import org.joml.Matrix4f;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL13;

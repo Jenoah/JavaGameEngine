@@ -1,11 +1,8 @@
 package nl.jenoah.core.gui;
 
 import nl.jenoah.core.shaders.Shader;
-import nl.jenoah.core.utils.FileHelper;
 import nl.jenoah.core.utils.Transformation;
-import nl.jenoah.core.utils.Utils;
 import org.joml.Matrix4f;
-import org.joml.Vector4f;
 
 public class GuiShader extends Shader {
 

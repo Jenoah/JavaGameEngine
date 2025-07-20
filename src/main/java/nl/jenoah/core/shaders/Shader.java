@@ -6,7 +6,6 @@ import nl.jenoah.core.debugging.Debug;
 import nl.jenoah.core.entity.Material;
 import nl.jenoah.core.rendering.MeshMaterialSet;
 import nl.jenoah.core.utils.FileHelper;
-import nl.jenoah.core.utils.Utils;
 import org.joml.Matrix4f;
 import org.joml.Vector2f;
 import org.joml.Vector3f;

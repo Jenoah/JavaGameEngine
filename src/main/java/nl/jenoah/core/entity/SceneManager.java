@@ -13,7 +13,6 @@ import nl.jenoah.core.shaders.ShaderManager;
 import nl.jenoah.core.shaders.SimpleLitShader;
 import nl.jenoah.core.components.ComponentLoader;
 import nl.jenoah.core.utils.JsonHelper;
-import nl.jenoah.core.utils.Utils;
 import org.joml.Vector3f;
 
 import javax.json.Json;

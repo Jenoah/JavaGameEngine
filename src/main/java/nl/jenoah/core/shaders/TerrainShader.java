@@ -2,8 +2,6 @@ package nl.jenoah.core.shaders;
 
 import nl.jenoah.core.entity.Camera;
 import nl.jenoah.core.rendering.MeshMaterialSet;
-import nl.jenoah.core.utils.FileHelper;
-import nl.jenoah.core.utils.Utils;
 import org.joml.Vector2f;
 
 public class TerrainShader extends Shader {

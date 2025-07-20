@@ -1,8 +1,6 @@
 package nl.jenoah.core.shaders.postProcessing;
 
 import nl.jenoah.core.shaders.Shader;
-import nl.jenoah.core.utils.FileHelper;
-import nl.jenoah.core.utils.Utils;
 
 public class PPFXHorizontalBlurShader extends Shader {
     private int targetWidth = 1280;

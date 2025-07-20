@@ -9,7 +9,6 @@ import nl.jenoah.core.rendering.Face;
 import nl.jenoah.core.rendering.MeshMaterialSet;
 import nl.jenoah.core.shaders.ShaderManager;
 import nl.jenoah.core.utils.FileHelper;
-import nl.jenoah.core.utils.Utils;
 
 import org.joml.Vector2f;
 import org.joml.Vector3f;

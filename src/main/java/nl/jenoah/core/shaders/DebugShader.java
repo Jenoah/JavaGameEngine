@@ -1,9 +1,7 @@
 package nl.jenoah.core.shaders;
 
 import nl.jenoah.core.entity.Camera;
-import nl.jenoah.core.utils.FileHelper;
 import nl.jenoah.core.utils.Transformation;
-import nl.jenoah.core.utils.Utils;
 import org.joml.Matrix4f;
 import org.joml.Quaternionf;
 import org.joml.Vector3f;

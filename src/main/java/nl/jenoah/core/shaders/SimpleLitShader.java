@@ -7,9 +7,7 @@ import nl.jenoah.core.lighting.PointLight;
 import nl.jenoah.core.lighting.SpotLight;
 import nl.jenoah.core.rendering.MeshMaterialSet;
 import nl.jenoah.core.utils.Constants;
-import nl.jenoah.core.utils.FileHelper;
 import nl.jenoah.core.utils.Transformation;
-import nl.jenoah.core.utils.Utils;
 import org.joml.Matrix4f;
 import org.joml.Vector3f;
 

@@ -1,7 +1,6 @@
 package nl.jenoah.core.shaders.postProcessing;
 
 import nl.jenoah.core.shaders.Shader;
-import nl.jenoah.core.utils.Utils;
 
 public class PPFXBrightShader extends Shader {
     private float threshold = 0.6f;

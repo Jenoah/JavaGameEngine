@@ -1,8 +1,6 @@
 package nl.jenoah.core.fonts.fontRendering;
 
 import nl.jenoah.core.shaders.Shader;
-import nl.jenoah.core.utils.FileHelper;
-import nl.jenoah.core.utils.Utils;
 import org.joml.Vector2f;
 import org.joml.Vector3f;
 

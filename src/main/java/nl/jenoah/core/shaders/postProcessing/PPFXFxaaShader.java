@@ -1,7 +1,6 @@
 package nl.jenoah.core.shaders.postProcessing;
 
 import nl.jenoah.core.shaders.Shader;
-import nl.jenoah.core.utils.Utils;
 import org.joml.Vector2f;
 
 public class PPFXFxaaShader extends Shader {
