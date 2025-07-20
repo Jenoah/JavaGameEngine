@@ -1,5 +1,7 @@
 package nl.jenoah.core.utils;
 
+import nl.jenoah.core.debugging.Debug;
+
 import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
@@ -85,5 +87,42 @@ public class FileHelper {
         }
 
         return list;
+    }
+
+    public static String readFile(String filePath){
+        StringBuilder sb = new StringBuilder();
+        try {
+            File fileToRead = new File(filePath);
+            if(!fileToRead.exists()) return null;
+            Scanner fileReader = new Scanner(fileToRead);
+            while (fileReader.hasNextLine()){
+                sb.append(fileReader.nextLine());
+            }
+        } catch (Exception e) {
+            Debug.LogError("Error reading file: " + e.getMessage());
+        }
+
+        return sb.toString();
+    }
+
+    public static void writeToFile(String content, String targetPath){
+        File targetFile  = new File(targetPath);
+        BufferedWriter fileOutput = null;
+        try {
+            if (!targetFile.exists()) targetFile.createNewFile();
+            fileOutput = new BufferedWriter(new FileWriter(targetFile));
+            fileOutput.write(content);
+
+        } catch (IOException e) {
+            Debug.Log("Cannot write contents to file at " + targetPath + ". " + e.getMessage());
+        }finally {
+            if(fileOutput != null){
+                try {
+                    fileOutput.close();
+                } catch (IOException e) {
+                    Debug.Log("Cannot write contents to file at " + targetPath + ". " + e.getMessage());
+                }
+            }
+        }
     }
 }
