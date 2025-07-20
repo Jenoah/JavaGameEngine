@@ -7,9 +7,10 @@ import imgui.flag.ImGuiWindowFlags;
 import nl.framegengine.engine.EditorGameLauncher;
 import nl.framegengine.engine.EditorPanel;
 import nl.framegengine.engine.EditorWindow;
+import nl.framegengine.engine.EngineSettings;
+import nl.jenoah.core.EngineManager;
 import nl.jenoah.core.WindowManager;
 import nl.jenoah.core.debugging.Debug;
-import org.lwjgl.glfw.GLFW;
 
 public class GamePanel extends EditorPanel {
 
@@ -36,20 +37,15 @@ public class GamePanel extends EditorPanel {
         if(EditorWindow.getInstance().getGameFBOID() != -1){
             ImGui.image(EditorWindow.getInstance().getGameFBOID(), sizeX, sizeY - 20, 0, 1, 1, 0);
             inFocus = ImGui.isItemHovered();
-        }else{
-            ImGui.text("Game panel");
         }
 
         ImGui.setCursorPos((float) sizeX / 2 - 32, sizeY - 64 - 32);
         if(ImGui.button("Play", 64f, 64f)){
-            Debug.Log("Playing game");
             startGame();
         }
 
-        ImGui.setCursorPos((float) 32, sizeY - 32);
-        ImGui.text(inFocus ? "Focus" : "Unfocussed");
-
-
+        ImGui.setCursorPos(8, 24);
+        ImGui.text("FPS: " + EngineManager.getFps());
     }
 
     @Override
@@ -61,6 +57,10 @@ public class GamePanel extends EditorPanel {
     }
 
     private void startGame(){
+        if(EngineSettings.currentLevelPath.isEmpty()){
+            Debug.LogError("Cannot start game. No level selected");
+            return;
+        }
         if(editorGameLauncher == null) {
             editorGameLauncher = new EditorGameLauncher();
             editorGameLauncher.run(sizeX, sizeY - 20);
