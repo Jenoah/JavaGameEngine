@@ -14,8 +14,8 @@ import static org.lwjgl.opengl.GL11.glDepthMask;
 public class UnlitShader extends Shader{
     public UnlitShader() throws Exception {
         super();
-        createVertexShader(Utils.loadResource("/shaders/unlit/unlit.vs"));
-        createFragmentShader(Utils.loadResource("/shaders/unlit/unlit.fs"));
+        loadVertexShaderFromFile("/shaders/unlit/unlit.vs");
+        loadFragmentShaderFromFile("/shaders/unlit/unlit.fs");
         link();
     }
 

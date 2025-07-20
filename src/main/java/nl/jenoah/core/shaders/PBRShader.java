@@ -2,6 +2,7 @@ package nl.jenoah.core.shaders;
 
 import nl.jenoah.core.entity.Camera;
 import nl.jenoah.core.rendering.MeshMaterialSet;
+import nl.jenoah.core.utils.FileHelper;
 import nl.jenoah.core.utils.Utils;
 import org.lwjgl.opengl.*;
 
@@ -9,8 +10,8 @@ public class PBRShader extends SimpleLitShader{
 
     public PBRShader() throws Exception {
         super();
-        createVertexShader(Utils.loadResource("/shaders/lit/PBR/vertex.vs"));
-        createFragmentShader(Utils.loadResource("/shaders/lit/PBR/fragment.fs"));
+        loadVertexShaderFromFile("/shaders/lit/PBR/vertex.vs");
+        loadFragmentShaderFromFile("/shaders/lit/PBR/fragment.fs");
         link();
     }
 

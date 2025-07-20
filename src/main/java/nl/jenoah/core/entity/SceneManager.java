@@ -12,6 +12,7 @@ import nl.jenoah.core.rendering.MeshMaterialSet;
 import nl.jenoah.core.shaders.ShaderManager;
 import nl.jenoah.core.shaders.SimpleLitShader;
 import nl.jenoah.core.components.ComponentLoader;
+import nl.jenoah.core.utils.JsonHelper;
 import nl.jenoah.core.utils.Utils;
 import org.joml.Vector3f;
 
@@ -65,13 +66,13 @@ public class SceneManager {
 
             JsonObject sceneInfo = reader.readObject();
 
-            Utils.loadVariableIntoObject(newScene, sceneInfo);
+            JsonHelper.loadVariableIntoObject(newScene, sceneInfo);
 
             // Game Objects
             sceneInfo.getJsonArray("gameObjects").forEach(goInfoContainer -> {
                 JsonObject goInfo = goInfoContainer.asJsonObject();
                 String goTypeName = "GameObject";
-                if(Utils.hasJsonKey(goInfo, "goType")) goTypeName = goInfo.getString("goType");
+                if(JsonHelper.hasJsonKey(goInfo, "goType")) goTypeName = goInfo.getString("goType");
                 GoType goType = GoType.fromJsonName(goTypeName);
 
                 GameObject go = null;
@@ -81,18 +82,18 @@ public class SceneManager {
                     throw new RuntimeException(e);
                 }
 
-                Utils.loadVariableIntoObject(go, goInfo, new String[]{"parentGuid", "goType", "meshPath", "texturePath", "isMain"});
+                JsonHelper.loadVariableIntoObject(go, goInfo, new String[]{"parentGuid", "goType", "meshPath", "texturePath", "isMain"});
 
-                if (Utils.hasJsonKey(goInfo, "meshPath")) {
+                if (JsonHelper.hasJsonKey(goInfo, "meshPath")) {
                     Set<MeshMaterialSet> meshMaterialSets = OBJLoader.loadOBJModel(goInfo.getString("meshPath"));
 
-                    if(Utils.hasJsonKey(goInfo, "texturePath")){
+                    if(JsonHelper.hasJsonKey(goInfo, "texturePath")){
                         JsonObject textureInfo = goInfo.getJsonObject("texturePath");
-                        if(!Utils.hasJsonKey(textureInfo, "diffuse")) return;
+                        if(!JsonHelper.hasJsonKey(textureInfo, "diffuse")) return;
                         Material meshMaterial = new Material(ShaderManager.pbrShader);
                         meshMaterial.setAlbedoTexture(new Texture(textureInfo.getString("diffuse")));
-                        if(Utils.hasJsonKey(textureInfo, "normal")) meshMaterial.setNormalMap(new Texture(textureInfo.getString("normal"), false, false, true, true));
-                        if(Utils.hasJsonKey(textureInfo, "roughness")) meshMaterial.setRoughnessMap(new Texture(textureInfo.getString("roughness"), false, false, true, false));
+                        if(JsonHelper.hasJsonKey(textureInfo, "normal")) meshMaterial.setNormalMap(new Texture(textureInfo.getString("normal"), false, false, true, true));
+                        if(JsonHelper.hasJsonKey(textureInfo, "roughness")) meshMaterial.setRoughnessMap(new Texture(textureInfo.getString("roughness"), false, false, true, false));
                         meshMaterial.setRoughness(.6f);
                         meshMaterialSets.forEach(meshMaterialSet -> meshMaterialSet.material = meshMaterial);
                     }
@@ -107,11 +108,11 @@ public class SceneManager {
                         tryAddLight((Light) go, newScene);
                         break;
                     case GoType.CAMERA:
-                        if(Utils.hasJsonKey(goInfo, "isMain") && goInfo.getBoolean("isMain")) ((Camera)go).setAsMain();
+                        if(JsonHelper.hasJsonKey(goInfo, "isMain") && goInfo.getBoolean("isMain")) ((Camera)go).setAsMain();
                         break;
                 }
 
-                if(Utils.hasJsonKey(goInfo, "parentGuid")) go.setParent(newScene.getGameObjectByGUID(goInfo.getString("parentGuid")));
+                if(JsonHelper.hasJsonKey(goInfo, "parentGuid")) go.setParent(newScene.getGameObjectByGUID(goInfo.getString("parentGuid")));
 
                 tryAddComponent(goInfo, go);
                 newScene.addEntity(go, false);
@@ -146,7 +147,7 @@ public class SceneManager {
     }
 
     private void tryAddComponent(JsonObject jsonObject, GameObject gameObject){
-        if(Utils.hasJsonKey(jsonObject, "components")){
+        if(JsonHelper.hasJsonKey(jsonObject, "components")){
             jsonObject.getJsonArray("components").forEach(componentInfoContainer -> {
                 JsonObject componentInfo = componentInfoContainer.asJsonObject();
                 if (!(componentInfo.containsKey("class") && !componentInfo.isNull("class"))) return;
@@ -156,7 +157,7 @@ public class SceneManager {
                     Component component = componentLoader.loadComponent("nl.framegengine.customScripts." + className);
                     if(component != null) {
 
-                        Utils.loadVariableIntoObject(component, componentInfo, new String[]{"class"});
+                        JsonHelper.loadVariableIntoObject(component, componentInfo, new String[]{"class"});
 
                         component.setRoot(gameObject);
                         gameObject.addComponent(component);

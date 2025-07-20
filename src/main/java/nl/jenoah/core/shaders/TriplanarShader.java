@@ -2,6 +2,7 @@ package nl.jenoah.core.shaders;
 
 import nl.jenoah.core.entity.Camera;
 import nl.jenoah.core.rendering.MeshMaterialSet;
+import nl.jenoah.core.utils.FileHelper;
 import nl.jenoah.core.utils.Utils;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL13;
@@ -18,8 +19,8 @@ public class TriplanarShader extends SimpleLitShader {
 
     public TriplanarShader() throws Exception {
         super();
-        createVertexShader(Utils.loadResource("/shaders/lit/triplanar/triplanar.vs"));
-        createFragmentShader(Utils.loadResource("/shaders/lit/triplanar/triplanar.fs"));
+        loadVertexShaderFromFile("/shaders/lit/triplanar/triplanar.vs");
+        loadFragmentShaderFromFile("/shaders/lit/triplanar/triplanar.fs");
         link();
         init();
     }

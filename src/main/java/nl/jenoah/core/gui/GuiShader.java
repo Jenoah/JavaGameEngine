@@ -1,6 +1,7 @@
 package nl.jenoah.core.gui;
 
 import nl.jenoah.core.shaders.Shader;
+import nl.jenoah.core.utils.FileHelper;
 import nl.jenoah.core.utils.Transformation;
 import nl.jenoah.core.utils.Utils;
 import org.joml.Matrix4f;
@@ -13,8 +14,8 @@ public class GuiShader extends Shader {
     }
 
     public void init() throws Exception {
-        createVertexShader(Utils.loadResource("/shaders/GUI/guiGeneric.vs"));
-        createFragmentShader(Utils.loadResource("/shaders/GUI/guiGeneric.fs"));
+        loadVertexShaderFromFile("/shaders/GUI/guiGeneric.vs");
+        loadFragmentShaderFromFile("/shaders/GUI/guiGeneric.fs");
         link();
         super.init();
     }

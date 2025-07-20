@@ -11,8 +11,8 @@ public class PPFXBrightShader extends Shader {
     }
 
     public void init() throws Exception {
-        createVertexShader(Utils.loadResource("/shaders/postProcessing/ppfxGeneric.vs"));
-        createFragmentShader(Utils.loadResource("/shaders/postProcessing/ppfxBrightFilter.fs"));
+        loadVertexShaderFromFile("/shaders/postProcessing/ppfxGeneric.vs");
+        loadFragmentShaderFromFile("/shaders/postProcessing/ppfxBrightFilter.fs");
         link();
         super.init();
     }

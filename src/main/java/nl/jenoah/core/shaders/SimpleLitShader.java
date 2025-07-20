@@ -7,6 +7,7 @@ import nl.jenoah.core.lighting.PointLight;
 import nl.jenoah.core.lighting.SpotLight;
 import nl.jenoah.core.rendering.MeshMaterialSet;
 import nl.jenoah.core.utils.Constants;
+import nl.jenoah.core.utils.FileHelper;
 import nl.jenoah.core.utils.Transformation;
 import nl.jenoah.core.utils.Utils;
 import org.joml.Matrix4f;
@@ -23,8 +24,8 @@ public class SimpleLitShader extends Shader {
 
     public SimpleLitShader() throws Exception {
         super();
-        createVertexShader(Utils.loadResource("/shaders/lit/simpleLit/vertex.vs"));
-        createFragmentShader(Utils.loadResource("/shaders/lit/simpleLit/fragment.fs"));
+        loadVertexShaderFromFile("/shaders/lit/simpleLit/vertex.vs");
+        loadFragmentShaderFromFile("/shaders/lit/simpleLit/fragment.fs");
         //TODO: Make that the vertex- and fragment shaders do not get created and linked when this is called from an inheriting class
         link();
     }

@@ -5,6 +5,7 @@ import nl.jenoah.core.WindowManager;
 import nl.jenoah.core.debugging.Debug;
 import nl.jenoah.core.entity.Material;
 import nl.jenoah.core.rendering.MeshMaterialSet;
+import nl.jenoah.core.utils.FileHelper;
 import nl.jenoah.core.utils.Utils;
 import org.joml.Matrix4f;
 import org.joml.Vector2f;
@@ -45,14 +46,22 @@ public class Shader {
     }
 
     public Shader init(String vertexShader, String fragmentShader) throws Exception {
-        createVertexShader(Utils.loadResource(vertexShader));
-        createFragmentShader(Utils.loadResource(fragmentShader));
+        createVertexShader(FileHelper.loadResource(vertexShader));
+        createFragmentShader(FileHelper.loadResource(fragmentShader));
         link();
         init();
         return this;
     }
 
     public void createRequiredUniforms() throws Exception { }
+
+    public void loadVertexShaderFromFile(String file) throws Exception {
+        createVertexShader(FileHelper.loadResource(file));
+    }
+
+    public void loadFragmentShaderFromFile(String file) throws Exception {
+        createFragmentShader(FileHelper.loadResource(file));
+    }
 
     public void createVertexShader(String shaderCode) throws Exception{
         vertexShaderID = createShader(shaderCode, GL20.GL_VERTEX_SHADER);

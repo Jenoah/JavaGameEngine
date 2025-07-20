@@ -3,6 +3,7 @@ package nl.jenoah.core.skybox;
 import nl.jenoah.core.entity.Camera;
 import nl.jenoah.core.entity.SceneManager;
 import nl.jenoah.core.shaders.Shader;
+import nl.jenoah.core.utils.FileHelper;
 import nl.jenoah.core.utils.Utils;
 import org.joml.Matrix4f;
 
@@ -13,8 +14,8 @@ public class SkyboxShader extends Shader {
     }
 
     public void init() throws Exception {
-        createVertexShader(Utils.loadResource("/shaders/skybox/skyboxGeneric.vs"));
-        createFragmentShader(Utils.loadResource("/shaders/skybox/skyboxGeneric.fs"));
+        loadVertexShaderFromFile("/shaders/skybox/skyboxGeneric.vs");
+        loadFragmentShaderFromFile("/shaders/skybox/skyboxGeneric.fs");
         link();
         super.init();
     }

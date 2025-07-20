@@ -8,6 +8,7 @@ import nl.jenoah.core.loaders.TextureLoader;
 import nl.jenoah.core.rendering.Face;
 import nl.jenoah.core.rendering.MeshMaterialSet;
 import nl.jenoah.core.shaders.ShaderManager;
+import nl.jenoah.core.utils.FileHelper;
 import nl.jenoah.core.utils.Utils;
 
 import org.joml.Vector2f;
@@ -20,7 +21,7 @@ import java.util.*;
 public class OBJLoader {
 
     public static Set<MeshMaterialSet> loadOBJModel(String fileName) {
-        List<String> lines = Utils.readAllLines(fileName);
+        List<String> lines = FileHelper.readAllLines(fileName);
         OBJObject objObject = new OBJObject();
 
         List<Vector3f> vertices = new ArrayList<>();
@@ -174,7 +175,7 @@ public class OBJLoader {
         HashMap<String, Material> mtlMaterials = new HashMap<>();
         Material currentMaterial = null;
 
-        List<String> lines = Utils.readAllLines(fileName);
+        List<String> lines = FileHelper.readAllLines(fileName);
         for (String line : lines) {
             String[] tokens = line.split("\\s+");
             switch (tokens[0]) {

@@ -1,5 +1,6 @@
 package nl.jenoah.core.shaders;
 import nl.jenoah.core.rendering.MeshMaterialSet;
+import nl.jenoah.core.utils.FileHelper;
 import nl.jenoah.core.utils.Transformation;
 import nl.jenoah.core.utils.Utils;
 import org.joml.Matrix4f;
@@ -7,8 +8,8 @@ import org.joml.Matrix4f;
 public class ShadowShader extends Shader{
     public ShadowShader() throws Exception {
         super();
-        createVertexShader(Utils.loadResource("/shaders/shadow/vertex.vs"));
-        createFragmentShader(Utils.loadResource("/shaders/shadow/fragment.fs"));
+        loadVertexShaderFromFile("/shaders/shadow/vertex.vs");
+        loadFragmentShaderFromFile("/shaders/shadow/fragment.fs");
         link();
     }
 

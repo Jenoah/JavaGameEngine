@@ -1,6 +1,7 @@
 package nl.jenoah.core.shaders;
 
 import nl.jenoah.core.entity.Camera;
+import nl.jenoah.core.utils.FileHelper;
 import nl.jenoah.core.utils.Transformation;
 import nl.jenoah.core.utils.Utils;
 import org.joml.Matrix4f;
@@ -11,8 +12,8 @@ public class DebugShader extends Shader{
 
     public DebugShader() throws Exception {
         super();
-        createVertexShader(Utils.loadResource("/shaders/debug/vertex.vs"));
-        createFragmentShader(Utils.loadResource("/shaders/debug/fragment.fs"));
+        loadVertexShaderFromFile("/shaders/debug/vertex.vs");
+        loadFragmentShaderFromFile("/shaders/debug/fragment.fs");
         link();
     }
 

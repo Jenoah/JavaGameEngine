@@ -1,6 +1,7 @@
 package nl.jenoah.core.fonts.fontRendering;
 
 import nl.jenoah.core.shaders.Shader;
+import nl.jenoah.core.utils.FileHelper;
 import nl.jenoah.core.utils.Utils;
 import org.joml.Vector2f;
 import org.joml.Vector3f;
@@ -14,8 +15,8 @@ public class FontShader extends Shader {
     }
 
     public void init() throws Exception {
-        createVertexShader(Utils.loadResource("/shaders/GUI/fonts/fontGeneric.vs"));
-        createFragmentShader(Utils.loadResource("/shaders/GUI/fonts/fontGeneric.fs"));
+        loadVertexShaderFromFile("/shaders/GUI/fonts/fontGeneric.vs");
+        loadFragmentShaderFromFile("/shaders/GUI/fonts/fontGeneric.fs");
         link();
         super.init();
     }

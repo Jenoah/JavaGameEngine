@@ -11,8 +11,8 @@ public class PPFXGammaCorrectShader extends Shader {
     }
 
     public void init() throws Exception {
-        createVertexShader(Utils.loadResource("/shaders/postProcessing/ppfxGeneric.vs"));
-        createFragmentShader(Utils.loadResource("/shaders/postProcessing/ppfxGammaCorrect.fs"));
+        loadVertexShaderFromFile("/shaders/postProcessing/ppfxGeneric.vs");
+        loadFragmentShaderFromFile("/shaders/postProcessing/ppfxGammaCorrect.fs");
         link();
         super.init();
     }

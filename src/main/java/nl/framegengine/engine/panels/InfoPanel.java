@@ -4,7 +4,7 @@ import imgui.ImGui;
 import imgui.flag.ImGuiCol;
 import nl.framegengine.engine.EditorPanel;
 import nl.jenoah.core.entity.GameObject;
-import nl.jenoah.core.utils.Utils;
+import nl.jenoah.core.utils.ClassHelper;
 
 import java.lang.reflect.Field;
 import java.util.ArrayList;
@@ -57,7 +57,7 @@ public class InfoPanel extends EditorPanel {
     public void setCurrentlySelectedObject(GameObject gameObject){
         currentlySelectedObject = gameObject;
         hierarchyObjects.clear();
-        Utils.getAllProperties(hierarchyObjects, currentlySelectedObject.getClass());
+        ClassHelper.getAllProperties(hierarchyObjects, currentlySelectedObject.getClass());
     }
 
     private void drawOption(String title, String content){

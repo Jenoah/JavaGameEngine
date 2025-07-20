@@ -1,6 +1,7 @@
 package nl.jenoah.core.shaders.postProcessing;
 
 import nl.jenoah.core.shaders.Shader;
+import nl.jenoah.core.utils.FileHelper;
 import nl.jenoah.core.utils.Utils;
 
 public class PPFXHorizontalBlurShader extends Shader {
@@ -11,8 +12,8 @@ public class PPFXHorizontalBlurShader extends Shader {
     }
 
     public void init() throws Exception {
-        createVertexShader(Utils.loadResource("/shaders/postProcessing/ppfxHorizontalBlur.vs"));
-        createFragmentShader(Utils.loadResource("/shaders/postProcessing/ppfxBlur.fs"));
+        loadVertexShaderFromFile("/shaders/postProcessing/ppfxHorizontalBlur.vs");
+        loadFragmentShaderFromFile("/shaders/postProcessing/ppfxBlur.fs");
         link();
         super.init();
     }

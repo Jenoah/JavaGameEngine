@@ -12,8 +12,8 @@ public class PPFXCombineShader extends Shader {
     }
 
     public void init() throws Exception {
-        createVertexShader(Utils.loadResource("/shaders/postProcessing/ppfxGeneric.vs"));
-        createFragmentShader(Utils.loadResource("/shaders/combineTextures.fs"));
+        loadVertexShaderFromFile("/shaders/postProcessing/ppfxGeneric.vs");
+        loadFragmentShaderFromFile("/shaders/combineTextures.fs");
         link();
         super.init();
     }

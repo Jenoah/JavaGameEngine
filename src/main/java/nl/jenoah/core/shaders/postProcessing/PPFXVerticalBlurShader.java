@@ -11,8 +11,8 @@ public class PPFXVerticalBlurShader extends Shader {
     }
 
     public void init() throws Exception {
-        createVertexShader(Utils.loadResource("/shaders/postProcessing/ppfxVerticalBlur.vs"));
-        createFragmentShader(Utils.loadResource("/shaders/postProcessing/ppfxBlur.fs"));
+        loadVertexShaderFromFile("/shaders/postProcessing/ppfxVerticalBlur.vs");
+        loadFragmentShaderFromFile("/shaders/postProcessing/ppfxBlur.fs");
         link();
         super.init();
     }
