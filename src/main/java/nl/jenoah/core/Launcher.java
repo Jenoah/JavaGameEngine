@@ -1,19 +1,16 @@
-package game.demo;
+package nl.jenoah.core;
 
-import nl.jenoah.core.EngineManager;
-import nl.jenoah.core.Settings;
-import nl.jenoah.core.WindowManager;
 import nl.jenoah.core.utils.Constants;
 import org.lwjgl.Version;
 
-public class DemoLauncher {
-    private static DemoGame game;
+public class Launcher {
+    private static GameInstance game;
 
     public static void main(String[] args){
         System.out.println(Version.getVersion());
 
         WindowManager.createInstance(Constants.TITLE, 1280, 720, Settings.isUseVSync(), true);
-        game = new DemoGame();
+        game = new GameInstance();
         EngineManager engine = new EngineManager();
 
         try{
@@ -23,7 +20,7 @@ public class DemoLauncher {
         }
     }
 
-    public static DemoGame getGame() {
+    public static GameInstance getGame() {
         return game;
     }
 }

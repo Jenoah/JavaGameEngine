@@ -1,7 +1,7 @@
 package nl.framegengine.engine;
 
-import game.demo.DemoGame;
 import nl.jenoah.core.EngineManager;
+import nl.jenoah.core.GameInstance;
 import nl.jenoah.core.Settings;
 import nl.jenoah.core.WindowManager;
 import nl.jenoah.core.utils.Constants;
@@ -11,7 +11,7 @@ public class EditorGameLauncher {
 
     public void run(int width, int height) {
         WindowManager.createInstance(Constants.TITLE, width, height, Settings.isUseVSync(), false);
-        DemoGame game = new DemoGame();
+        GameInstance game = new GameInstance();
         engine = new EngineManager();
 
         try{

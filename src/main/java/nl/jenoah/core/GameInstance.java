@@ -1,19 +1,16 @@
-package game.demo;
+package nl.jenoah.core;
 
-import nl.jenoah.core.ILogic;
-import nl.jenoah.core.MouseInput;
-import nl.jenoah.core.WindowManager;
 import nl.jenoah.core.debugging.Debug;
 import nl.jenoah.core.entity.Scene;
 import nl.jenoah.core.entity.SceneManager;
 import nl.jenoah.core.rendering.RenderManager;
 
-public class DemoGame implements ILogic {
+public class GameInstance implements ILogic{
     private final RenderManager renderer;
     private final WindowManager window;
     private final SceneManager sceneManager;
 
-    public DemoGame(){
+    public GameInstance(){
         RenderManager.createInstance();
         renderer = RenderManager.getInstance();
         window = WindowManager.getInstance();
