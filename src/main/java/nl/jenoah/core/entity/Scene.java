@@ -58,7 +58,11 @@ public class Scene {
 
     public void cleanUp() {
         ModelManager.cleanUp();
-        getGameObjects().forEach(gameObject -> gameObject.getComponents().forEach(Component::cleanUp));
+        getGameObjects().forEach(GameObject::cleanUp);
+        gameObjects.clear();
+        rootGameObjects.clear();
+        guiObjects.clear();
+        rootGameObjects.clear();
     }
 
     public void addEntity(GameObject entity, boolean intitiateComponents){

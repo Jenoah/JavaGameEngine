@@ -39,9 +39,14 @@ public class GamePanel extends EditorPanel {
             inFocus = ImGui.isItemHovered();
         }
 
-        ImGui.setCursorPos((float) sizeX / 2 - 32, sizeY - 64 - 32);
+        ImGui.setCursorPos((float) sizeX / 2 - 64, sizeY - 64 - 32);
         if(ImGui.button("Play", 64f, 64f)){
             startGame();
+        }
+
+        ImGui.setCursorPos((float) sizeX / 2 + 64, sizeY - 64 - 32);
+        if(ImGui.button("Stop", 64f, 64f)){
+            stopGame();
         }
 
         ImGui.setCursorPos(8, 24);
@@ -64,6 +69,14 @@ public class GamePanel extends EditorPanel {
         if(editorGameLauncher == null) {
             editorGameLauncher = new EditorGameLauncher();
             editorGameLauncher.run(sizeX, sizeY - 20);
+        }
+    }
+
+    private void stopGame(){
+        if(editorGameLauncher != null){
+            editorGameLauncher.stop();
+            editorGameLauncher = null;
+            EditorWindow.getInstance().resetGameFBOID();
         }
     }
 }

@@ -138,6 +138,10 @@ public class EditorWindow {
         this.gameFBOID = gameFBOID;
     }
 
+    public void resetGameFBOID(){
+        this.gameFBOID = -1;
+    }
+
     public void setEditorLayout(EditorLayout editorLayout){
         this.editorLayout = editorLayout;
     }

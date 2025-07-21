@@ -132,6 +132,8 @@ public class RenderManager {
         skyboxRenderer.cleanUp();
         shadowRenderer.cleanUp();
         debugRenderer.cleanUp();
+        instance = null;
+        renderCamera = null;
     }
 
     private void regenerateFrameBuffer(){

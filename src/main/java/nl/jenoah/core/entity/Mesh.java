@@ -1,5 +1,6 @@
 package nl.jenoah.core.entity;
 
+import nl.jenoah.core.ModelManager;
 import nl.jenoah.core.utils.Constants;
 import nl.jenoah.core.debugging.Debug;
 import nl.jenoah.core.utils.*;
@@ -137,6 +138,7 @@ public class Mesh {
             calculateTangents();
         }
 
+        ModelManager.addMesh(this);
         unbind();
     }
 
@@ -453,10 +455,18 @@ public class Mesh {
         tangents = null;
         bitangents = null;
         triangles = null;
+        instanceOffsets = null;
 
         for(int vbo: vbos){
             GL30.glDeleteBuffers(vbo);
         }
+        GL30.glDeleteBuffers(instanceVBOID);
+        GL30.glDeleteBuffers(tangentsVBOID);
+        GL30.glDeleteBuffers(bitangentsVBOID);
+        GL30.glDeleteBuffers(normalVBOID);
+        GL30.glDeleteBuffers(vertexVBOID);
+        GL30.glDeleteBuffers(triangleVBOID);
+        GL30.glDeleteBuffers(uvVBOID);
     }
 
     public boolean hasTangents(){

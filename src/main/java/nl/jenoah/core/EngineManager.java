@@ -60,6 +60,7 @@ public class EngineManager {
                 renderSingleFrame();
             }
         } finally {
+            Debug.Log("Stopping engine");
             cleanup();
         }
     }
@@ -80,7 +81,9 @@ public class EngineManager {
     }
 
     public void stop() {
+        Debug.Log("Stopping engine...");
         running = false;
+        cleanup();
     }
 
     private void handleInput() {
@@ -107,10 +110,10 @@ public class EngineManager {
     }
 
     private void cleanup() {
+        Debug.Log("Cleaning up...");
         window.cleanUp();
         gameLogic.cleanUp();
         if (errorCallback != null) errorCallback.free();
-        GLFW.glfwTerminate();
     }
 
     public static int getFps() {

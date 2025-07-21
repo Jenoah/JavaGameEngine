@@ -63,6 +63,10 @@ public class ModelManager {
         return mesh.getVaoID();
     }
 
+    public static void addMesh(Mesh mesh){
+        if(!meshes.containsKey(mesh.getVaoID())) meshes.put(mesh.getVaoID(), mesh);
+    }
+
     public static void unloadModel(int modelID){
         meshes.get(modelID).cleanUp();
         meshes.remove(modelID);

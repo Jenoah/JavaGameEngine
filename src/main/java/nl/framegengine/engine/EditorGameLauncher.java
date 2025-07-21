@@ -24,4 +24,9 @@ public class EditorGameLauncher {
     public void render(){
         engine.run();
     }
+
+    public void stop(){
+        engine.stop();
+        engine = null;
+    }
 }

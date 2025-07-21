@@ -89,7 +89,7 @@ public class ComponentRenderer implements IRenderer {
 
     private void prepareShadow(MeshMaterialSet meshMaterialSet){
         if(meshMaterialSet.material.receiveShadows() && meshMaterialSet.material.getShader() instanceof SimpleLitShader) {
-                ((SimpleLitShader) meshMaterialSet.material.getShader()).setShadowSpaceMatrix(shadowSpaceMatrix);
+            ((SimpleLitShader) meshMaterialSet.material.getShader()).setShadowSpaceMatrix(shadowSpaceMatrix);
             GL13.glActiveTexture(GL13.GL_TEXTURE9);
             GL11.glBindTexture(GL11.GL_TEXTURE_2D, shadowMapID);
             meshMaterialSet.material.getShader().setTexture("shadowMap", 9);
@@ -111,7 +111,10 @@ public class ComponentRenderer implements IRenderer {
 
     @Override
     public void cleanUp() {
-
+        renderObjects.clear();
+        sortedRenderObjects.clear();
+        sortedTransparentRenderObjects.clear();
+        mainCamera = null;
     }
 
     public void queue(RenderComponent renderComponent) {

@@ -325,6 +325,11 @@ public class GameObject {
         return this;
     }
 
+    public void cleanUp(){
+        components.forEach(Component::cleanUp);
+        children.forEach(child -> child.components.forEach(Component::cleanUp));
+    }
+
     public Set<Component> getComponents(){
         return components;
     }

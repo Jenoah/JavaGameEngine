@@ -194,6 +194,7 @@ public class SceneManager {
 
     public void cleanUp(){
         currentScene.cleanUp();
+        instance = null;
     }
 
     public enum GoType{

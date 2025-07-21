@@ -122,4 +122,12 @@ public class RenderComponent extends Component {
 
         root.setAabb(new AABB(min, max));
     }
+
+    @Override
+    public void cleanUp() {
+        super.cleanUp();
+        meshMaterialSets.forEach(mms -> {
+            mms.mesh.cleanUp();
+        });
+    }
 }
