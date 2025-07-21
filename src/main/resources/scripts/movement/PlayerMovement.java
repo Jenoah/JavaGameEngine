@@ -1,14 +1,13 @@
 package nl.framegengine.customScripts;
 
-import nl.jenoah.core.EngineManager;
-import nl.jenoah.core.MouseInput;
-import nl.jenoah.core.WindowManager;
-import nl.jenoah.core.components.Component;
-import nl.jenoah.core.debugging.Debug;
-import nl.jenoah.core.entity.Camera;
-import nl.jenoah.core.entity.GameObject;
-import nl.jenoah.core.utils.Constants;
-import nl.jenoah.core.utils.ObjectPool;
+import nl.framegengine.core.EngineManager;
+import nl.framegengine.core.MouseInput;
+import nl.framegengine.core.WindowManager;
+import nl.framegengine.core.components.Component;
+import nl.framegengine.core.entity.Camera;
+import nl.framegengine.core.entity.GameObject;
+import nl.framegengine.core.utils.Constants;
+import nl.framegengine.core.utils.ObjectPool;
 import org.joml.Quaternionf;
 import org.joml.Vector2f;
 import org.joml.Vector3f;

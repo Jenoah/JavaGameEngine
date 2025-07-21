@@ -1,9 +1,9 @@
 package nl.framegengine.customScripts;
 
-import nl.jenoah.core.EngineManager;
-import nl.jenoah.core.WindowManager;
-import nl.jenoah.core.components.Component;
-import nl.jenoah.core.debugging.Debug;
+import nl.framegengine.core.EngineManager;
+import nl.framegengine.core.WindowManager;
+import nl.framegengine.core.components.Component;
+import nl.framegengine.core.debugging.Debug;
 import org.joml.Vector3f;
 import org.lwjgl.glfw.GLFW;
 

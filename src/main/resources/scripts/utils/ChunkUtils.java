@@ -1,8 +1,7 @@
 package nl.framegengine.customScripts.utils;
 
-import nl.jenoah.core.utils.FastNoise;
-import nl.jenoah.core.utils.SimplexNoise;
-import nl.jenoah.core.utils.Utils;
+import nl.framegengine.core.utils.SimplexNoise;
+import nl.framegengine.core.utils.Utils;
 
 public class ChunkUtils {
 

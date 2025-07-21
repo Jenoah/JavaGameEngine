@@ -1,7 +1,7 @@
 package nl.framegengine.customScripts;
 
-import nl.jenoah.core.debugging.Debug;
-import nl.jenoah.core.utils.Calculus;
+import nl.framegengine.core.debugging.Debug;
+import nl.framegengine.core.utils.Calculus;
 import org.joml.Math;
 import org.joml.Vector3f;
 import nl.framegengine.customScripts.*;

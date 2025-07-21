@@ -1,17 +1,16 @@
 package nl.framegengine.customScripts;
 
-import nl.jenoah.core.EngineManager;
-import nl.jenoah.core.components.Component;
-import nl.jenoah.core.components.RenderComponent;
-import nl.jenoah.core.debugging.Debug;
-import nl.jenoah.core.entity.Camera;
-import nl.jenoah.core.entity.GameObject;
-import nl.jenoah.core.entity.SceneManager;
-import nl.jenoah.core.loaders.OBJLoader.OBJLoader;
-import nl.jenoah.core.loaders.TextureLoader;
-import nl.jenoah.core.rendering.MeshMaterialSet;
-import nl.jenoah.core.shaders.ShaderManager;
-import nl.jenoah.core.utils.Utils;
+import nl.framegengine.core.EngineManager;
+import nl.framegengine.core.components.Component;
+import nl.framegengine.core.components.RenderComponent;
+import nl.framegengine.core.entity.Camera;
+import nl.framegengine.core.entity.GameObject;
+import nl.framegengine.core.entity.SceneManager;
+import nl.framegengine.core.loaders.OBJLoader.OBJLoader;
+import nl.framegengine.core.loaders.TextureLoader;
+import nl.framegengine.core.rendering.MeshMaterialSet;
+import nl.framegengine.core.shaders.ShaderManager;
+import nl.framegengine.core.utils.Utils;
 
 import nl.framegengine.customScripts.TerrainGeneration;
 import nl.framegengine.customScripts.MarchingChunk;
@@ -22,8 +21,6 @@ import org.joml.Vector3f;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
-
-import java.util.Timer;
 
 public class TerrainManager extends Component {
     private int renderDistance = 2;
