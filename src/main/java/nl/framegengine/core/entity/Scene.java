@@ -11,6 +11,8 @@ import nl.framegengine.core.gui.GuiObject;
 import nl.framegengine.core.lighting.DirectionalLight;
 import nl.framegengine.core.lighting.PointLight;
 import nl.framegengine.core.lighting.SpotLight;
+import nl.framegengine.core.shaders.ShaderManager;
+import nl.framegengine.core.shaders.SimpleLitShader;
 import org.joml.Vector3f;
 
 import java.util.*;
@@ -125,6 +127,11 @@ public class Scene {
                 }
             }
         }
+    }
+
+    public void updateLights(){
+        for (SimpleLitShader s : Arrays.asList(ShaderManager.litShader, ShaderManager.triplanarShader, ShaderManager.pbrShader))
+            s.setLights(getDirectionalLight(), getPointLights(), getSpotLights());
     }
 
     public List<GuiObject> getGuiObjects() {

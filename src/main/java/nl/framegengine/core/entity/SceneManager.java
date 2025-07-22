@@ -11,7 +11,6 @@ import nl.framegengine.core.lighting.SpotLight;
 import nl.framegengine.core.loaders.OBJLoader.OBJLoader;
 import nl.framegengine.core.rendering.MeshMaterialSet;
 import nl.framegengine.core.shaders.ShaderManager;
-import nl.framegengine.core.shaders.SimpleLitShader;
 import nl.framegengine.core.components.ComponentLoader;
 import nl.framegengine.core.utils.JsonHelper;
 import org.joml.Vector3f;
@@ -116,8 +115,7 @@ public class SceneManager {
 
         newScene.getGameObjects().forEach(go -> go.getComponents().forEach(Component::initiate));
 
-        for (SimpleLitShader s : Arrays.asList(ShaderManager.litShader, ShaderManager.triplanarShader, ShaderManager.pbrShader))
-            s.setLights(newScene.getDirectionalLight(), newScene.getPointLights(), newScene.getSpotLights());
+        newScene.updateLights();
         return newScene;
     }
 

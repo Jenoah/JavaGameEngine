@@ -64,14 +64,12 @@ public class ProjectPanel extends EditorPanel {
 
     private void showContextMenu(String stringID, String path){
         if (ImGui.beginPopupContextItem(stringID)) {
-            ImGui.text("Options");
-            ImGui.newLine();
-            if (ImGui.beginMenu("Create new")) {
+            ImGui.text("-- Options --");
+            if (ImGui.beginMenu("New")) {
                 if (ImGui.menuItem("Folder")) {
                     ImGuiHelper.setInputFieldModal(name -> createNewDirectory(FileHelper.getDirectoryPath(path), name));
                     ImGui.closeCurrentPopup();
                 }
-                ImGui.text("--------");
                 if (ImGui.menuItem("Class")) {
                     ImGuiHelper.setInputFieldModal(name -> createNewClass(FileHelper.getDirectoryPath(path), name));
                     ImGui.closeCurrentPopup();
