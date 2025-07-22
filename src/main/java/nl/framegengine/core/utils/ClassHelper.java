@@ -3,6 +3,7 @@ package nl.framegengine.core.utils;
 import nl.framegengine.core.debugging.Debug;
 
 import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
 import java.util.Arrays;
 import java.util.List;
 
@@ -61,7 +62,35 @@ public class ClassHelper {
         if (type.getSuperclass() != null) {
             getAllProperties(fields, type.getSuperclass());
         }
+    }
 
+    public static void getAllPublicAndProtectedProperties(List<Field> fields, Class<?> type) {
+        fields.addAll(Arrays.stream(type.getDeclaredFields()).filter(f -> Modifier.isPublic(f.getModifiers())  || Modifier.isProtected(f.getModifiers())).toList());
+
+        if (type.getSuperclass() != null) {
+            getAllPublicAndProtectedProperties(fields, type.getSuperclass());
+        }
+    }
+
+    public static Field getFieldFromObject(String fieldName, Class<?> type) throws NoSuchFieldException {
+        try {
+            return type.getDeclaredField(fieldName);
+        } catch (NoSuchFieldException e) {
+            Class<?> superClass = type.getSuperclass();
+            if (superClass != null) {
+                return getFieldFromObject(fieldName, superClass);
+            } else {
+                throw e;
+            }
+        }
+    }
+
+    public static void getAllPublicProperties(List<Field> fields, Class<?> type) {
+        fields.addAll(Arrays.stream(type.getDeclaredFields()).filter(f -> Modifier.isPublic(f.getModifiers())).toList());
+
+        if (type.getSuperclass() != null) {
+            getAllPublicProperties(fields, type.getSuperclass());
+        }
     }
 
     public static Field findField(Class<?> clazz, String fieldName) {

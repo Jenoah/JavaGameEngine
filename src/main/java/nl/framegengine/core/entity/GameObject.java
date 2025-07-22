@@ -24,18 +24,19 @@ public class GameObject {
     private AABB aabb;
     private final Vector3f center = new Vector3f(0);
     private String guid;
+    private boolean isEnabled = true;
+    private boolean isStatic = false;
+    private boolean drawDebugWireframe = false;
+    private String name = "GameObject";
 
     private final List<GameObject> children;
     private GameObject parent;
-    protected boolean isEnabled = true;
-    protected boolean isStatic = false;
-    protected boolean willUpdate = false;
 
-    private boolean drawDebugWireframe = false;
+    protected boolean willUpdate = false;
 
     private final Set<Component> components = new HashSet<>();
 
-    private String name = "GameObject";
+
 
     public GameObject() {
         this.children = new ArrayList<>();
