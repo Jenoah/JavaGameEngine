@@ -19,6 +19,8 @@ import org.joml.Vector3f;
 import javax.json.Json;
 import javax.json.JsonObject;
 import javax.json.JsonReader;
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.InputStream;
 
 import java.net.URL;
@@ -55,11 +57,6 @@ public class SceneManager {
 
         try (InputStream is = new FileInputStream(filePath);
              JsonReader reader = Json.createReader(is)) {
-
-            if (is == null) {
-                throw new IllegalArgumentException("File not found: " + filePath);
-            }
-
             JsonObject sceneInfo = reader.readObject();
 
             JsonHelper.loadVariableIntoObject(newScene, sceneInfo);
@@ -87,9 +84,9 @@ public class SceneManager {
                         JsonObject textureInfo = goInfo.getJsonObject("texturePath");
                         if(!JsonHelper.hasJsonKey(textureInfo, "diffuse")) return;
                         Material meshMaterial = new Material(ShaderManager.pbrShader);
-                        meshMaterial.setAlbedoTexture(new Texture(textureInfo.getString("diffuse")));
-                        if(JsonHelper.hasJsonKey(textureInfo, "normal")) meshMaterial.setNormalMap(new Texture(textureInfo.getString("normal"), false, false, true, true));
-                        if(JsonHelper.hasJsonKey(textureInfo, "roughness")) meshMaterial.setRoughnessMap(new Texture(textureInfo.getString("roughness"), false, false, true, false));
+                        meshMaterial.setAlbedoTexture(new Texture(EngineSettings.currentProjectDirectory + File.separator + textureInfo.getString("diffuse")));
+                        if(JsonHelper.hasJsonKey(textureInfo, "normal")) meshMaterial.setNormalMap(new Texture(EngineSettings.currentProjectDirectory + File.separator + textureInfo.getString("normal"), false, false, true, true));
+                        if(JsonHelper.hasJsonKey(textureInfo, "roughness")) meshMaterial.setRoughnessMap(new Texture(EngineSettings.currentProjectDirectory + File.separator + textureInfo.getString("roughness"), false, false, true, false));
                         meshMaterial.setRoughness(.6f);
                         meshMaterialSets.forEach(meshMaterialSet -> meshMaterialSet.material = meshMaterial);
                     }
@@ -146,7 +143,7 @@ public class SceneManager {
         if(JsonHelper.hasJsonKey(jsonObject, "components")){
             jsonObject.getJsonArray("components").forEach(componentInfoContainer -> {
                 JsonObject componentInfo = componentInfoContainer.asJsonObject();
-                if (!(componentInfo.containsKey("class") && !componentInfo.isNull("class"))) return;
+                if(! JsonHelper.hasJsonKey(componentInfo, "class")) return;
                 String className = componentInfo.getString("class");
 
                 try {
