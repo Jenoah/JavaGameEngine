@@ -38,6 +38,7 @@ public class EngineSettings {
 
         if (JsonHelper.hasJsonKey(projectInfo, "currentLevelPath")) currentLevelPath = projectInfo.getString("currentLevelPath");
         currentProjectName = FileHelper.getDirectoryName(currentProjectDirectory);
+        saveEngineConfig();
 
         Debug.Log("Project settings successfully loaded in");
     }
@@ -67,5 +68,41 @@ public class EngineSettings {
         }
         EngineSettings.currentProjectDirectory = projectDirectory;
         EngineSettings.loadSettings();
+    }
+
+    private static void saveEngineConfig(){
+        String userHome = System.getProperty("user.home");
+        File configDir = new File(userHome, ".framegengine");
+        if (!configDir.exists()) {
+            configDir.mkdirs();
+        }
+        File settingsFile = new File(configDir, "editorconfig.json");
+        Debug.Log("Loading editor config from " + settingsFile.getAbsolutePath());
+
+        JsonObjectBuilder jsonSaveContent = Json.createObjectBuilder();
+        jsonSaveContent.add("currentProjectDirectory", currentProjectDirectory);
+
+        JsonObject jsonSaveContentObject = jsonSaveContent.build();
+        FileHelper.writeToFile(jsonSaveContentObject.toString(), settingsFile.getAbsolutePath());
+    }
+
+    public static void loadEngineConfig(){
+        String userHome = System.getProperty("user.home");
+        File configDir = new File(userHome, ".framegengine");
+        File settingsFile = new File(configDir, "editorconfig.json");
+
+        String saveFileContent = FileHelper.readFile(settingsFile.getAbsolutePath());
+        if(saveFileContent == null) {
+            Debug.LogError("No editor config found. Creating...");
+            saveEngineConfig();
+            return;
+        }
+
+        JsonObject projectInfo = Json.createReader(new StringReader(saveFileContent)).readObject();
+
+        if (!JsonHelper.hasJsonKey(projectInfo, "currentProjectDirectory")) return;
+
+        currentProjectDirectory = projectInfo.getString("currentProjectDirectory");
+        currentProjectName = FileHelper.getDirectoryName(currentProjectDirectory);
     }
 }
