@@ -5,11 +5,21 @@ import org.lwjgl.PointerBuffer;
 import org.lwjgl.system.MemoryStack;
 
 import java.io.*;
+import java.net.URISyntaxException;
+import java.net.URL;
+import java.net.URLDecoder;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
+import java.util.Enumeration;
 import java.util.List;
 import java.util.Scanner;
+import java.util.jar.JarEntry;
+import java.util.jar.JarFile;
 
 import static org.lwjgl.util.nfd.NativeFileDialog.*;
 
@@ -18,6 +28,10 @@ public class FileHelper {
     public static String getFileName(String filePath) {
         String fileName = new File(filePath).getName();
         return fileName.substring(0, fileName.lastIndexOf('.'));
+    }
+
+    public static String getDirectoryName(String directoryPath) {
+        return new File(directoryPath).getName();
     }
 
     public static List<File> findAllJavaFiles(File rootDir) {
@@ -153,5 +167,67 @@ public class FileHelper {
         }
 
         return selectedDirectory;
+    }
+
+    public static void copyResourceToDirectory(String inputDirectory, String outputDirectory) throws IOException, URISyntaxException {
+        Path outputPath = new File(outputDirectory).toPath();
+
+        if (!Files.exists(outputPath)) {
+            Files.createDirectories(outputPath);
+        }
+
+        URL dirURL = FileHelper.class.getClassLoader().getResource(inputDirectory);
+        if (dirURL == null) {
+            throw new IllegalArgumentException("Resource folder not found: " + inputDirectory);
+        }
+
+        if (dirURL.getProtocol().equals("file")) {
+            copyResourceFromFilesystem(inputDirectory, outputPath, dirURL);
+        }else if(dirURL.getProtocol().equals("jar")) {
+            copyResourceFromJar(inputDirectory, outputPath, dirURL);
+        }
+    }
+
+    private static void copyResourceFromFilesystem(String inputDirectory, Path outputDirectory, URL dirURL) throws URISyntaxException, IOException {
+        Path sourcePath = Paths.get(dirURL.toURI());
+        Files.walk(sourcePath).forEach(source -> {
+            try {
+                Path target = outputDirectory.resolve(sourcePath.relativize(source).toString());
+                if (Files.isDirectory(source)) {
+                    if (!Files.exists(target)) Files.createDirectories(target);
+                } else {
+                    Files.copy(source, target, StandardCopyOption.REPLACE_EXISTING);
+                }
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+        });
+    }
+
+    private static void copyResourceFromJar(String inputDirectory, Path outputDirectory, URL dirURL) throws UnsupportedEncodingException {
+        String jarPath = dirURL.getPath().substring(5, dirURL.getPath().indexOf("!"));
+        try (JarFile jar = new JarFile(URLDecoder.decode(jarPath, "UTF-8"))) {
+            Enumeration<JarEntry> entries = jar.entries(); // all entries in jar
+            while (entries.hasMoreElements()) {
+                JarEntry entry = entries.nextElement();
+                String name = entry.getName();
+
+                if (name.startsWith(inputDirectory + "/")) {
+                    String relativePath = name.substring(inputDirectory.length() + 1);
+                    Path outPath = outputDirectory.resolve(relativePath);
+
+                    if (entry.isDirectory()) {
+                        Files.createDirectories(outPath);
+                    } else {
+                        InputStream is = jar.getInputStream(entry);
+                        Files.createDirectories(outPath.getParent());
+                        Files.copy(is, outPath, StandardCopyOption.REPLACE_EXISTING);
+                        is.close();
+                    }
+                }
+            }
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 }
