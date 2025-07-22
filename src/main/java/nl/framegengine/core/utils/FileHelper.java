@@ -31,7 +31,23 @@ public class FileHelper {
     }
 
     public static String getDirectoryName(String directoryPath) {
-        return new File(directoryPath).getName();
+        File file = new File(directoryPath);
+        if (file.isDirectory()) {
+            return file.getName();
+        } else {
+            File parent = file.getAbsoluteFile().getParentFile();
+            return parent != null ? parent.getName() : null;
+        }
+    }
+
+    public static String getDirectoryPath(String directoryPath) {
+        File file = new File(directoryPath).getAbsoluteFile();
+        if (file.isDirectory()) {
+            return file.getAbsolutePath();
+        } else {
+            File parent = file.getParentFile();
+            return parent != null ? parent.getAbsolutePath() : null;
+        }
     }
 
     public static List<File> findAllJavaFiles(File rootDir) {
@@ -58,6 +74,10 @@ public class FileHelper {
     }
 
     public static void openFile(File file) throws IOException {
+        if (!file.exists()) {
+            throw new IllegalArgumentException("File does not exist: " + file.getAbsolutePath());
+        }
+
         String osName = System.getProperty("os.name").toLowerCase();
 
         if (osName.contains("win")) {
@@ -69,6 +89,34 @@ public class FileHelper {
         } else if (osName.contains("nix") || osName.contains("nux") || osName.contains("aix")) {
             // Linux/Unix
             new ProcessBuilder("xdg-open", file.getAbsolutePath()).start();
+        } else {
+            throw new UnsupportedOperationException("Unsupported operating system: " + osName);
+        }
+    }
+
+    public static void openDirectory(File file) throws IOException {
+        if (!file.exists()) {
+            throw new IllegalArgumentException("File does not exist: " + file.getAbsolutePath());
+        }
+
+        String osName = System.getProperty("os.name").toLowerCase();
+        File parentDir = file.getParentFile();
+        if (parentDir == null) {
+            throw new IOException("File does not have a parent directory: " + file.getAbsolutePath());
+        }
+
+        if (osName.contains("win")) {
+            // Windows: open Explorer and select the file
+            new ProcessBuilder("explorer.exe", "/select,", file.getAbsolutePath()).start();
+
+        } else if (osName.contains("mac")) {
+            // macOS: open Finder and reveal file
+            new ProcessBuilder("open", "-R", file.getAbsolutePath()).start();
+
+        } else if (osName.contains("nix") || osName.contains("nux") || osName.contains("aix")) {
+            // Linux/Unix: open containing folder (no standard way to select a file)
+            new ProcessBuilder("xdg-open", parentDir.getAbsolutePath()).start();
+
         } else {
             throw new UnsupportedOperationException("Unsupported operating system: " + osName);
         }
@@ -229,5 +277,16 @@ public class FileHelper {
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    public static boolean deleteFile(File inputFile){
+        if(!inputFile.exists()) return false;
+        File[] allContents = inputFile.listFiles();
+        if (allContents != null) {
+            for (File fileChild : allContents) {
+                deleteFile(fileChild);
+            }
+        }
+        return inputFile.delete();
     }
 }
