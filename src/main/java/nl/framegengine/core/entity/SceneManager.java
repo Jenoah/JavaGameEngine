@@ -47,17 +47,13 @@ public class SceneManager {
         Scene newScene = new Scene();
 
         if(componentLoader == null){
-            URL inputResourceUrl = ComponentLoader.class.getResource("/scripts/");
-            URL compiledResourceUrl = ComponentLoader.class.getResource("/scripts/bin/");
-            if (inputResourceUrl == null){
-                Debug.Log("File not found " + "scripts");
-                return newScene;
-            }
+            URL inputResourceUrl = new File(EngineSettings.currentProjectDirectory).toURI().toURL();
+            URL compiledResourceUrl = new File(EngineSettings.currentProjectDirectory + File.separator + "/.compiled").toURI().toURL();
 
             componentLoader = new ComponentLoader(inputResourceUrl.toURI().getPath(), compiledResourceUrl.toURI().getPath());
         }
 
-        try (InputStream is = getClass().getClassLoader().getResourceAsStream(filePath);
+        try (InputStream is = new FileInputStream(filePath);
              JsonReader reader = Json.createReader(is)) {
 
             if (is == null) {
