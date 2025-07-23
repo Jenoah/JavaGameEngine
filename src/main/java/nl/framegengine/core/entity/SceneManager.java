@@ -15,9 +15,7 @@ import nl.framegengine.core.components.ComponentLoader;
 import nl.framegengine.core.utils.JsonHelper;
 import org.joml.Vector3f;
 
-import javax.json.Json;
-import javax.json.JsonObject;
-import javax.json.JsonReader;
+import javax.json.*;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStream;
@@ -64,7 +62,7 @@ public class SceneManager {
             sceneInfo.getJsonArray("gameObjects").forEach(goInfoContainer -> {
                 JsonObject goInfo = goInfoContainer.asJsonObject();
                 String goTypeName = "GameObject";
-                if(JsonHelper.hasJsonKey(goInfo, "goType")) goTypeName = goInfo.getString("goType");
+                if(JsonHelper.hasJsonKey(goInfo, "class")) goTypeName = goInfo.getString("class");
                 GoType goType = GoType.fromJsonName(goTypeName);
 
                 GameObject go = null;
@@ -74,7 +72,7 @@ public class SceneManager {
                     throw new RuntimeException(e);
                 }
 
-                JsonHelper.loadVariableIntoObject(go, goInfo, new String[]{"parentGuid", "goType", "meshPath", "texturePath", "isMain"});
+                JsonHelper.loadVariableIntoObject(go, goInfo, new String[]{"parentGuid", "class", "meshPath", "texturePath", "isMain"});
 
                 if (JsonHelper.hasJsonKey(goInfo, "meshPath")) {
                     Set<MeshMaterialSet> meshMaterialSets = OBJLoader.loadOBJModel(goInfo.getString("meshPath"));
@@ -187,6 +185,22 @@ public class SceneManager {
     public void cleanUp(){
         currentScene.cleanUp();
         instance = null;
+    }
+
+    public static String sceneToJson(Scene scene){
+        JsonObjectBuilder sceneInfo = Json.createObjectBuilder();
+        sceneInfo.add("levelName", scene.getLevelName());
+        sceneInfo.add("fogGradient", scene.getFogGradient());
+        sceneInfo.add("fogDensity", scene.getFogDensity());
+        sceneInfo.add("fogColor", JsonHelper.vector3ToJsonArray(scene.getFogColor()));
+
+        JsonArrayBuilder sceneGoInfo = Json.createArrayBuilder();
+        scene.getGameObjects().forEach(go -> {
+            sceneGoInfo.add(JsonHelper.objectToJson(go));
+        });
+        sceneInfo.add("gameObjects", sceneGoInfo);
+
+        return sceneInfo.build().toString();
     }
 
     public enum GoType{

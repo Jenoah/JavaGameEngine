@@ -1,6 +1,7 @@
 package nl.framegengine.editor;
 
 import nl.framegengine.core.debugging.Debug;
+import nl.framegengine.core.entity.SceneManager;
 import nl.framegengine.core.utils.FileHelper;
 import nl.framegengine.core.utils.JsonHelper;
 
@@ -23,6 +24,8 @@ public class EngineSettings {
 
         JsonObject jsonSaveContentObject = jsonSaveContent.build();
         FileHelper.writeToFile(jsonSaveContentObject.toString(), currentProjectDirectory + settingsFileName);
+        if(SceneManager.getInstance() != null && SceneManager.getInstance().getCurrentScene() != null)
+            FileHelper.writeToFile(SceneManager.sceneToJson(SceneManager.getInstance().getCurrentScene()), currentProjectDirectory + File.separator + currentLevelPath);
     }
 
     public static void loadSettings() {
@@ -77,7 +80,6 @@ public class EngineSettings {
             configDir.mkdirs();
         }
         File settingsFile = new File(configDir, "editorconfig.json");
-        Debug.Log("Loading editor config from " + settingsFile.getAbsolutePath());
 
         JsonObjectBuilder jsonSaveContent = Json.createObjectBuilder();
         jsonSaveContent.add("currentProjectDirectory", currentProjectDirectory);
