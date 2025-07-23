@@ -20,7 +20,7 @@
     {
       "name": "Camera - Player",
       "parentGuid": "playerGUID",
-      "goType": "Camera",
+      "class": "Camera",
       "isMain": true,
       "localPosition": {
         "x": 0,
@@ -29,7 +29,7 @@
       },
       "components": [
         {
-            "class": "PlayerMovement"
+          "class": "PlayerMovement"
         }
       ]
     },
@@ -38,9 +38,9 @@
       "guid": "123abc",
       "meshPath": "/models/cube.obj",
       "texturePath": {
-				"diffuse": "/demo/textures/grid_Kenney_prototype.png",
-				"roughness": "/demo/textures/grid_Kenney_prototype.png"
-			},
+        "diffuse": "/demo/textures/grid_Kenney_prototype.png",
+        "roughness": "/demo/textures/grid_Kenney_prototype.png"
+      },
       "localPosition": {
         "x": 0,
         "y": 0,
@@ -54,7 +54,7 @@
     },
     {
       "name": "Directional Light",
-      "goType": "DirectionalLight",
+      "class": "DirectionalLight",
       "localPosition": {
         "x": -2.5,
         "y": 6.5,
@@ -75,7 +75,7 @@
     },
     {
       "name": "Pointlight 1",
-      "goType": "PointLight",
+      "class": "PointLight",
       "color": {
         "x": 0.25,
         "y": 0.25,
@@ -99,7 +99,7 @@
     },
     {
       "name": "Spotlight 1",
-      "goType": "SpotLight",
+      "class": "SpotLight",
       "color": {
         "x": 0.1,
         "y": 1,
@@ -124,14 +124,14 @@
       "outerCutOff": 0.81915206,
       "components": [
         {
-            "class": "RotateOnAxis",
-            "rotationSpeed": 100
+          "class": "RotateOnAxis",
+          "rotationSpeed": 100
         }
       ]
     },
     {
       "name": "Spotlight 2",
-      "goType": "SpotLight",
+      "class": "SpotLight",
       "color": {
         "x": 1,
         "y": 0.1,
@@ -156,11 +156,10 @@
       "outerCutOff": 0.81915206,
       "components": [
         {
-            "class": "RotateOnAxis",
-            "rotationSpeed": 25
+          "class": "RotateOnAxis",
+          "rotationSpeed": 25
         }
       ]
-
     }
   ]
 }
