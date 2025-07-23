@@ -17,6 +17,7 @@ import java.util.List;
 import java.util.Set;
 
 public class GameObject {
+    private String name = "GameObject";
     private final Vector3f localPosition = new Vector3f();
     private final Quaternionf localRotation = new Quaternionf();
     private final Vector3f scale = new Vector3f(1f);
@@ -26,8 +27,7 @@ public class GameObject {
     private String guid;
     private boolean isEnabled = true;
     private boolean isStatic = false;
-    private boolean drawDebugWireframe = false;
-    private String name = "GameObject";
+    protected boolean drawDebugWireframe = false;
 
     private final List<GameObject> children;
     private GameObject parent;
@@ -35,8 +35,6 @@ public class GameObject {
     protected boolean willUpdate = false;
 
     private final Set<Component> components = new HashSet<>();
-
-
 
     public GameObject() {
         this.children = new ArrayList<>();

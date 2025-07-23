@@ -32,6 +32,8 @@ public class InfoPanel extends EditorPanel {
 
         ImGui.setWindowFontScale(2f);
         ImGui.text(currentlySelectedObject.getName());
+        ImGui.setWindowFontScale(1f);
+        ImGui.text(currentlySelectedObject.getClass().getSimpleName());
         ImGui.newLine();
 
         for (Field field : hierarchyObjects) {
@@ -44,21 +46,6 @@ public class InfoPanel extends EditorPanel {
                 throw new RuntimeException(e);
             }
         }
-
-        ImGui.pushStyleColor(ImGuiCol.ButtonHovered, 1f, 1f, 0f, 1f);
-        ImGui.pushStyleColor(ImGuiCol.Text, .2f, .2f, .2f, 1f);
-        if(currentlySelectedObject.isDrawDebugWireframe()){
-            ImGui.pushStyleColor(ImGuiCol.Button, 0f, 1f, 0f, 1f);
-            if(ImGui.button("Debugging frame")){
-                currentlySelectedObject.setDrawDebugWireframe(false);
-            }
-        }else{
-            ImGui.pushStyleColor(ImGuiCol.Button, 1f, 0f, 0f, 1f);
-            if(ImGui.button("Debugging frame")){
-                currentlySelectedObject.setDrawDebugWireframe(true);
-            }
-        }
-        ImGui.popStyleColor(3);
     }
 
     public void setCurrentlySelectedObject(GameObject gameObject){
