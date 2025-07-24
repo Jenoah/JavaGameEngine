@@ -111,6 +111,7 @@ public class EngineManager {
 
     private void cleanup() {
         Debug.Log("Cleaning up...");
+        mouseInput.cleanUp();
         window.cleanUp();
         gameLogic.cleanUp();
         if (errorCallback != null) errorCallback.free();

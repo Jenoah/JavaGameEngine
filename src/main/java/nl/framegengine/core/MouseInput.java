@@ -17,29 +17,36 @@ public class MouseInput {
     private static long windowLong;
     private static WindowManager window;
 
+    private GLFWCursorPosCallback prevCursorPosCallback;
+    private GLFWMouseButtonCallback prevMouseButtonCallback;
+
     public MouseInput(){
         window = WindowManager.getInstance();
         windowLong = GLFW.glfwGetCurrentContext();
     }
 
     public void init(){
-        GLFWCursorPosCallback imguiCursorPosCallback = GLFW.glfwSetCursorPosCallback(this.window.getWindow(), null);
-        GLFWMouseButtonCallback imguiMouseButtonCallback = GLFW.glfwSetMouseButtonCallback(this.window.getWindow(), null);
+        prevCursorPosCallback = GLFW.glfwSetCursorPosCallback(this.window.getWindow(), null);
+        prevMouseButtonCallback = GLFW.glfwSetMouseButtonCallback(this.window.getWindow(), null);
 
+        // Now set your own callbacks
         GLFW.glfwSetCursorPosCallback(this.window.getWindow(), (window, xPos, yPos) -> {
-            if(this.window.getFocus()) {
+            if (this.window.getFocus()) {
                 currentPosition.x = xPos;
                 currentPosition.y = yPos;
             }
-            if (imguiCursorPosCallback != null) imguiCursorPosCallback.invoke(window, xPos, yPos);
+            // Call previous callback if set
+            if (prevCursorPosCallback != null)
+                prevCursorPosCallback.invoke(window, xPos, yPos);
         });
 
         GLFW.glfwSetMouseButtonCallback(this.window.getWindow(), (window, button, action, mods) -> {
-            if(this.window.getFocus()) {
+            if (this.window.getFocus()) {
                 lbDown = button == GLFW.GLFW_MOUSE_BUTTON_1 && action == GLFW.GLFW_PRESS;
                 rbDown = button == GLFW.GLFW_MOUSE_BUTTON_2 && action == GLFW.GLFW_PRESS;
             }
-            if (imguiMouseButtonCallback != null) imguiMouseButtonCallback.invoke(window, button, action, mods);
+            if (prevMouseButtonCallback != null)
+                prevMouseButtonCallback.invoke(window, button, action, mods);
         });
     }
 
@@ -74,6 +81,14 @@ public class MouseInput {
 
     public static Vector2f getMouseDelta() {
         return mouseDelta;
+    }
+
+    public void cleanUp(){
+        GLFW.glfwSetCursorPosCallback(window.getWindow(), prevCursorPosCallback);
+        GLFW.glfwSetMouseButtonCallback(window.getWindow(), prevMouseButtonCallback);
+
+        prevCursorPosCallback = null;
+        prevMouseButtonCallback = null;
     }
 
     public static Vector2d getMousePositionInViewport(){

@@ -174,4 +174,10 @@ public class Camera extends GameObject {
         updateViewFrustum();
         willUpdate = false;
     }
+
+    @Override
+    public void cleanUp() {
+        super.cleanUp();
+        mainCamera = null;
+    }
 }
