@@ -6,6 +6,7 @@ import java.util.Set;
 
 public class OBJObject {
     private ArrayList<OBJModel> objModels = new ArrayList<>();
+    private String modelPath = "";
 
 
     public ArrayList<OBJModel> getObjModels() {
@@ -31,5 +32,13 @@ public class OBJObject {
         for (Integer integer : indicesToRemove) {
             objModels.remove((int) integer);
         }
+    }
+
+    public String getModelPath() {
+        return modelPath;
+    }
+
+    public void setModelPath(String modelPath) {
+        this.modelPath = modelPath;
     }
 }

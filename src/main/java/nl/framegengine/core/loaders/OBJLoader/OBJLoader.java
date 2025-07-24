@@ -22,6 +22,7 @@ public class OBJLoader {
     public static Set<MeshMaterialSet> loadOBJModel(String fileName) {
         List<String> lines = FileHelper.readAllLines(fileName);
         OBJObject objObject = new OBJObject();
+        objObject.setModelPath(fileName);
 
         List<Vector3f> vertices = new ArrayList<>();
         List<Vector3f> normals = new ArrayList<>();
@@ -31,6 +32,7 @@ public class OBJLoader {
         String objName = "";
         Random rand = new Random();
         HashMap<String, Material> mtlInfo = new HashMap<>();
+        Debug.Log("Mtlfolder is " + fileName);
         String mtlFolder = Paths.get(fileName).getParent().toString() + "/";
 
         for (String line : lines) {

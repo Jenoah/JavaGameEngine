@@ -30,6 +30,7 @@ public class ModelManager {
             Vector3f[] modelNormals = objModel.getNormals();
 
             Mesh modelMesh = new Mesh(modelVertices, modelUVs, modelIndices, modelNormals);
+            modelMesh.setMeshPath(objObject.getModelPath());
             meshes.put(modelMesh.getVaoID(), modelMesh);
             meshMaterialSets.add(new MeshMaterialSet(modelMesh, objModel.getMaterial()));
         }));
