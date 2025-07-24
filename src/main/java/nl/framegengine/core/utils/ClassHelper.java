@@ -1,6 +1,7 @@
 package nl.framegengine.core.utils;
 
 import nl.framegengine.core.debugging.Debug;
+import nl.framegengine.core.entity.GameObject;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
@@ -14,7 +15,12 @@ public class ClassHelper {
             try {
                 Field field = clazz.getDeclaredField(fieldName);
                 field.setAccessible(true);
-                field.set(instance, value);
+                if(field.getType() == GameObject.class && value instanceof String guid){
+                    GameObject gameObject = GameObject.getByGUID(guid);
+                    if(gameObject != null) field.set(instance, GameObject.getByGUID(guid));
+                }else {
+                    field.set(instance, value);
+                }
                 return; // success, exit method
             } catch (NoSuchFieldException e) {
                 clazz = clazz.getSuperclass(); // try superclass
