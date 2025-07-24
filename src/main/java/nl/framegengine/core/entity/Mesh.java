@@ -1,9 +1,11 @@
 package nl.framegengine.core.entity;
 
+import nl.framegengine.core.IJsonSerializable;
 import nl.framegengine.core.ModelManager;
 import nl.framegengine.core.utils.Constants;
 import nl.framegengine.core.debugging.Debug;
 import nl.framegengine.core.utils.Conversion;
+import nl.framegengine.core.utils.JsonHelper;
 import nl.framegengine.core.utils.Utils;
 import org.joml.Matrix4f;
 import org.joml.Vector2f;
@@ -12,11 +14,15 @@ import org.lwjgl.opengl.*;
 import org.lwjgl.system.MemoryStack;
 import org.lwjgl.system.MemoryUtil;
 
+import javax.json.Json;
+import javax.json.JsonObject;
+import javax.json.JsonReader;
+import java.io.StringReader;
 import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
 import java.util.*;
 
-public class Mesh {
+public class Mesh implements IJsonSerializable {
     private float[] vertices;
     private float[] normals;
     private float[] tangents;
@@ -24,6 +30,7 @@ public class Mesh {
     private float[] uvs;
     private int[] triangles;
     private int dimension = 3;
+    private String meshPath = "";
 
     private final Set<Integer> vbos = new HashSet<>();
 
@@ -46,6 +53,7 @@ public class Mesh {
         this.uvs = mesh.uvs;
         this.normals = mesh.normals;
         this.triangles = mesh.triangles;
+        this.meshPath = mesh.meshPath;
 
         load(this.vertices, this.uvs, this.triangles, this.normals);
     }
@@ -474,6 +482,14 @@ public class Mesh {
         return tangentsVBOID != -1 && bitangentsVBOID != -1;
     }
 
+    public void setMeshPath(String meshPath) {
+        this.meshPath = meshPath;
+    }
+
+    public String getMeshPath() {
+        return meshPath;
+    }
+
     public final int getInstanceVBOID(){
         return instanceVBOID;
     }
@@ -666,6 +682,19 @@ public class Mesh {
 
     public boolean isStatic(){
         return isStatic;
+    }
+
+    @Override
+    public JsonObject serializeToJson() {
+        return JsonHelper.objectToJson(this, new String[]{"vbos", "vaoID", "vertexVBOID", "normalVBOID", "tangentsVBOID",
+                "bitangentsVBOID", "triangleVBOID", "uvVBOID", "instanceVBOID", "vertexCount", "previousInstanceCount"});
+    }
+
+    @Override
+    public void deserializeFromJson(String json) {
+        JsonReader jsonReader = Json.createReader(new StringReader(json));
+        JsonObject jsonInfo = jsonReader.readObject();
+        JsonHelper.loadVariableIntoObject(this, jsonInfo);
     }
 
     static class VertexKey {

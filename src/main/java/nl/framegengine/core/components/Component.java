@@ -1,8 +1,15 @@
 package nl.framegengine.core.components;
 
+import nl.framegengine.core.IJsonSerializable;
 import nl.framegengine.core.entity.GameObject;
+import nl.framegengine.core.utils.JsonHelper;
 
-public class Component {
+import javax.json.Json;
+import javax.json.JsonObject;
+import javax.json.JsonReader;
+import java.io.StringReader;
+
+public class Component implements IJsonSerializable {
     protected GameObject root = null;
     protected boolean hasInitiated = false;
 
@@ -24,10 +31,6 @@ public class Component {
         return this;
     }
 
-    public Component clone() {
-        return new Component().setRoot(this.getRoot());
-    }
-
     public void enable(){
         isEnabled = true;
     }
@@ -41,4 +44,16 @@ public class Component {
     }
 
     public void cleanUp(){ }
+
+    @Override
+    public JsonObject serializeToJson() {
+        return JsonHelper.objectToJson(this, new String[]{"hasInitiated"});
+    }
+
+    @Override
+    public void deserializeFromJson(String json) {
+        JsonReader jsonReader = Json.createReader(new StringReader(json));
+        JsonObject jsonInfo = jsonReader.readObject();
+        JsonHelper.loadVariableIntoObject(this, jsonInfo);
+    }
 }

@@ -1,11 +1,18 @@
 package nl.framegengine.core.entity;
 
+import nl.framegengine.core.IJsonSerializable;
 import nl.framegengine.core.shaders.Shader;
 import nl.framegengine.core.utils.Constants;
+import nl.framegengine.core.utils.JsonHelper;
 import org.joml.Math;
 import org.joml.Vector4f;
 
-public class Material {
+import javax.json.Json;
+import javax.json.JsonObject;
+import javax.json.JsonReader;
+import java.io.StringReader;
+
+public class Material implements IJsonSerializable {
 
     private Vector4f ambientColor = Constants.DEFAULT_COLOR;
     private Vector4f diffuseColor = Constants.DEFAULT_COLOR;
@@ -203,5 +210,17 @@ public class Material {
 
     public final boolean hasAOMap(){
         return aoMap != null;
+    }
+
+    @Override
+    public JsonObject serializeToJson() {
+        return JsonHelper.objectToJson(this);
+    }
+
+    @Override
+    public void deserializeFromJson(String json) {
+        JsonReader jsonReader = Json.createReader(new StringReader(json));
+        JsonObject jsonInfo = jsonReader.readObject();
+        JsonHelper.loadVariableIntoObject(this, jsonInfo);
     }
 }

@@ -6,8 +6,11 @@ import nl.framegengine.core.entity.Material;
 import nl.framegengine.core.entity.Texture;
 import nl.framegengine.core.loaders.PrimitiveLoader;
 import nl.framegengine.core.shaders.ShaderManager;
+import nl.framegengine.core.utils.JsonHelper;
 import org.joml.Vector3f;
 import org.joml.Vector4f;
+
+import javax.json.JsonObject;
 
 public class Light extends GameObject {
 
@@ -16,7 +19,7 @@ public class Light extends GameObject {
     protected float constant;
     protected float linear;
     protected float exponent;
-    protected boolean isShowingProxy = false;
+    private boolean isShowingProxy = false;
 
     public Light(){}
 
@@ -93,11 +96,22 @@ public class Light extends GameObject {
             String texturePath = this instanceof PointLight ? "textures/light.png": "textures/lightDirection.png";
             proxyMaterial.setAlbedoTexture(new Texture(texturePath, false, !isPointLight)).setDoubleSided(true).setTransparent(true);
             proxyMaterial.setDiffuseColor(new Vector4f(color.x, color.y, color.z, 1f));
-            RenderComponent renderComponent = new RenderComponent(isPointLight ? PrimitiveLoader.getQuad().getMesh() : PrimitiveLoader.getQuadRotated().getMesh(), proxyMaterial);
-            this.addComponent(renderComponent);
-            renderComponent.initiate();
+            if(getComponent(RenderComponent.class) != null){
+                RenderComponent renderComponent = getComponent(RenderComponent.class);
+                renderComponent.addMesh(isPointLight ? PrimitiveLoader.getQuad().getMesh() : PrimitiveLoader.getQuadRotated().getMesh(), proxyMaterial);
+            }else {
+                RenderComponent renderComponent = new RenderComponent(isPointLight ? PrimitiveLoader.getQuad().getMesh() : PrimitiveLoader.getQuadRotated().getMesh(), proxyMaterial);
+                this.addComponent(renderComponent);
+                renderComponent.initiate();
+            }
+            isShowingProxy = true;
         }
 
         return this;
+    }
+
+    @Override
+    public JsonObject serializeToJson() {
+        return JsonHelper.objectToJson(this, new String[]{"isShowingProxy"});
     }
 }

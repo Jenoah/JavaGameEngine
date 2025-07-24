@@ -1,5 +1,6 @@
 package nl.framegengine.core.entity;
 
+import nl.framegengine.core.IJsonSerializable;
 import nl.framegengine.core.MouseInput;
 import nl.framegengine.core.components.Component;
 import nl.framegengine.core.components.RenderComponent;
@@ -7,16 +8,16 @@ import nl.framegengine.core.debugging.Debug;
 import nl.framegengine.core.rendering.RenderManager;
 import nl.framegengine.core.utils.AABB;
 import nl.framegengine.core.utils.Constants;
+import nl.framegengine.core.utils.JsonHelper;
 import nl.framegengine.core.utils.ObjectPool;
 import org.joml.*;
 import org.joml.Math;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import javax.json.*;
+import java.io.StringReader;
+import java.util.*;
 
-public class GameObject {
+public class GameObject implements IJsonSerializable {
     private String name = "GameObject";
     private final Vector3f localPosition = new Vector3f();
     private final Quaternionf localRotation = new Quaternionf();
@@ -29,22 +30,26 @@ public class GameObject {
     private boolean isStatic = false;
     protected boolean drawDebugWireframe = false;
 
+    private static Dictionary<String, GameObject> instancedObjects = new Hashtable<>();
+
     private final List<GameObject> children;
     private GameObject parent;
 
     protected boolean willUpdate = false;
 
-    private final Set<Component> components = new HashSet<>();
+    protected final Set<Component> components = new HashSet<>();
 
     public GameObject() {
         this.children = new ArrayList<>();
         setGuid();
+        instancedObjects.put(getGuid(), this);
     }
 
     public GameObject(String name){
         this.name = name;
         this.children = new ArrayList<>();
         setGuid();
+        instancedObjects.put(getGuid(), this);
     }
 
     public void initiate(){
@@ -230,24 +235,30 @@ public class GameObject {
 
     public GameObject setScale(float scale) {
         this.scale.set(scale);
+        if(aabb != null && getComponent(RenderComponent.class) != null) getComponent(RenderComponent.class).calculateAABB();
+
         callUpdate();
         return this;
     }
 
     public GameObject setScale(Vector3f scale) {
         this.scale.set(scale);
+        if(aabb != null && getComponent(RenderComponent.class) != null) getComponent(RenderComponent.class).calculateAABB();
         callUpdate();
         return this;
     }
 
     public GameObject setScale(float x, float y, float z) {
         this.scale.set(x, y, z);
+        if(aabb != null && getComponent(RenderComponent.class) != null) getComponent(RenderComponent.class).calculateAABB();
+
         callUpdate();
         return this;
     }
 
     public GameObject setScale(float x, float y) {
         this.scale.set(x, y, 0);
+        if(aabb != null && getComponent(RenderComponent.class) != null) getComponent(RenderComponent.class).calculateAABB();
         callUpdate();
         return this;
     }
@@ -431,5 +442,28 @@ public class GameObject {
 
     public void setGuid(String guid) {
         this.guid = guid;
+        instancedObjects.remove(getGuid());
+        instancedObjects.put(getGuid(), this);
+    }
+
+    public static GameObject getByGUID(String guid){
+        return instancedObjects.get(guid);
+    }
+
+    @Override
+    public JsonObject serializeToJson() {
+        JsonObjectBuilder jsonObjectBuilder = Json.createObjectBuilder();
+        JsonObject jsonObject = JsonHelper.objectToJson(this, new String[]{"children", "parent"});
+        jsonObject.forEach(jsonObjectBuilder::add);
+        if(parent != null) jsonObjectBuilder.add("parentGuid", Json.createValue(parent.guid));
+        return jsonObjectBuilder.build();
+    }
+
+    @Override
+    public void deserializeFromJson(String json) {
+        JsonReader jsonReader = Json.createReader(new StringReader(json));
+        JsonObject jsonInfo = jsonReader.readObject();
+        JsonHelper.loadVariableIntoObject(this, jsonInfo);
+        if(JsonHelper.hasJsonKey(jsonInfo, "parentGuid")) setParent(GameObject.getByGUID(jsonInfo.getString("parentGuid")));
     }
 }
