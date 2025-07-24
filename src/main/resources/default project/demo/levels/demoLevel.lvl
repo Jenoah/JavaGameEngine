@@ -15,23 +15,23 @@
         "x": 0,
         "y": 0,
         "z": 0
-      }
+      },
+      "components": [
+        {
+          "class": "nl.framegengine.customScripts.PlayerMovement"
+        }
+      ]
     },
     {
       "name": "Camera - Player",
       "parentGuid": "playerGUID",
-      "class": "Camera",
+      "class": "nl.framegengine.core.entity.Camera",
       "isMain": true,
       "localPosition": {
         "x": 0,
         "y": 1.8,
         "z": 0
-      },
-      "components": [
-        {
-          "class": "PlayerMovement"
-        }
-      ]
+      }
     },
     {
       "name": "Cuby",
@@ -54,7 +54,7 @@
     },
     {
       "name": "Directional Light",
-      "class": "DirectionalLight",
+      "class": "nl.framegengine.core.lighting.DirectionalLight",
       "localPosition": {
         "x": -2.5,
         "y": 6.5,
@@ -75,7 +75,7 @@
     },
     {
       "name": "Pointlight 1",
-      "class": "PointLight",
+      "class": "nl.framegengine.core.lighting.PointLight",
       "color": {
         "x": 0.25,
         "y": 0.25,
@@ -99,7 +99,7 @@
     },
     {
       "name": "Spotlight 1",
-      "class": "SpotLight",
+      "class": "nl.framegengine.core.lighting.SpotLight",
       "color": {
         "x": 0.1,
         "y": 1,
@@ -124,14 +124,14 @@
       "outerCutOff": 0.81915206,
       "components": [
         {
-          "class": "RotateOnAxis",
+          "class": "nl.framegengine.customScripts.RotateOnAxis",
           "rotationSpeed": 100
         }
       ]
     },
     {
       "name": "Spotlight 2",
-      "class": "SpotLight",
+      "class": "nl.framegengine.core.lighting.SpotLight",
       "color": {
         "x": 1,
         "y": 0.1,
@@ -156,7 +156,7 @@
       "outerCutOff": 0.81915206,
       "components": [
         {
-          "class": "RotateOnAxis",
+          "class": "nl.framegengine.customScripts.RotateOnAxis",
           "rotationSpeed": 25
         }
       ]

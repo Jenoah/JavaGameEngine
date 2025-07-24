@@ -43,6 +43,7 @@ public class PlayerMovement extends Component {
     }
 
     private void move(){
+        if(windowManager == null) return;
         moveDelta.set(0, 0, 0);
         float moveSpeed = windowManager.isKeyPressed(GLFW.GLFW_KEY_LEFT_SHIFT) ?
                 this.moveSpeed * EngineManager.getDeltaTime() * 4f :
