@@ -1,17 +1,17 @@
 package nl.framegengine.core.utils;
 
-import nl.framegengine.core.components.Component;
+import nl.framegengine.core.IJsonSerializable;
+import nl.framegengine.core.debugging.Debug;
 import nl.framegengine.core.entity.GameObject;
-import java.util.Set;
+
+import java.lang.reflect.*;
+import java.util.*;
+
 import org.joml.Quaternionf;
 import org.joml.Vector3f;
 import org.joml.Vector4f;
 
 import javax.json.*;
-import java.lang.reflect.Field;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
 
 public class JsonHelper {
     public static boolean hasJsonKey(JsonObject o, String k) { return o.containsKey(k) && !o.isNull(k); }
@@ -20,6 +20,115 @@ public class JsonHelper {
         loadVariableIntoObject(object, objectInfo, new String[]{});
     }
 
+    public static void loadVariableIntoObject(Object object, JsonObject objectInfo, String[] keysToIgnore){
+        for (String key : objectInfo.keySet()) {
+            if (Arrays.asList(keysToIgnore).contains(key)) continue;
+
+            JsonValue jsonValue = objectInfo.get(key);
+            Field field = ClassHelper.findField(object.getClass(), key);
+            if (field == null) continue;
+
+            field.setAccessible(true);
+            Class<?> fieldType = field.getType();
+
+            try {
+                if (jsonValue.getValueType() == JsonValue.ValueType.ARRAY) {
+                    loadJsonArrayIntoObject(jsonValue, fieldType, field, object);
+                } else if (jsonValue.getValueType() == JsonValue.ValueType.OBJECT) {
+                    loadJsonObjectIntoObject(jsonValue, fieldType, field, object);
+                } else {
+                    if(fieldType.isAssignableFrom(GameObject.class) && jsonValue.getValueType() == JsonValue.ValueType.STRING){
+                        field.set(object, GameObject.getByGUID(((JsonString)jsonValue).getString()));
+                    }else {
+                        Object value = JsonHelper.jsonToObject(jsonValue);
+                        field.set(object, value);
+                    }
+                }
+            } catch (Exception e) {
+                Debug.LogError("Error loading variable '" + key + "': " + e.getMessage());
+            }
+        }
+    }
+
+    private static void loadJsonObjectIntoObject(JsonValue jsonValue, Class<?> fieldType, Field field, Object object) throws Exception {
+        JsonObject nestedObj = jsonValue.asJsonObject();
+        Object nestedInstance = field.get(object);
+
+        if (nestedInstance == null) {
+            if (nestedObj.containsKey("guid")) {
+                String guid = nestedObj.getString("guid");
+                GameObject existing = GameObject.getByGUID(guid);
+                if (existing != null) {
+                    field.set(object, existing);
+                    nestedInstance = existing;
+                } else {
+                    Object newInstance = fieldType.getDeclaredConstructor().newInstance();
+                    field.set(object, newInstance);
+                    nestedInstance = newInstance;
+                }
+            } else {
+                nestedInstance = fieldType.getDeclaredConstructor().newInstance();
+                field.set(object, nestedInstance);
+            }
+        }
+
+        if (nestedInstance instanceof IJsonSerializable serializable) {
+            serializable.deserializeFromJson(nestedObj.toString());
+        } else {
+            loadVariableIntoObject(nestedInstance, nestedObj, new String[0]);
+        }
+    }
+
+    private static void loadJsonArrayIntoObject(JsonValue jsonValue, Class<?> fieldType, Field field, Object object) throws Exception {
+        JsonArray jsonArray = jsonValue.asJsonArray();
+
+        if (fieldType.isArray()) {
+            Class<?> componentType = fieldType.getComponentType();
+            Object array = Array.newInstance(componentType, jsonArray.size());
+
+            for (int i = 0; i < jsonArray.size(); i++) {
+                Object element = convertJsonValueToObject(jsonArray.get(i), componentType);
+                Array.set(array, i, element);
+            }
+            field.set(object, array);
+
+        } else if (List.class.isAssignableFrom(fieldType)) {
+            // For List fields
+            Type genericType = field.getGenericType();
+            Class<?> elementType = Object.class;
+            if (genericType instanceof ParameterizedType) {
+                Type[] typeArgs = ((ParameterizedType) genericType).getActualTypeArguments();
+                elementType = (Class<?>) typeArgs[0];
+            }
+            List<Object> list = new ArrayList<>();
+            for (JsonValue val : jsonArray) {
+                list.add(convertJsonValueToObject(val, elementType));
+            }
+            field.set(object, list);
+        }
+    }
+
+    private static Object convertJsonValueToObject(JsonValue jsonValue, Class<?> targetType) throws Exception {
+        if (jsonValue.getValueType() == JsonValue.ValueType.OBJECT) {
+            JsonObject jsonObj = jsonValue.asJsonObject();
+            Object instance = targetType.getDeclaredConstructor().newInstance();
+            if (instance instanceof IJsonSerializable serializable) {
+                serializable.deserializeFromJson(jsonObj.toString());
+                return instance;
+            } else {
+                loadVariableIntoObject(instance, jsonObj, new String[0]);
+                return instance;
+            }
+        } else if (jsonValue.getValueType() == JsonValue.ValueType.ARRAY) {
+            // Only needed for arrays-of-arrays, rare
+            // Otherwise, handled at higher level
+            return null;
+        } else {
+            return JsonHelper.jsonToObject(jsonValue); // your primitive/unboxing method
+        }
+    }
+
+    /*
     public static void loadVariableIntoObject(Object object, JsonObject objectInfo, String[] keysToIgnore){
         for (String key : objectInfo.keySet()) {
             if (Arrays.asList(keysToIgnore).contains(key)) continue;
@@ -39,44 +148,52 @@ public class JsonHelper {
         }
     }
 
+    /**/
+
     public static JsonObject objectToJson(Object object){
         return objectToJson(object, new String[]{});
     }
 
     public static JsonObject objectToJson(Object object, String[] valuesToIgnore){
         JsonObjectBuilder objectInfo = Json.createObjectBuilder();
-        objectInfo.add("class", object.getClass().getSimpleName());
+        objectInfo.add("class", object.getClass().getName());
         if(object instanceof GameObject go && go.getParent() != null){
             objectInfo.add("parentGuid", go.getParent().getGuid());
+        }
+
+        Class<?> clazz = object.getClass();
+        Object defaultInstance;
+        try {
+            defaultInstance = clazz.getDeclaredConstructor().newInstance();
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to create default instance for comparison: " + e.getMessage(), e);
         }
 
         List<Field> objectProperties = new ArrayList<>();
         ClassHelper.getAllProperties(objectProperties, object.getClass());
 
-        //TODO: Filter out variables that are the same as the default value
-        objectProperties.forEach(field -> {
-            Object value = null;
+        Set<String> ignoreSet = new HashSet<>(Arrays.asList(valuesToIgnore));
+        for (Field field : objectProperties) {
+            if (ignoreSet.contains(field.getName())) continue;
+
             try {
                 field.setAccessible(true);
-                value = field.get(object);
+                Object currentValue = field.get(object);
+                Object defaultValue = field.get(defaultInstance);
+
+                // Skip if current is null or equal to default
+                if (currentValue == null && defaultValue == null) continue;
+                if (currentValue != null && currentValue.equals(defaultValue)) continue;
+
+                assert currentValue != null;
+                addPropertyToJsonObject(objectInfo, field.getName(), currentValue);
+
             } catch (IllegalAccessException e) {
-                throw new RuntimeException(e);
+                throw new RuntimeException("Failed to access field '" + field.getName() + "': " + e.getMessage(), e);
             }
-            if(value == null || Arrays.stream(valuesToIgnore).toList().contains(field.getName())) return;
-            addPropertyToJsonObject(objectInfo, field.getName(), value);
-        });
+        }
 
         return objectInfo.build();
-    }
-
-    public static JsonArray componentsToJsonArray(Set<Component> components){
-        JsonArrayBuilder componentArray = Json.createArrayBuilder();
-        components.forEach(component -> {
-            if(component.getClass().getSimpleName().equals("RenderComponent")) return;
-            JsonObject componentInfo = objectToJson(component, new String[]{"hasInitiated"});
-            componentArray.add(componentInfo);
-        });
-        return componentArray.build();
     }
 
     @SuppressWarnings("unchecked")
@@ -89,12 +206,39 @@ public class JsonHelper {
             case Integer integer -> jsonObjectBuilder.add(name, integer);
             case Boolean bool -> jsonObjectBuilder.add(name, bool);
             case String str -> jsonObjectBuilder.add(name, str);
-            case Set<?> set -> {
-                if(!set.isEmpty() && set.stream().findAny().get() instanceof Component){
-                    JsonArray componentsArray = componentsToJsonArray((Set<Component>) set);
-                    if(!componentsArray.isEmpty()) jsonObjectBuilder.add("components", componentsArray);
+            case GameObject go -> jsonObjectBuilder.add(name, go.getGuid());
+            case IJsonSerializable jsonSerializable -> jsonObjectBuilder.add(name, jsonSerializable.serializeToJson());
+            case List<?> list -> {
+                if(!list.isEmpty()){
+                    JsonArrayBuilder jsonArrayBuilder = Json.createArrayBuilder();
+                    list.forEach(listItem -> addPropertyToJsonArray(jsonArrayBuilder, listItem));
+                    JsonArray jsonArray = jsonArrayBuilder.build();
+                    if(!jsonArray.isEmpty()) jsonObjectBuilder.add(name, jsonArray);
                 }
             }
+            case Set<?> set -> {
+                if (!set.isEmpty()) {
+                    JsonArrayBuilder jsonArrayBuilder = Json.createArrayBuilder();
+                    set.forEach(listItem -> addPropertyToJsonArray(jsonArrayBuilder, listItem));
+                    JsonArray jsonArray = jsonArrayBuilder.build();
+                    if(!jsonArray.isEmpty()) jsonObjectBuilder.add(name, jsonArray);
+                }
+            }
+            default -> {}
+        }
+    }
+
+    @SuppressWarnings("unchecked")
+    public static void addPropertyToJsonArray(JsonArrayBuilder jsonArrayBuilder, Object object) {
+        switch (object) {
+            case Vector3f vector -> jsonArrayBuilder.add(JsonHelper.vector3ToJsonObject(vector));
+            case Vector4f vector -> jsonArrayBuilder.add(JsonHelper.vector4ToJsonObject(vector));
+            case Quaternionf quaternion -> jsonArrayBuilder.add(JsonHelper.quaternionToJsonObject(quaternion));
+            case Float fl -> jsonArrayBuilder.add(fl);
+            case Integer integer -> jsonArrayBuilder.add(integer);
+            case Boolean bool -> jsonArrayBuilder.add(bool);
+            case String str -> jsonArrayBuilder.add(str);
+            case IJsonSerializable jsonSerializable -> jsonArrayBuilder.add(jsonSerializable.serializeToJson());
             default -> {}
         }
     }
@@ -138,7 +282,6 @@ public class JsonHelper {
         switch (jsonValue.getValueType()) {
             case NUMBER:
                 JsonNumber num = (JsonNumber) jsonValue;
-                // Return as double or int depending on your needs
                 if (num.isIntegral()) {
                     return num.intValue();
                 } else {
@@ -150,8 +293,6 @@ public class JsonHelper {
                 return true;
             case FALSE:
                 return false;
-            case NULL:
-                return null;
             default:
                 return null;
         }

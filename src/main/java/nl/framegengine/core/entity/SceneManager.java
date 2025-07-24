@@ -16,10 +16,12 @@ import nl.framegengine.core.utils.JsonHelper;
 import org.joml.Vector3f;
 
 import javax.json.*;
+import javax.json.stream.JsonGenerator;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStream;
 
+import java.io.StringWriter;
 import java.net.URL;
 import java.util.*;
 
@@ -56,23 +58,23 @@ public class SceneManager {
              JsonReader reader = Json.createReader(is)) {
             JsonObject sceneInfo = reader.readObject();
 
-            JsonHelper.loadVariableIntoObject(newScene, sceneInfo);
+            JsonHelper.loadVariableIntoObject(newScene, sceneInfo, new String[]{"gameObjects"});
 
             // Game Objects
             sceneInfo.getJsonArray("gameObjects").forEach(goInfoContainer -> {
                 JsonObject goInfo = goInfoContainer.asJsonObject();
-                String goTypeName = "GameObject";
+                String goTypeName = GameObject.class.getName();
                 if(JsonHelper.hasJsonKey(goInfo, "class")) goTypeName = goInfo.getString("class");
-                GoType goType = GoType.fromJsonName(goTypeName);
 
                 GameObject go = null;
                 try {
-                    go = goType.createInstance();
-                } catch (ReflectiveOperationException e) {
+                    go = (GameObject) this.getClass().getClassLoader().loadClass(goTypeName).getDeclaredConstructor().newInstance();
+                } catch (Exception e) {
                     throw new RuntimeException(e);
                 }
 
                 JsonHelper.loadVariableIntoObject(go, goInfo, new String[]{"parentGuid", "class", "meshPath", "texturePath", "isMain"});
+                go.setGuid(go.getGuid());
 
                 if (JsonHelper.hasJsonKey(goInfo, "meshPath")) {
                     Set<MeshMaterialSet> meshMaterialSets = OBJLoader.loadOBJModel(goInfo.getString("meshPath"));
@@ -91,20 +93,22 @@ public class SceneManager {
                     RenderComponent renderComponent = new RenderComponent(meshMaterialSets);
                     go.addComponent(renderComponent);
                 }
-                switch (goType){
-                    case GoType.DIRECTIONAL_LIGHT:
-                    case GoType.POINT_LIGHT:
-                    case GoType.SPOT_LIGHT:
-                        tryAddLight((Light) go, newScene);
-                        break;
-                    case GoType.CAMERA:
-                        if(JsonHelper.hasJsonKey(goInfo, "isMain") && goInfo.getBoolean("isMain")) ((Camera)go).setAsMain();
-                        break;
-                }
-
-                if(JsonHelper.hasJsonKey(goInfo, "parentGuid")) go.setParent(newScene.getGameObjectByGUID(goInfo.getString("parentGuid")));
 
                 tryAddComponent(goInfo, go);
+
+                switch (go){
+                    case DirectionalLight light -> tryAddLight(light, newScene);
+                    case PointLight light -> tryAddLight(light, newScene);
+                    case SpotLight light -> tryAddLight(light, newScene);
+                    case Camera camera -> {
+                        if(JsonHelper.hasJsonKey(goInfo, "isMain") && goInfo.getBoolean("isMain")) (camera).setAsMain();
+                    }
+                    default -> {}
+                }
+
+                if(JsonHelper.hasJsonKey(goInfo, "parentGuid")) go.setParent(GameObject.getByGUID(goInfo.getString("parentGuid")));
+
+
                 newScene.addEntity(go, false);
             });
         } catch (Exception e) {
@@ -143,11 +147,9 @@ public class SceneManager {
                 String className = componentInfo.getString("class");
 
                 try {
-                    Component component = componentLoader.loadComponent("nl.framegengine.customScripts." + className);
+                    Component component = componentLoader.loadComponent(className);
                     if(component != null) {
-
                         JsonHelper.loadVariableIntoObject(component, componentInfo, new String[]{"class"});
-
                         component.setRoot(gameObject);
                         gameObject.addComponent(component);
                     }
@@ -192,43 +194,22 @@ public class SceneManager {
         sceneInfo.add("levelName", scene.getLevelName());
         sceneInfo.add("fogGradient", scene.getFogGradient());
         sceneInfo.add("fogDensity", scene.getFogDensity());
-        sceneInfo.add("fogColor", JsonHelper.vector3ToJsonArray(scene.getFogColor()));
+        sceneInfo.add("fogColor", JsonHelper.vector3ToJsonObject(scene.getFogColor()));
 
         JsonArrayBuilder sceneGoInfo = Json.createArrayBuilder();
         scene.getGameObjects().forEach(go -> {
-            sceneGoInfo.add(JsonHelper.objectToJson(go));
+            sceneGoInfo.add(go.serializeToJson());
         });
         sceneInfo.add("gameObjects", sceneGoInfo);
 
-        return sceneInfo.build().toString();
-    }
+        Map<String, Boolean> config = new HashMap<>();
+        config.put(JsonGenerator.PRETTY_PRINTING, true);
+        JsonWriterFactory jsonWriterFactory = Json.createWriterFactory(config);
 
-    public enum GoType{
-        GAME_OBJECT("GameObject", GameObject.class),
-        CAMERA("Camera", Camera.class),
-        DIRECTIONAL_LIGHT("DirectionalLight", DirectionalLight.class),
-        POINT_LIGHT("PointLight", PointLight.class),
-        SPOT_LIGHT("SpotLight", SpotLight.class);
+        StringWriter stringWriter = new StringWriter();
+        JsonWriter jsonWriter = jsonWriterFactory.createWriter(stringWriter);
+        jsonWriter.write(sceneInfo.build());
 
-        private final String jsonName;
-        private final Class<? extends GameObject> clazz;
-
-        GoType(String jsonName, Class<? extends GameObject> clazz) {
-            this.jsonName = jsonName;
-            this.clazz = clazz;
-        }
-
-        public static GoType fromJsonName(String name) {
-            for (GoType type : values()) {
-                if (type.jsonName.equals(name)) {
-                    return type;
-                }
-            }
-            throw new IllegalArgumentException("Unknown classType: " + name);
-        }
-
-        public GameObject createInstance() throws ReflectiveOperationException {
-            return clazz.getDeclaredConstructor().newInstance();
-        }
+        return stringWriter.toString();
     }
 }
