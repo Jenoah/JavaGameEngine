@@ -1,165 +1,232 @@
 {
-  "levelName": "Test level",
-  "fogDensity": 0.025,
-  "fogGradient": 10,
-  "fogColor": {
-    "x": 0.7,
-    "y": 0.75,
-    "z": 0.8
-  },
-  "gameObjects": [
-    {
-      "name": "Player",
-      "guid": "playerGUID",
-      "localPosition": {
-        "x": 0,
-        "y": 0,
-        "z": 0
-      },
-      "components": [
+    "levelName": "Test level",
+    "fogGradient": 10.0,
+    "fogDensity": 0.02500000037252903,
+    "fogColor": {
+        "x": 0.699999988079071,
+        "y": 0.75,
+        "z": 0.800000011920929
+    },
+    "gameObjects": [
         {
-          "class": "nl.framegengine.customScripts.PlayerMovement"
-        }
-      ]
-    },
-    {
-      "name": "Camera - Player",
-      "parentGuid": "playerGUID",
-      "class": "nl.framegengine.core.entity.Camera",
-      "isMain": true,
-      "localPosition": {
-        "x": 0,
-        "y": 1.8,
-        "z": 0
-      }
-    },
-    {
-      "name": "Cuby",
-      "guid": "123abc",
-      "meshPath": "/models/cube.obj",
-      "texturePath": {
-        "diffuse": "/demo/textures/grid_Kenney_prototype.png",
-        "roughness": "/demo/textures/grid_Kenney_prototype.png"
-      },
-      "localPosition": {
-        "x": 0,
-        "y": 0,
-        "z": 0
-      },
-      "scale": {
-        "x": 5,
-        "y": 0.1,
-        "z": 5
-      }
-    },
-    {
-      "name": "Directional Light",
-      "class": "nl.framegengine.core.lighting.DirectionalLight",
-      "localPosition": {
-        "x": -2.5,
-        "y": 6.5,
-        "z": -4
-      },
-      "localRotation": {
-        "x": -0.3651,
-        "y": -0.1826,
-        "z": 0,
-        "w": 0.9129
-      },
-      "color": {
-        "x": 1,
-        "y": 1,
-        "z": 0.75
-      },
-      "intensity": 1
-    },
-    {
-      "name": "Pointlight 1",
-      "class": "nl.framegengine.core.lighting.PointLight",
-      "color": {
-        "x": 0.25,
-        "y": 0.25,
-        "z": 1
-      },
-      "localPosition": {
-        "x": 0,
-        "y": 0.5,
-        "z": -3
-      },
-      "localRotation": {
-        "x": 0,
-        "y": 0,
-        "z": 0,
-        "w": 1
-      },
-      "intensity": 5,
-      "constant": 1,
-      "linear": 0.5,
-      "exponent": 0.25
-    },
-    {
-      "name": "Spotlight 1",
-      "class": "nl.framegengine.core.lighting.SpotLight",
-      "color": {
-        "x": 0.1,
-        "y": 1,
-        "z": 0.1
-      },
-      "localPosition": {
-        "x": 1,
-        "y": 0.5,
-        "z": -4
-      },
-      "localRotation": {
-        "x": 0,
-        "y": -1,
-        "z": 0,
-        "w": 0
-      },
-      "intensity": 3,
-      "constant": 1,
-      "linear": 0.09,
-      "exponent": 0.032,
-      "cutOff": 0.8660254,
-      "outerCutOff": 0.81915206,
-      "components": [
+            "class": "nl.framegengine.core.entity.GameObject",
+            "name": "Player",
+            "guid": "playerGUID",
+            "willUpdate": true,
+            "components": [
+                {
+                    "class": "nl.framegengine.customScripts.PlayerMovement",
+                    "cameraObject": "85c78dc9-aa96-4d67-8816-dff378ae11f1",
+                    "pitch": 0.39522525668144226,
+                    "yaw": -0.13337238132953644,
+                    "root": "playerGUID"
+                },
+                {
+                    "class": "nl.framegengine.customScripts.PlayerMovement",
+                    "cameraObject": "85c78dc9-aa96-4d67-8816-dff378ae11f1",
+                    "pitch": 0.39522525668144226,
+                    "yaw": -0.13337238132953644,
+                    "root": "playerGUID"
+                }
+            ]
+        },
         {
-          "class": "nl.framegengine.customScripts.RotateOnAxis",
-          "rotationSpeed": 100
-        }
-      ]
-    },
-    {
-      "name": "Spotlight 2",
-      "class": "nl.framegengine.core.lighting.SpotLight",
-      "color": {
-        "x": 1,
-        "y": 0.1,
-        "z": 0.1
-      },
-      "localPosition": {
-        "x": -1,
-        "y": 0.5,
-        "z": -4
-      },
-      "localRotation": {
-        "x": 0,
-        "y": 0,
-        "z": 1,
-        "w": 0
-      },
-      "intensity": 3,
-      "constant": 1,
-      "linear": 0.09,
-      "exponent": 0.032,
-      "cutOff": 0.8660254,
-      "outerCutOff": 0.81915206,
-      "components": [
+            "class": "nl.framegengine.core.entity.Camera",
+            "parentGuid": "playerGUID",
+            "name": "Camera - Player",
+            "localPosition": {
+                "x": 0.0,
+                "y": 1.7999999523162842,
+                "z": 0.0
+            },
+            "localRotation": {
+                "x": 0.1958926022052765,
+                "y": -0.06533990055322647,
+                "z": -0.013082730583846569,
+                "w": 0.9783586263656616
+            },
+            "guid": "85c78dc9-aa96-4d67-8816-dff378ae11f1",
+            "willUpdate": false
+        },
         {
-          "class": "nl.framegengine.customScripts.RotateOnAxis",
-          "rotationSpeed": 25
+            "class": "nl.framegengine.core.entity.GameObject",
+            "name": "Cuby",
+            "scale": {
+                "x": 5.0,
+                "y": 0.10000000149011612,
+                "z": 5.0
+            },
+            "radius": 1.7320507764816284,
+            "guid": "123abc",
+            "components": [
+                {
+                    "class": "nl.framegengine.core.components.RenderComponent",
+                    "meshPaths": [
+                        "/models/cube.obj"
+                    ],
+                    "meshMaterialSets": [
+                        {
+                            "class": "nl.framegengine.core.rendering.MeshMaterialSet",
+                            "mesh": {
+                                "class": "nl.framegengine.core.entity.Mesh",
+                                "meshPath": "/models/cube.obj"
+                            },
+                            "material": {
+                                "class": "nl.framegengine.core.entity.Material"
+                            },
+                            "root": "123abc"
+                        }
+                    ],
+                    "root": "123abc"
+                }
+            ]
+        },
+        {
+            "class": "nl.framegengine.core.lighting.DirectionalLight",
+            "color": {
+                "x": 1.0,
+                "y": 1.0,
+                "z": 0.75
+            },
+            "intensity": 1.0,
+            "name": "Directional Light",
+            "localPosition": {
+                "x": -2.5,
+                "y": 6.5,
+                "z": -4.0
+            },
+            "guid": "a75e0e15-8fb5-4076-a16e-48bb7e6c590a",
+            "components": [
+                {
+                    "class": "nl.framegengine.core.components.RenderComponent",
+                    "meshPaths": [
+                        ""
+                    ],
+                    "root": "a75e0e15-8fb5-4076-a16e-48bb7e6c590a"
+                }
+            ]
+        },
+        {
+            "class": "nl.framegengine.core.lighting.PointLight",
+            "color": {
+                "x": 0.25,
+                "y": 0.25,
+                "z": 1.0
+            },
+            "intensity": 5.0,
+            "constant": 1.0,
+            "linear": 0.5,
+            "exponent": 0.25,
+            "name": "Pointlight 1",
+            "localPosition": {
+                "x": 0.0,
+                "y": 0.5,
+                "z": -3.0
+            },
+            "guid": "e6f5799c-f960-43d5-9090-1c2579e57f3a",
+            "components": [
+                {
+                    "class": "nl.framegengine.core.components.RenderComponent",
+                    "meshPaths": [
+                        ""
+                    ],
+                    "root": "e6f5799c-f960-43d5-9090-1c2579e57f3a"
+                }
+            ]
+        },
+        {
+            "class": "nl.framegengine.core.lighting.SpotLight",
+            "cutOff": 0.8660253882408142,
+            "outerCutOff": 0.8191520571708679,
+            "color": {
+                "x": 0.10000000149011612,
+                "y": 1.0,
+                "z": 0.10000000149011612
+            },
+            "intensity": 3.0,
+            "constant": 1.0,
+            "linear": 0.09000000357627869,
+            "exponent": 0.03200000151991844,
+            "name": "Spotlight 1",
+            "localPosition": {
+                "x": 1.0,
+                "y": 0.5,
+                "z": -4.0
+            },
+            "localRotation": {
+                "x": 0.0,
+                "y": 0.05916224420070648,
+                "z": 0.0,
+                "w": -0.9982483983039856
+            },
+            "guid": "120e15a1-a8ec-4d5f-a53c-16d7a02ab84a",
+            "willUpdate": true,
+            "components": [
+                {
+                    "class": "nl.framegengine.customScripts.RotateOnAxis",
+                    "rotationSpeed": 100.0,
+                    "root": "120e15a1-a8ec-4d5f-a53c-16d7a02ab84a"
+                },
+                {
+                    "class": "nl.framegengine.core.components.RenderComponent",
+                    "meshPaths": [
+                        ""
+                    ],
+                    "root": "120e15a1-a8ec-4d5f-a53c-16d7a02ab84a"
+                },
+                {
+                    "class": "nl.framegengine.customScripts.RotateOnAxis",
+                    "rotationSpeed": 100.0,
+                    "root": "120e15a1-a8ec-4d5f-a53c-16d7a02ab84a"
+                }
+            ]
+        },
+        {
+            "class": "nl.framegengine.core.lighting.SpotLight",
+            "cutOff": 0.8660253882408142,
+            "outerCutOff": 0.8191520571708679,
+            "color": {
+                "x": 1.0,
+                "y": 0.10000000149011612,
+                "z": 0.10000000149011612
+            },
+            "intensity": 3.0,
+            "constant": 1.0,
+            "linear": 0.09000000357627869,
+            "exponent": 0.03200000151991844,
+            "name": "Spotlight 2",
+            "localPosition": {
+                "x": -1.0,
+                "y": 0.5,
+                "z": -4.0
+            },
+            "localRotation": {
+                "x": 0.0,
+                "y": -0.7174946069717407,
+                "z": 0.0,
+                "w": 0.6965640783309937
+            },
+            "guid": "12e9d623-62ef-48fb-a351-69b31061b95b",
+            "willUpdate": true,
+            "components": [
+                {
+                    "class": "nl.framegengine.core.components.RenderComponent",
+                    "meshPaths": [
+                        ""
+                    ],
+                    "root": "12e9d623-62ef-48fb-a351-69b31061b95b"
+                },
+                {
+                    "class": "nl.framegengine.customScripts.RotateOnAxis",
+                    "rotationSpeed": 25.0,
+                    "root": "12e9d623-62ef-48fb-a351-69b31061b95b"
+                },
+                {
+                    "class": "nl.framegengine.customScripts.RotateOnAxis",
+                    "rotationSpeed": 25.0,
+                    "root": "12e9d623-62ef-48fb-a351-69b31061b95b"
+                }
+            ]
         }
-      ]
-    }
-  ]
+    ]
 }

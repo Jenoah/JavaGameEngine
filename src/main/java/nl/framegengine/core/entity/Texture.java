@@ -59,6 +59,10 @@ public class Texture implements IJsonSerializable {
         this.isNormalMap = isNormalMap;
     }
 
+    public final String getTexturePath(){
+        return texturePath;
+    }
+
     @Override
     public JsonObject serializeToJson() {
         return JsonHelper.objectToJson(this);
@@ -73,6 +77,7 @@ public class Texture implements IJsonSerializable {
         } catch (Exception e) {
             Debug.LogError("Error loading in data: " + e.getMessage());
         }
+        Debug.Log("Loading in texture with " + texturePath);
         if(texturePath != null && !texturePath.isEmpty()) this.id = TextureLoader.loadTexture(texturePath, pointFilter, flipped, repeat, isNormalMap);
         return this;
     }

@@ -151,10 +151,19 @@ public class JsonHelper {
                             fieldTypeName = jsonObjectItem.getString("class");
                         }
 
-                        Object fieldValue = ClassHelper.isValueObject(fieldType) ?
-                                jsonToCustomProperty(jsonObjectItem, fieldType) :
-                                Class.forName(fieldTypeName).getDeclaredConstructor().newInstance();
+                        Object fieldValue;
 
+                        if (ClassHelper.isValueObject(fieldType)) {
+                            fieldValue = jsonToCustomProperty(jsonObjectItem, fieldType);
+                        } else {
+                            fieldValue = field.get(object);
+                            if (fieldValue == null) {
+                                fieldValue = Class.forName(fieldTypeName).getDeclaredConstructor().newInstance();
+                            }
+                            loadVariableIntoObject(fieldValue, jsonItemValue);
+                        }
+
+                        if(fieldValue instanceof IJsonSerializable) ((IJsonSerializable)fieldValue).deserializeFromJson(jsonItemValue.toString());
                         field.set(object, fieldValue);
 
                     }else if(jsonItemValue.getValueType() == JsonValue.ValueType.ARRAY) {

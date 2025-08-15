@@ -80,6 +80,8 @@ public class RenderComponent extends Component {
     public void initiate() {
         if (hasInitiated) return;
         super.initiate();
+
+        //TODO: MAKE JSON DESERIALIZED LOADED IN MATERIALS APPLY TO UNDERLYING
         meshMaterialSets.clear();
         if(!meshPaths.isEmpty()){
             meshPaths.forEach(meshPath -> {
@@ -182,6 +184,8 @@ public class RenderComponent extends Component {
             throw new RuntimeException(e);
         }
 
+        /*
+
         if(!meshMaterialSets.isEmpty()){
             String meshPath = meshMaterialSets.stream().findFirst().get().getMesh().getMeshPath();
             Material mat = meshMaterialSets.stream().findFirst().get().material;
@@ -194,6 +198,9 @@ public class RenderComponent extends Component {
             });
             meshMaterialSets.addAll(mms);
         }
+
+
+         */
 
         return this;
     }

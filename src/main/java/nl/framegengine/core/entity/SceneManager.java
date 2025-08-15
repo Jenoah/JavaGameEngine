@@ -55,6 +55,7 @@ public class SceneManager {
         scene.getGameObjects().forEach(go -> {
             go.getComponents().forEach(Component::initiate);
             if(go instanceof Light light) tryAddLight(light, scene);
+            go.callUpdate();
         });
         scene.updateLights();
         scene.setFogColor(scene.getFogColor());
@@ -63,6 +64,7 @@ public class SceneManager {
 
         return scene;
     }
+
 
     /*
     public Scene loadScene(String filePath) throws Exception {
