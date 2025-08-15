@@ -1,12 +1,11 @@
 package nl.framegengine.core.utils;
 
+import nl.framegengine.core.IJsonSerializable;
 import nl.framegengine.core.debugging.Debug;
 import nl.framegengine.core.entity.GameObject;
 
-import java.lang.reflect.Field;
-import java.lang.reflect.Modifier;
-import java.util.Arrays;
-import java.util.List;
+import java.lang.reflect.*;
+import java.util.*;
 
 public class ClassHelper {
     public static void setProperty(Object instance, String fieldName, Object value) {
@@ -15,9 +14,13 @@ public class ClassHelper {
             try {
                 Field field = clazz.getDeclaredField(fieldName);
                 field.setAccessible(true);
-                if(field.getType() == GameObject.class && value instanceof String guid){
+                Debug.Log("Found a " + clazz.getSimpleName() + " for " + fieldName + " with value of " + value.toString());
+
+                if(field.getType() == GameObject.class && value instanceof String guid) {
                     GameObject gameObject = GameObject.getByGUID(guid);
-                    if(gameObject != null) field.set(instance, GameObject.getByGUID(guid));
+                    if (gameObject != null) field.set(instance, gameObject);
+                }else if(clazz.isAssignableFrom(IJsonSerializable.class)){
+                    IJsonSerializable serializable = (IJsonSerializable)value;
                 }else {
                     field.set(instance, value);
                 }
@@ -108,5 +111,37 @@ public class ClassHelper {
             }
         }
         return null;
+    }
+
+    public static Class<?> getFieldGenericType(Field field) {
+        Type type = field.getGenericType();
+        if (type instanceof ParameterizedType) {
+            ParameterizedType pType = (ParameterizedType) type;
+            Type[] args = pType.getActualTypeArguments();
+            if (args.length > 0) return (Class<?>) args[0];
+        }
+        return Object.class; // fallback
+    }
+
+    public static boolean isValueObject(Class<?> type) {
+        return type.getName().equals("org.joml.Vector3f") ||
+                type.getName().equals("org.joml.Vector4f") ||
+                type.getName().equals("org.joml.Quaternion4f");
+    }
+
+    @SuppressWarnings("unchecked")
+    public static Collection<Object> createCollectionOfType(Class<?> type) throws NoSuchMethodException, InvocationTargetException, InstantiationException, IllegalAccessException {
+        Collection<Object> collection;
+        if (Set.class.isAssignableFrom(type)) {
+            collection = new HashSet<>();
+        } else if (List.class.isAssignableFrom(type)) {
+            collection = new ArrayList<>();
+        } else if (!type.isInterface()) {
+            collection = (Collection<Object>) type.getDeclaredConstructor().newInstance();
+        } else {
+            throw new RuntimeException("Cannot instantiate collection type: " + type.getName());
+        }
+
+        return collection;
     }
 }

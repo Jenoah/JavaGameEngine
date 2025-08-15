@@ -33,7 +33,7 @@ public class PBRShader extends SimpleLitShader{
     public void prepare(MeshMaterialSet meshMaterialSet, Camera camera) {
         super.prepare(meshMaterialSet, camera);
 
-        this.setUniform("useInstancing", meshMaterialSet.mesh.isInstanced());
+        this.setUniform("useInstancing", meshMaterialSet.getMesh().isInstanced());
 
         if(meshMaterialSet.material.hasAlbedoTexture()) {
             GL13.glActiveTexture(GL13.GL_TEXTURE0);

@@ -48,6 +48,8 @@ public class Mesh implements IJsonSerializable {
     private int previousInstanceCount = 0;
     private FloatBuffer instanceBuffer = null;
 
+    public Mesh(){ }
+
     public Mesh(Mesh mesh){
         this.vertices = mesh.vertices;
         this.uvs = mesh.uvs;
@@ -691,10 +693,15 @@ public class Mesh implements IJsonSerializable {
     }
 
     @Override
-    public void deserializeFromJson(String json) {
+    public IJsonSerializable deserializeFromJson(String json) {
         JsonReader jsonReader = Json.createReader(new StringReader(json));
         JsonObject jsonInfo = jsonReader.readObject();
-        JsonHelper.loadVariableIntoObject(this, jsonInfo);
+        try{
+            JsonHelper.loadVariableIntoObject(this, jsonInfo);
+        } catch (Exception e) {
+            Debug.LogError("Error loading in data: " + e.getMessage());
+        }
+        return this;
     }
 
     static class VertexKey {

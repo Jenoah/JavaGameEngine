@@ -2,26 +2,19 @@ package nl.framegengine.core.entity;
 
 import nl.framegengine.editor.EngineSettings;
 import nl.framegengine.core.components.Component;
-import nl.framegengine.core.components.RenderComponent;
 import nl.framegengine.core.debugging.Debug;
 import nl.framegengine.core.lighting.DirectionalLight;
 import nl.framegengine.core.lighting.Light;
 import nl.framegengine.core.lighting.PointLight;
 import nl.framegengine.core.lighting.SpotLight;
-import nl.framegengine.core.loaders.OBJLoader.OBJLoader;
-import nl.framegengine.core.rendering.MeshMaterialSet;
-import nl.framegengine.core.shaders.ShaderManager;
 import nl.framegengine.core.components.ComponentLoader;
 import nl.framegengine.core.utils.JsonHelper;
 import org.joml.Vector3f;
 
 import javax.json.*;
 import javax.json.stream.JsonGenerator;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.InputStream;
+import java.io.*;
 
-import java.io.StringWriter;
 import java.net.URL;
 import java.util.*;
 
@@ -33,7 +26,7 @@ public class SceneManager {
     public static float fogGradient = 15f;
 
     private static SceneManager instance = null;
-    private ComponentLoader componentLoader;
+    public static ComponentLoader componentLoader;
 
     public static synchronized SceneManager getInstance()
     {
@@ -44,6 +37,34 @@ public class SceneManager {
         return instance;
     }
 
+    public Scene loadScene(String filePath) throws Exception {
+        if(componentLoader == null){
+            URL inputResourceUrl = new File(EngineSettings.currentProjectDirectory).toURI().toURL();
+            URL compiledResourceUrl = new File(EngineSettings.currentProjectDirectory + File.separator + "/.compiled").toURI().toURL();
+
+            componentLoader = new ComponentLoader(inputResourceUrl.toURI().getPath(), compiledResourceUrl.toURI().getPath());
+        }
+
+        Scene scene = new Scene();
+
+        InputStream is = new FileInputStream(filePath);
+        JsonReader reader = Json.createReader(is);
+        JsonObject sceneInfo = reader.readObject();
+        scene.deserializeFromJson(sceneInfo.toString());
+
+        scene.getGameObjects().forEach(go -> {
+            go.getComponents().forEach(Component::initiate);
+            if(go instanceof Light light) tryAddLight(light, scene);
+        });
+        scene.updateLights();
+        scene.setFogColor(scene.getFogColor());
+        scene.setFogDensity(scene.getFogDensity());
+        scene.setFogGradient(scene.getFogGradient());
+
+        return scene;
+    }
+
+    /*
     public Scene loadScene(String filePath) throws Exception {
         Scene newScene = new Scene();
 
@@ -59,6 +80,7 @@ public class SceneManager {
             JsonObject sceneInfo = reader.readObject();
 
             JsonHelper.loadVariableIntoObject(newScene, sceneInfo, new String[]{"gameObjects"});
+            Debug.Log("Loaded fog color is " + newScene.getFogColor());
 
             // Game Objects
             sceneInfo.getJsonArray("gameObjects").forEach(goInfoContainer -> {
@@ -73,7 +95,11 @@ public class SceneManager {
                     throw new RuntimeException(e);
                 }
 
-                JsonHelper.loadVariableIntoObject(go, goInfo, new String[]{"parentGuid", "class", "meshPath", "texturePath", "isMain"});
+                try {
+                    JsonHelper.loadVariableIntoObject(go, goInfo, new String[]{"parentGuid", "class", "meshPath", "texturePath", "isMain"});
+                } catch (Exception e) {
+                    throw new RuntimeException(e);
+                }
                 go.setGuid(go.getGuid());
 
                 if (JsonHelper.hasJsonKey(goInfo, "meshPath")) {
@@ -108,7 +134,6 @@ public class SceneManager {
 
                 if(JsonHelper.hasJsonKey(goInfo, "parentGuid")) go.setParent(GameObject.getByGUID(goInfo.getString("parentGuid")));
 
-
                 newScene.addEntity(go, false);
             });
         } catch (Exception e) {
@@ -120,6 +145,8 @@ public class SceneManager {
         newScene.updateLights();
         return newScene;
     }
+
+    /**/
 
     private void tryAddLight(Light lightObject, Scene scene){
         switch (lightObject) {

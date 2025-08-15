@@ -15,6 +15,7 @@ import org.joml.Math;
 
 import javax.json.*;
 import java.io.StringReader;
+import java.lang.reflect.InvocationTargetException;
 import java.util.*;
 
 public class GameObject implements IJsonSerializable {
@@ -30,7 +31,7 @@ public class GameObject implements IJsonSerializable {
     private boolean isStatic = false;
     protected boolean drawDebugWireframe = false;
 
-    private static Dictionary<String, GameObject> instancedObjects = new Hashtable<>();
+    private static final Dictionary<String, GameObject> instancedObjects = new Hashtable<>();
 
     private final List<GameObject> children;
     private GameObject parent;
@@ -374,7 +375,7 @@ public class GameObject implements IJsonSerializable {
         RenderComponent renderComponent = getComponent(RenderComponent.class);
         if (renderComponent != null) {
             renderComponent.getMeshMaterialSets().forEach(meshMaterialSet ->
-                    meshMaterialSet.mesh.setStatic(isStatic)
+                    meshMaterialSet.getMesh().setStatic(isStatic)
             );
         }
         return this;
@@ -453,17 +454,24 @@ public class GameObject implements IJsonSerializable {
     @Override
     public JsonObject serializeToJson() {
         JsonObjectBuilder jsonObjectBuilder = Json.createObjectBuilder();
-        JsonObject jsonObject = JsonHelper.objectToJson(this, new String[]{"children", "parent"});
+        JsonObject jsonObject = JsonHelper.objectToJson(this, new String[]{"children", "parent", "instancedObjects"});
         jsonObject.forEach(jsonObjectBuilder::add);
         if(parent != null) jsonObjectBuilder.add("parentGuid", Json.createValue(parent.guid));
         return jsonObjectBuilder.build();
     }
 
     @Override
-    public void deserializeFromJson(String json) {
+    public IJsonSerializable deserializeFromJson(String json) {
         JsonReader jsonReader = Json.createReader(new StringReader(json));
         JsonObject jsonInfo = jsonReader.readObject();
-        JsonHelper.loadVariableIntoObject(this, jsonInfo);
+        if(JsonHelper.hasJsonKey(jsonInfo, "guid")) setGuid(jsonInfo.getString("guid"));
+        try {
+            JsonHelper.loadVariableIntoObject(this, jsonInfo);
+        } catch (ClassNotFoundException | InvocationTargetException | NoSuchMethodException | InstantiationException |
+                 IllegalAccessException e) {
+            throw new RuntimeException(e);
+        }
         if(JsonHelper.hasJsonKey(jsonInfo, "parentGuid")) setParent(GameObject.getByGUID(jsonInfo.getString("parentGuid")));
+        return this;
     }
 }

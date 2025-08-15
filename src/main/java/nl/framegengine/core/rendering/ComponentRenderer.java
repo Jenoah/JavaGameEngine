@@ -49,11 +49,11 @@ public class ComponentRenderer implements IRenderer {
             shader.prepare(meshMaterialSet, mainCamera);
 
             if (recordMetrics) metrics.recordDrawCall();
-            if(meshMaterialSet.mesh.isInstanced()){
-                GL33.glDrawElementsInstanced(GL11.GL_TRIANGLES, meshMaterialSet.mesh.getVertexCount(), GL11.GL_UNSIGNED_INT, 0, meshMaterialSet.mesh.getInstanceCount());
+            if(meshMaterialSet.getMesh().isInstanced()){
+                GL33.glDrawElementsInstanced(GL11.GL_TRIANGLES, meshMaterialSet.getMesh().getVertexCount(), GL11.GL_UNSIGNED_INT, 0, meshMaterialSet.getMesh().getInstanceCount());
             }else{
-                if(recordMetrics) metrics.recordVertexCount(meshMaterialSet.mesh.getVertexCount());
-                GL11.glDrawElements(GL11.GL_TRIANGLES, meshMaterialSet.mesh.getVertexCount(), GL11.GL_UNSIGNED_INT, 0);
+                if(recordMetrics) metrics.recordVertexCount(meshMaterialSet.getMesh().getVertexCount());
+                GL11.glDrawElements(GL11.GL_TRIANGLES, meshMaterialSet.getMesh().getVertexCount(), GL11.GL_UNSIGNED_INT, 0);
             }
 
             unbind();
@@ -62,17 +62,17 @@ public class ComponentRenderer implements IRenderer {
     }
 
     public void bind(MeshMaterialSet meshMaterialSet) {
-        GL30.glBindVertexArray(meshMaterialSet.mesh.getVaoID());
+        GL30.glBindVertexArray(meshMaterialSet.getMesh().getVaoID());
         if (recordMetrics) metrics.recordVaoBind();
 
         GL20.glEnableVertexAttribArray(0);
         GL20.glEnableVertexAttribArray(1);
         GL20.glEnableVertexAttribArray(2);
-        if (meshMaterialSet.mesh.hasTangents()) {
+        if (meshMaterialSet.getMesh().hasTangents()) {
             GL20.glEnableVertexAttribArray(3);
             GL20.glEnableVertexAttribArray(4);
         }
-        if(meshMaterialSet.mesh.isInstanced()){
+        if(meshMaterialSet.getMesh().isInstanced()){
             GL20.glEnableVertexAttribArray(5);
             GL20.glEnableVertexAttribArray(6);
             GL20.glEnableVertexAttribArray(7);

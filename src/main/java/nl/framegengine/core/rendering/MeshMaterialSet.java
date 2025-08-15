@@ -1,6 +1,7 @@
 package nl.framegengine.core.rendering;
 
 import nl.framegengine.core.IJsonSerializable;
+import nl.framegengine.core.debugging.Debug;
 import nl.framegengine.core.entity.GameObject;
 import nl.framegengine.core.entity.Material;
 import nl.framegengine.core.entity.Mesh;
@@ -14,9 +15,11 @@ import javax.json.JsonReader;
 import java.io.StringReader;
 
 public class MeshMaterialSet implements IJsonSerializable {
-    public final Mesh mesh;
+    private Mesh mesh;
     public Material material;
     private GameObject root;
+
+    public MeshMaterialSet() {}
 
     public MeshMaterialSet(Mesh mesh, Material material) {
         this.mesh = mesh;
@@ -26,6 +29,10 @@ public class MeshMaterialSet implements IJsonSerializable {
     public MeshMaterialSet(Mesh mesh) {
         this.mesh = mesh;
         this.material = new Material(ShaderManager.pbrShader);
+    }
+
+    public Mesh getMesh(){
+        return this.mesh;
     }
 
     public GameObject getRoot() {
@@ -47,9 +54,14 @@ public class MeshMaterialSet implements IJsonSerializable {
     }
 
     @Override
-    public void deserializeFromJson(String json) {
+    public IJsonSerializable deserializeFromJson(String json) {
         JsonReader jsonReader = Json.createReader(new StringReader(json));
         JsonObject jsonInfo = jsonReader.readObject();
-        JsonHelper.loadVariableIntoObject(this, jsonInfo);
+        try{
+            JsonHelper.loadVariableIntoObject(this, jsonInfo);
+        } catch (Exception e) {
+            Debug.LogError("Error loading in data: " + e.getMessage());
+        }
+        return this;
     }
 }

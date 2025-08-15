@@ -1,150 +1,228 @@
 package nl.framegengine.core.utils;
 
 import nl.framegengine.core.IJsonSerializable;
+import nl.framegengine.core.components.Component;
 import nl.framegengine.core.debugging.Debug;
 import nl.framegengine.core.entity.GameObject;
 
 import java.lang.reflect.*;
 import java.util.*;
 
+import nl.framegengine.core.entity.SceneManager;
 import org.joml.Quaternionf;
 import org.joml.Vector3f;
 import org.joml.Vector4f;
-
 import javax.json.*;
 
 public class JsonHelper {
     public static boolean hasJsonKey(JsonObject o, String k) { return o.containsKey(k) && !o.isNull(k); }
 
-    public static void loadVariableIntoObject(Object object, JsonObject objectInfo){
+    public static void loadVariableIntoObject(Object object, JsonValue objectInfo) throws ClassNotFoundException, InvocationTargetException, NoSuchMethodException, InstantiationException, IllegalAccessException {
         loadVariableIntoObject(object, objectInfo, new String[]{});
     }
 
-    public static void loadVariableIntoObject(Object object, JsonObject objectInfo, String[] keysToIgnore){
-        for (String key : objectInfo.keySet()) {
-            if (Arrays.asList(keysToIgnore).contains(key)) continue;
+    /*
+    public static void loadVariableIntoObject(Object targetObj, JsonValue jsonValue, String[] keysToIgnore) throws Exception {
+        if (jsonValue == null || targetObj == null) return;
 
-            JsonValue jsonValue = objectInfo.get(key);
-            Field field = ClassHelper.findField(object.getClass(), key);
-            if (field == null) continue;
+        if (jsonValue.getValueType() == JsonValue.ValueType.OBJECT) {
+            JsonObject jsonObject = jsonValue.asJsonObject();
 
-            field.setAccessible(true);
-            Class<?> fieldType = field.getType();
+            for (String key : jsonObject.keySet()) {
+                if (Arrays.asList(keysToIgnore).contains(key) || key.equals("class")) continue;
 
-            try {
-                if (jsonValue.getValueType() == JsonValue.ValueType.ARRAY) {
-                    loadJsonArrayIntoObject(jsonValue, fieldType, field, object);
-                } else if (jsonValue.getValueType() == JsonValue.ValueType.OBJECT) {
-                    loadJsonObjectIntoObject(jsonValue, fieldType, field, object);
-                } else {
-                    if(fieldType.isAssignableFrom(GameObject.class) && jsonValue.getValueType() == JsonValue.ValueType.STRING){
-                        field.set(object, GameObject.getByGUID(((JsonString)jsonValue).getString()));
+                JsonValue fieldJsonValue = jsonObject.get(key);
+
+                Field field = ClassHelper.findField(targetObj.getClass(), key);
+                if (field == null) continue; // Skip unknown or computed fields
+
+                field.setAccessible(true); // Already set, but safe
+
+                Class<?> fieldType = field.getType();
+
+                if (fieldJsonValue.getValueType() == JsonValue.ValueType.OBJECT) {
+                    JsonObject fieldJsonObject = fieldJsonValue.asJsonObject();
+
+                    // Handle Vector3f, Vector4f, Color, etc.
+                    if (ClassHelper.isValueObject(fieldType)) {
+                        for (String nestedKey : fieldJsonObject.keySet()) {
+                            Object nestedValue = JsonHelper.jsonToObject(fieldJsonObject.get(nestedKey), fieldType);
+                            ClassHelper.setDeepProperty(targetObj, key + "." + nestedKey, nestedValue);
+                        }
+                        continue;
+                    }
+
+                    // For user-defined IJsonSerializable or polymorphic type
+                    String implClassName = fieldType.getName();
+                    if (JsonHelper.hasJsonKey(fieldJsonObject, "class")) {
+                        implClassName = fieldJsonObject.getString("class");
+                    }
+
+                    Object fieldInstance;
+                    if(fieldType.isAssignableFrom(Component.class)) {
+                        fieldInstance = SceneManager.componentLoader.loadComponent(implClassName);
+                    }else if(fieldType.isAssignableFrom(GameObject.class) && jsonValue.getValueType() == JsonValue.ValueType.STRING){
+                        fieldInstance = GameObject.getByGUID(((JsonString)jsonValue).getString());
                     }else {
-                        Object value = JsonHelper.jsonToObject(jsonValue);
-                        field.set(object, value);
+                        fieldInstance = Class.forName(implClassName).getDeclaredConstructor().newInstance();
+                    }
+
+                    if (fieldInstance instanceof IJsonSerializable serializable) {
+                            fieldInstance = serializable.deserializeFromJson(fieldJsonObject.toString());
+                    } else {
+                        loadVariableIntoObject(fieldInstance, fieldJsonObject, new String[0]);
+                    }
+                    field.set(targetObj, fieldInstance);
+
+                } else if (fieldJsonValue.getValueType() == JsonValue.ValueType.ARRAY) {
+                    // For List<T> fields
+                    Collection<Object> collection;
+                    if (Set.class.isAssignableFrom(fieldType)) {
+                        collection = new HashSet<>();
+                    } else if (List.class.isAssignableFrom(fieldType)) {
+                        collection = new ArrayList<>();
+                    } else if (!fieldType.isInterface()) {
+                        collection = (Collection<Object>) fieldType.getDeclaredConstructor().newInstance();
+                    } else {
+                        throw new RuntimeException("Cannot instantiate collection type: " + fieldType.getName());
+                    }
+
+                    Class<?> elementType = ClassHelper.getFieldGenericType(field);
+
+                    for (JsonValue elemJson : fieldJsonValue.asJsonArray()) {
+                        Object elemObj;
+                        if (elemJson.getValueType() == JsonValue.ValueType.OBJECT) {
+                            JsonObject elemObjJson = elemJson.asJsonObject();
+                            String elemClassName = elementType.getName();
+                            if (JsonHelper.hasJsonKey(elemObjJson, "class")) {
+                                elemClassName = elemObjJson.getString("class");
+                            }
+                            if(elementType.isAssignableFrom(Component.class)){
+                                elemObj = SceneManager.componentLoader.loadComponent(elemClassName);
+                                ((Component)elemObj).setRoot((GameObject)targetObj);
+                            }else {
+                                elemObj = Class.forName(elemClassName).getDeclaredConstructor().newInstance();
+                            }
+                            if (elemObj instanceof IJsonSerializable serializable) {
+                                elemObj = serializable.deserializeFromJson(elemObjJson.toString());
+                            } else {
+                                loadVariableIntoObject(elemObj, elemObjJson, new String[0]);
+                            }
+                        } else {
+                            elemObj = JsonHelper.jsonToObject(elemJson, elementType);
+                        }
+                        collection.add(elemObj);
+                    }
+                    field.set(targetObj, collection);
+
+                } else {
+                    // Primitive, string, enum etc.
+                    Object value = null;
+                    if(fieldType.isAssignableFrom(GameObject.class) && fieldJsonValue.getValueType() == JsonValue.ValueType.STRING){
+                        value = GameObject.getByGUID(((JsonString) fieldJsonValue).getString());
+                    } else {
+                        value = JsonHelper.jsonToObject(fieldJsonValue, fieldType);
+                    }
+                    field.set(targetObj, value);
+                }
+            }
+        }
+    }
+    /**/
+
+    public static void loadVariableIntoObject(Object object, JsonValue jsonValue, String[] keysToIgnore) throws ClassNotFoundException, NoSuchMethodException, InvocationTargetException, InstantiationException, IllegalAccessException {
+        switch (jsonValue.getValueType()) {
+            case OBJECT:
+                JsonObject jsonObject = jsonValue.asJsonObject();
+                for (String key : jsonObject.keySet()) {
+                    if (Arrays.asList(keysToIgnore).contains(key)) continue;
+                    JsonValue jsonItemValue = jsonObject.get(key);
+
+                    Field field = ClassHelper.findField(object.getClass(), key);
+                    if(field == null) continue;
+                    field.setAccessible(true);
+                    Class<?> fieldType = field.getType();
+                    String fieldTypeName = fieldType.getName();
+
+                    if (jsonItemValue.getValueType() == JsonValue.ValueType.OBJECT) {
+                        JsonObject jsonObjectItem = jsonItemValue.asJsonObject();
+
+                        if (JsonHelper.hasJsonKey(jsonObjectItem, "class")) {
+                            fieldTypeName = jsonObjectItem.getString("class");
+                        }
+
+                        Object fieldValue = ClassHelper.isValueObject(fieldType) ?
+                                jsonToCustomProperty(jsonObjectItem, fieldType) :
+                                Class.forName(fieldTypeName).getDeclaredConstructor().newInstance();
+
+                        field.set(object, fieldValue);
+
+                    }else if(jsonItemValue.getValueType() == JsonValue.ValueType.ARRAY) {
+                        Collection<Object> collection = ClassHelper.createCollectionOfType(fieldType);
+
+                        Class<?> arrayItemType = ClassHelper.getFieldGenericType(field);
+
+                        for (JsonValue arrayItemJsonValue : jsonItemValue.asJsonArray()) {
+                            Object arrayItemInstantiatedObject;
+
+                            if (arrayItemJsonValue.getValueType() == JsonValue.ValueType.OBJECT) {
+                                JsonObject arrayItemJsonObject = arrayItemJsonValue.asJsonObject();
+
+                                fieldTypeName = arrayItemType.getName();
+                                if (JsonHelper.hasJsonKey(arrayItemJsonObject, "class")) {
+                                    fieldTypeName = arrayItemJsonObject.getString("class");
+                                }
+
+                                Debug.Log("Field is a " + arrayItemType.getSimpleName() + " vs " + fieldTypeName);
+
+                                if(arrayItemType.isAssignableFrom(Component.class)){
+                                    arrayItemInstantiatedObject = SceneManager.componentLoader.loadComponent(fieldTypeName);
+                                    ((Component)arrayItemInstantiatedObject).setRoot((GameObject) object);
+                                }else {
+                                    arrayItemInstantiatedObject = Class.forName(fieldTypeName).getDeclaredConstructor().newInstance();
+                                }
+
+                                if (arrayItemInstantiatedObject instanceof IJsonSerializable serializable) {
+                                    Debug.Log("Deserializing " + serializable.getClass().getSimpleName());
+                                    arrayItemInstantiatedObject = serializable.deserializeFromJson(arrayItemJsonObject.toString());
+                                }else{
+                                    loadVariableIntoObject(arrayItemInstantiatedObject, arrayItemJsonObject, new String[0]);
+                                }
+                            } else {
+                                arrayItemInstantiatedObject = JsonHelper.jsonToObject(arrayItemJsonValue);
+                            }
+
+                            collection.add(arrayItemInstantiatedObject);
+                        }
+                        Debug.Log("The list is filled with " + collection.size() + " items");
+
+                        field.set(object, collection);
+
+                    }else{ //IF IS INSTANCE OF AN OBJECT
+                        Object fieldValue = null;
+                        if(fieldType.isAssignableFrom(GameObject.class) && jsonItemValue.getValueType() == JsonValue.ValueType.STRING){
+                            fieldValue = GameObject.getByGUID(((JsonString)jsonItemValue).getString());
+                        }else {
+                            fieldValue = jsonToObject(jsonItemValue);
+                        }
+
+                        //TODO: COMPONENT ROOT WILL PROBABLY BE OVERWRITTEN HERE
+                        if (fieldValue != null && fieldValue.getClass().isAssignableFrom(IJsonSerializable.class)) {
+                            ((IJsonSerializable) fieldValue).deserializeFromJson(((JsonString) jsonItemValue).getString());
+                        }
+                        field.set(object, fieldValue);
                     }
                 }
-            } catch (Exception e) {
-                Debug.LogError("Error loading variable '" + key + "': " + e.getMessage());
-            }
-        }
-    }
+                break;
+            case ARRAY:
+                JsonArray jsonArray = jsonValue.asJsonArray();
+                Debug.Log("Array is " + jsonArray.toString());
+                jsonArray.forEach(jsonArrayItem -> {
 
-    private static void loadJsonObjectIntoObject(JsonValue jsonValue, Class<?> fieldType, Field field, Object object) throws Exception {
-        JsonObject nestedObj = jsonValue.asJsonObject();
-        Object nestedInstance = field.get(object);
-
-        if (nestedInstance == null) {
-            if (nestedObj.containsKey("guid")) {
-                String guid = nestedObj.getString("guid");
-                GameObject existing = GameObject.getByGUID(guid);
-                if (existing != null) {
-                    field.set(object, existing);
-                    nestedInstance = existing;
-                } else {
-                    Object newInstance = fieldType.getDeclaredConstructor().newInstance();
-                    field.set(object, newInstance);
-                    nestedInstance = newInstance;
-                }
-            } else {
-                nestedInstance = fieldType.getDeclaredConstructor().newInstance();
-                field.set(object, nestedInstance);
-            }
-        }
-
-        if (nestedInstance instanceof IJsonSerializable serializable) {
-            serializable.deserializeFromJson(nestedObj.toString());
-        } else {
-            loadVariableIntoObject(nestedInstance, nestedObj, new String[0]);
-        }
-    }
-
-    private static void loadJsonArrayIntoObject(JsonValue jsonValue, Class<?> fieldType, Field field, Object object) throws Exception {
-        JsonArray jsonArray = jsonValue.asJsonArray();
-
-        if (fieldType.isArray()) {
-            Class<?> componentType = fieldType.getComponentType();
-            Object array = Array.newInstance(componentType, jsonArray.size());
-
-            for (int i = 0; i < jsonArray.size(); i++) {
-                Object element = convertJsonValueToObject(jsonArray.get(i), componentType);
-                Array.set(array, i, element);
-            }
-            field.set(object, array);
-
-        } else if (List.class.isAssignableFrom(fieldType)) {
-            // For List fields
-            Type genericType = field.getGenericType();
-            Class<?> elementType = Object.class;
-            if (genericType instanceof ParameterizedType) {
-                Type[] typeArgs = ((ParameterizedType) genericType).getActualTypeArguments();
-                elementType = (Class<?>) typeArgs[0];
-            }
-            List<Object> list = new ArrayList<>();
-            for (JsonValue val : jsonArray) {
-                list.add(convertJsonValueToObject(val, elementType));
-            }
-            field.set(object, list);
-        }
-    }
-
-    private static Object convertJsonValueToObject(JsonValue jsonValue, Class<?> targetType) throws Exception {
-        if (jsonValue.getValueType() == JsonValue.ValueType.OBJECT) {
-            JsonObject jsonObj = jsonValue.asJsonObject();
-            Object instance = targetType.getDeclaredConstructor().newInstance();
-            if (instance instanceof IJsonSerializable serializable) {
-                serializable.deserializeFromJson(jsonObj.toString());
-                return instance;
-            } else {
-                loadVariableIntoObject(instance, jsonObj, new String[0]);
-                return instance;
-            }
-        } else if (jsonValue.getValueType() == JsonValue.ValueType.ARRAY) {
-            // Only needed for arrays-of-arrays, rare
-            // Otherwise, handled at higher level
-            return null;
-        } else {
-            return JsonHelper.jsonToObject(jsonValue); // your primitive/unboxing method
-        }
-    }
-
-    /*
-    public static void loadVariableIntoObject(Object object, JsonObject objectInfo, String[] keysToIgnore){
-        for (String key : objectInfo.keySet()) {
-            if (Arrays.asList(keysToIgnore).contains(key)) continue;
-
-            JsonValue jsonValue = objectInfo.get(key);
-            if (jsonValue.getValueType() == JsonValue.ValueType.OBJECT) {
-                JsonObject nestedObj = jsonValue.asJsonObject();
-                for (String nestedKey : nestedObj.keySet()) {
-                    Object nestedValue = JsonHelper.jsonToObject(nestedObj.get(nestedKey));
-                    ClassHelper.setDeepProperty(object, key + "." + nestedKey, nestedValue);
-                }
-                // Nested object, set each nested field using deep property
-            } else if (jsonValue.getValueType() != JsonValue.ValueType.ARRAY) {
-                Object value = JsonHelper.jsonToObject(jsonValue);
-                ClassHelper.setProperty(object, key, value);
-            }
+                });
+                break;
+            case null, default:
+                break;
         }
     }
 
@@ -228,6 +306,13 @@ public class JsonHelper {
         }
     }
 
+    public static Object jsonToCustomProperty(JsonObject jsonObject, Class<?> type) {
+        if(type.isAssignableFrom(Vector3f.class)) return jsonToVector3f(jsonObject);
+        if(type.isAssignableFrom(Vector4f.class)) return jsonToVector4f(jsonObject);
+        if(type.isAssignableFrom(Quaternionf.class)) return jsonToQuaternionf(jsonObject);
+        return null;
+    }
+
     @SuppressWarnings("unchecked")
     public static void addPropertyToJsonArray(JsonArrayBuilder jsonArrayBuilder, Object object) {
         switch (object) {
@@ -270,6 +355,14 @@ public class JsonHelper {
         return new Vector3f(x, y, z);
     }
 
+    public static Vector4f jsonToVector4f(JsonObject obj) {
+        float x = jsonToFloat(obj, "x", 0.0f);
+        float y = jsonToFloat(obj, "y", 0.0f);
+        float z = jsonToFloat(obj, "z", 0.0f);
+        float w = jsonToFloat(obj, "w", 0.0f);
+        return new Vector4f(x, y, z, w);
+    }
+
     public static Quaternionf jsonToQuaternionf(JsonObject obj) {
         float x = jsonToFloat(obj, "x", 0.0f);
         float y = jsonToFloat(obj, "y", 0.0f);
@@ -287,14 +380,10 @@ public class JsonHelper {
                 } else {
                     return (float) num.doubleValue();
                 }
-            case STRING:
-                return ((JsonString) jsonValue).getString();
-            case TRUE:
-                return true;
-            case FALSE:
-                return false;
-            default:
-                return null;
+            case STRING: return ((JsonString) jsonValue).getString();
+            case TRUE: return true;
+            case FALSE: return false;
+            default: return null;
         }
     }
 

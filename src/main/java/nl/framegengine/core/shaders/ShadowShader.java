@@ -24,7 +24,7 @@ public class ShadowShader extends Shader{
 
         this.setUniform("projectionViewMatrix", projectionViewMatrix);
 
-        if(meshMaterialSet.mesh.isInstanced()){
+        if(meshMaterialSet.getMesh().isInstanced()){
             this.setUniform("useInstancing", true);
         }else{
             this.setUniform("useInstancing", false);

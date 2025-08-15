@@ -5,5 +5,11 @@ import javax.json.JsonObject;
 public interface IJsonSerializable {
     JsonObject serializeToJson();
 
-    void deserializeFromJson(String json);
+    IJsonSerializable deserializeFromJson(String json);
+
+    static Object deserializeFromJsonToObject(String json, Class<?> classType) throws Exception {
+        Object instance = classType.getDeclaredConstructor().newInstance();
+        ((IJsonSerializable)instance).deserializeFromJson(json);
+        return instance;
+    }
 }

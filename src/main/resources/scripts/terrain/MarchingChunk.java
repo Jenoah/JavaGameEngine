@@ -278,7 +278,7 @@ public class MarchingChunk {
         if(surfaceFeatureRenderComponent == null) {
             Set<MeshMaterialSet> localMMS = new HashSet<>();
             surfaceFeatureEntity.getComponent(RenderComponent.class).getMeshMaterialSets().forEach(mms -> {
-                localMMS.add(new MeshMaterialSet(new Mesh(mms.mesh), new Material(mms.material)));
+                localMMS.add(new MeshMaterialSet(new Mesh(mms.getMesh()), new Material(mms.material)));
             });
             this.surfaceFeatureRenderComponent = new RenderComponent(localMMS);
             this.surfaceFeatureRenderComponent.setRoot(chunkEntity);

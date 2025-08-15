@@ -6,6 +6,7 @@ import javax.tools.StandardJavaFileManager;
 import javax.tools.ToolProvider;
 import java.io.File;
 import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.nio.file.Files;
@@ -73,7 +74,7 @@ public class ComponentLoader {
         return new URLClassLoader(urls, Component.class.getClassLoader());
     }
 
-    public Component loadComponent(String className) throws Exception {
+    public Component loadComponent(String className) throws NoSuchMethodException, InvocationTargetException, InstantiationException, IllegalAccessException, ClassNotFoundException {
         Class<?> cls = classLoader.loadClass(className);
         if (!Component.class.isAssignableFrom(cls)) {
             throw new IllegalArgumentException("Class " + className + " is not a subclass of Component.");

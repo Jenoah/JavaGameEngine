@@ -1,6 +1,7 @@
 package nl.framegengine.core.entity;
 
 import nl.framegengine.core.IJsonSerializable;
+import nl.framegengine.core.debugging.Debug;
 import nl.framegengine.core.shaders.Shader;
 import nl.framegengine.core.utils.Constants;
 import nl.framegengine.core.utils.JsonHelper;
@@ -14,24 +15,26 @@ import java.io.StringReader;
 
 public class Material implements IJsonSerializable {
 
-    private Vector4f ambientColor = Constants.DEFAULT_COLOR;
-    private Vector4f diffuseColor = Constants.DEFAULT_COLOR;
-    private Vector4f specularColor = Constants.DEFAULT_COLOR;
+    protected Vector4f ambientColor = Constants.DEFAULT_COLOR;
+    protected Vector4f diffuseColor = Constants.DEFAULT_COLOR;
+    protected Vector4f specularColor = Constants.DEFAULT_COLOR;
 
-    private float reflectance = 0.04f;
-    private float roughness = 0.1f;
-    private Texture albedoTexture = null;
-    private Texture normalMap = null;
-    private Texture roughnessMap = null;
-    private Texture metallicMap = null;
-    private Texture aoMap = null;
+    protected float reflectance = 0.04f;
+    protected float roughness = 0.1f;
+    protected Texture albedoTexture = null;
+    protected Texture normalMap = null;
+    protected Texture roughnessMap = null;
+    protected Texture metallicMap = null;
+    protected Texture aoMap = null;
 
-    private boolean isDoubleSided = false;
-    private boolean castShadow = true;
-    private boolean receiveShadows = true;
-    private boolean isTransparent;
+    protected boolean isDoubleSided = false;
+    protected boolean castShadow = true;
+    protected boolean receiveShadows = true;
+    protected boolean isTransparent;
 
-    private Shader shader;
+    protected Shader shader;
+
+    public Material(){}
 
     public Material(Shader shader){
         this.shader = shader;
@@ -218,9 +221,14 @@ public class Material implements IJsonSerializable {
     }
 
     @Override
-    public void deserializeFromJson(String json) {
+    public IJsonSerializable deserializeFromJson(String json) {
         JsonReader jsonReader = Json.createReader(new StringReader(json));
         JsonObject jsonInfo = jsonReader.readObject();
-        JsonHelper.loadVariableIntoObject(this, jsonInfo);
+        try{
+            JsonHelper.loadVariableIntoObject(this, jsonInfo);
+        } catch (Exception e) {
+            Debug.LogError("Error loading in data: " + e.getMessage());
+        }
+        return this;
     }
 }

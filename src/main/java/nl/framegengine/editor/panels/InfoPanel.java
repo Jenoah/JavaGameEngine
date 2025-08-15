@@ -1,11 +1,13 @@
 package nl.framegengine.editor.panels;
 
 import imgui.ImGui;
+import imgui.flag.ImGuiCol;
 import imgui.type.ImBoolean;
 import imgui.type.ImFloat;
 import imgui.type.ImInt;
 import imgui.type.ImString;
-import nl.framegengine.core.components.Component;
+import nl.framegengine.core.entity.Material;
+import nl.framegengine.core.entity.Texture;
 import nl.framegengine.editor.EditorPanel;
 import nl.framegengine.core.entity.GameObject;
 import nl.framegengine.core.utils.ClassHelper;
@@ -17,6 +19,7 @@ import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public class InfoPanel extends EditorPanel {
 
@@ -37,6 +40,10 @@ public class InfoPanel extends EditorPanel {
         ImGui.text(currentlySelectedObject.getClass().getSimpleName());
         ImGui.newLine();
 
+        ImGui.pushStyleColor(ImGuiCol.FrameBg, 0.2f, 0.2f, 0.2f, 0.8f);
+        ImGui.pushStyleColor(ImGuiCol.Header, 0.5f, 0.3f, 0.1f, 1f);
+        ImGui.pushStyleColor(ImGuiCol.HeaderHovered, 0.625f, 0.3f, 0.05f, 1f);
+        ImGui.pushStyleColor(ImGuiCol.HeaderActive, 0.75f, 0.3f, 0.05f, 1f);
         for (Field field : hierarchyObjects) {
             try {
                 field.setAccessible(true);
@@ -47,6 +54,7 @@ public class InfoPanel extends EditorPanel {
                 throw new RuntimeException(e);
             }
         }
+        ImGui.popStyleColor(4);
     }
 
     public void setCurrentlySelectedObject(GameObject gameObject){
@@ -117,13 +125,30 @@ public class InfoPanel extends EditorPanel {
                     field.set(drawingObject, quaternion);
                 }
             }
+            case Texture texture -> {
+                ImGui.text(field.getName());
+                drawObject(texture);
+            }
+            case Material material -> {
+                ImGui.text(field.getName());
+                drawObject(material);
+            }
             case Set<?> set -> {
-                if(!set.isEmpty() && set.stream().findFirst().get() instanceof Component) drawComponent((Set<Component>)set);
+                if(!set.isEmpty()) {
+                    if(ImGui.collapsingHeader(field.getName())) {
+                        AtomicInteger idx = new AtomicInteger();
+                        idx.set(1);
+                        set.forEach(setItem -> {
+                            if(ImGui.collapsingHeader(setItem.getClass().getSimpleName() + " " + String.valueOf(idx.getAndIncrement()))) {
+                                drawObject(setItem);
+                            }
+                        });
+                    }
+                }
             }
             case null, default -> {
                 ImGui.text(field.getName());
-                assert objectValue != null;
-                ImGui.text(objectValue.toString());
+                if(objectValue != null) ImGui.text(objectValue.toString());
             }
         }
         ImGui.setWindowFontScale(0.4f);
@@ -131,23 +156,19 @@ public class InfoPanel extends EditorPanel {
         ImGui.setWindowFontScale(1f);
     }
 
-    private void drawComponent(Set<Component> components) {
-        components.forEach(component -> {
-            ImGui.indent(10);
-            ImGui.text(component.getClass().getSimpleName());
-            ImGui.text("------");
-            List<Field> componentFields = new ArrayList<>();
-            ClassHelper.getAllPublicAndProtectedProperties(componentFields, component.getClass());
-            componentFields.forEach(componentField -> {
-                try {
-                    componentField.setAccessible(true);
-                    drawOption(componentField, component);
-                } catch (IllegalAccessException e) {
-                    throw new RuntimeException(e);
-                }
-            });
-
-            ImGui.unindent(10);
+    private void drawObject(Object object){
+        //ImGui.text(object.getClass().getSimpleName());
+        ImGui.indent(10);
+        List<Field> objectFields = new ArrayList<>();
+        ClassHelper.getAllPublicAndProtectedProperties(objectFields, object.getClass());
+        objectFields.forEach(objectField -> {
+            try {
+                objectField.setAccessible(true);
+                drawOption(objectField, object);
+            } catch (IllegalAccessException e) {
+                throw new RuntimeException(e);
+            }
         });
+        ImGui.unindent(10);
     }
 }

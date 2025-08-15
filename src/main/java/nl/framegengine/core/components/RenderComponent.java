@@ -1,5 +1,6 @@
 package nl.framegengine.core.components;
 
+import nl.framegengine.core.IJsonSerializable;
 import nl.framegengine.core.entity.GameObject;
 import nl.framegengine.core.entity.Material;
 import nl.framegengine.core.entity.Mesh;
@@ -12,7 +13,11 @@ import nl.framegengine.core.utils.Constants;
 import nl.framegengine.core.utils.JsonHelper;
 import org.joml.Vector3f;
 
+import javax.json.Json;
 import javax.json.JsonObject;
+import javax.json.JsonReader;
+import java.io.StringReader;
+import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -22,7 +27,7 @@ public class RenderComponent extends Component {
 
     protected List<String> meshPaths = new ArrayList<>();
 
-    private final Set<MeshMaterialSet> meshMaterialSets = new HashSet<>();
+    protected final Set<MeshMaterialSet> meshMaterialSets = new HashSet<>();
 
     public RenderComponent(){ }
 
@@ -51,7 +56,7 @@ public class RenderComponent extends Component {
         Set<MeshMaterialSet> localMeshMaterialSets = new HashSet<>(meshMaterialSets);
         localMeshMaterialSets.forEach(meshMaterialSet -> {
             meshMaterialSet.setRoot(this.getRoot());
-            if(!meshPaths.contains(meshMaterialSet.mesh.getMeshPath())) meshPaths.add(meshMaterialSet.mesh.getMeshPath());
+            if(!meshPaths.contains(meshMaterialSet.getMesh().getMeshPath())) meshPaths.add(meshMaterialSet.getMesh().getMeshPath());
         });
         this.meshMaterialSets.addAll(localMeshMaterialSets);
     }
@@ -63,7 +68,7 @@ public class RenderComponent extends Component {
 
     public void addMesh(MeshMaterialSet meshMaterialSet) {
         meshMaterialSets.add(meshMaterialSet.setRoot(this.getRoot()));
-        if(!meshPaths.contains(meshMaterialSet.mesh.getMeshPath())) meshPaths.add(meshMaterialSet.mesh.getMeshPath());
+        if(!meshPaths.contains(meshMaterialSet.getMesh().getMeshPath())) meshPaths.add(meshMaterialSet.getMesh().getMeshPath());
 
     }
 
@@ -75,12 +80,14 @@ public class RenderComponent extends Component {
     public void initiate() {
         if (hasInitiated) return;
         super.initiate();
+        meshMaterialSets.clear();
         if(!meshPaths.isEmpty()){
             meshPaths.forEach(meshPath -> {
                         if(!meshPath.isEmpty()) addMeshes(OBJLoader.loadOBJModel(meshPath));
                     }
             );
         }
+        if(meshMaterialSets.isEmpty()) return;
         calculateRadius();
         calculateAABB();
         queueRender();
@@ -105,7 +112,7 @@ public class RenderComponent extends Component {
     private void calculateRadius() {
         float maxRadius = 0;
         for (MeshMaterialSet meshMaterialSet : meshMaterialSets) {
-            for (Vector3f vertex : meshMaterialSet.mesh.getVertices()) {
+            for (Vector3f vertex : meshMaterialSet.getMesh().getVertices()) {
                 float distance = vertex.distance(Constants.VECTOR3_ZERO);
                 if (distance > maxRadius) {
                     maxRadius = distance;
@@ -121,7 +128,7 @@ public class RenderComponent extends Component {
         Vector3f max = new Vector3f(-Float.MAX_VALUE);
 
         for (MeshMaterialSet meshMaterialSet : meshMaterialSets) {
-            for (Vector3f vertex : meshMaterialSet.mesh.getVertices()) {
+            for (Vector3f vertex : meshMaterialSet.getMesh().getVertices()) {
                 min.x = Math.min(min.x, vertex.x);
                 min.y = Math.min(min.y, vertex.y);
                 min.z = Math.min(min.z, vertex.z);
@@ -151,12 +158,43 @@ public class RenderComponent extends Component {
     public void cleanUp() {
         super.cleanUp();
         meshMaterialSets.forEach(mms -> {
-            mms.mesh.cleanUp();
+            mms.getMesh().cleanUp();
         });
     }
 
     @Override
     public JsonObject serializeToJson() {
-        return JsonHelper.objectToJson(this, new String[]{"hasInitiated", "meshMaterialSets"});
+        List<String> ignoredKeys = new ArrayList<>();
+        ignoredKeys.add("hasInitiated");
+        if(meshPaths.isEmpty()) ignoredKeys.add("meshPaths");
+
+        return JsonHelper.objectToJson(this, ignoredKeys.toArray(new String[0]));
+    }
+
+    @Override
+    public IJsonSerializable deserializeFromJson(String json) {
+        JsonReader jsonReader = Json.createReader(new StringReader(json));
+        JsonObject jsonInfo = jsonReader.readObject();
+        try {
+            JsonHelper.loadVariableIntoObject(this, jsonInfo);
+        } catch (ClassNotFoundException | InvocationTargetException | NoSuchMethodException | InstantiationException |
+                 IllegalAccessException e) {
+            throw new RuntimeException(e);
+        }
+
+        if(!meshMaterialSets.isEmpty()){
+            String meshPath = meshMaterialSets.stream().findFirst().get().getMesh().getMeshPath();
+            Material mat = meshMaterialSets.stream().findFirst().get().material;
+            if(meshPath.isEmpty()) return this;
+            meshMaterialSets.clear();
+            Set<MeshMaterialSet> mms = OBJLoader.loadOBJModel(meshPath);
+            mms.forEach(meshMaterialSet -> {
+                meshMaterialSet.setRoot(getRoot());
+                meshMaterialSet.material = mat;
+            });
+            meshMaterialSets.addAll(mms);
+        }
+
+        return this;
     }
 }

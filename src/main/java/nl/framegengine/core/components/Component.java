@@ -8,6 +8,7 @@ import javax.json.Json;
 import javax.json.JsonObject;
 import javax.json.JsonReader;
 import java.io.StringReader;
+import java.lang.reflect.InvocationTargetException;
 
 public class Component implements IJsonSerializable {
     protected GameObject root = null;
@@ -51,9 +52,15 @@ public class Component implements IJsonSerializable {
     }
 
     @Override
-    public void deserializeFromJson(String json) {
+    public IJsonSerializable deserializeFromJson(String json) {
         JsonReader jsonReader = Json.createReader(new StringReader(json));
         JsonObject jsonInfo = jsonReader.readObject();
-        JsonHelper.loadVariableIntoObject(this, jsonInfo);
+        try {
+            JsonHelper.loadVariableIntoObject(this, jsonInfo, new String[]{"class"});
+        } catch (ClassNotFoundException | InvocationTargetException | NoSuchMethodException | InstantiationException |
+                 IllegalAccessException e) {
+            throw new RuntimeException(e);
+        }
+        return this;
     }
 }

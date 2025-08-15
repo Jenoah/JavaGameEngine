@@ -1,6 +1,7 @@
 package nl.framegengine.core.entity;
 
 import nl.framegengine.core.IJsonSerializable;
+import nl.framegengine.core.debugging.Debug;
 import nl.framegengine.core.loaders.TextureLoader;
 import nl.framegengine.core.utils.JsonHelper;
 
@@ -12,7 +13,7 @@ import java.io.StringReader;
 public class Texture implements IJsonSerializable {
 
     private int id;
-    private final String texturePath;
+    protected String texturePath;
     private boolean pointFilter = false;
     private boolean flipped = false;
     private boolean repeat = true;
@@ -21,6 +22,8 @@ public class Texture implements IJsonSerializable {
     public int getId() {
         return id;
     }
+
+    public Texture(){}
 
     public Texture(int id) {
         this.id = id;
@@ -62,10 +65,15 @@ public class Texture implements IJsonSerializable {
     }
 
     @Override
-    public void deserializeFromJson(String json) {
+    public IJsonSerializable deserializeFromJson(String json) {
         JsonReader jsonReader = Json.createReader(new StringReader(json));
         JsonObject jsonInfo = jsonReader.readObject();
-        JsonHelper.loadVariableIntoObject(this, jsonInfo);
-        if(!texturePath.isEmpty()) this.id = TextureLoader.loadTexture(texturePath, pointFilter, flipped, repeat, isNormalMap);
+        try {
+            JsonHelper.loadVariableIntoObject(this, jsonInfo);
+        } catch (Exception e) {
+            Debug.LogError("Error loading in data: " + e.getMessage());
+        }
+        if(texturePath != null && !texturePath.isEmpty()) this.id = TextureLoader.loadTexture(texturePath, pointFilter, flipped, repeat, isNormalMap);
+        return this;
     }
 }

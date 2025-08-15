@@ -27,6 +27,7 @@ public class Camera extends GameObject {
         setPosition(new Vector3f(0, 0, 0));
 
         updateViewFrustum();
+        callUpdate();
     }
 
     public Camera(Vector3f position, Vector3f rotation) {
@@ -38,6 +39,7 @@ public class Camera extends GameObject {
         setRotation(rotation);
 
         updateViewFrustum();
+        callUpdate();
     }
 
     public Camera(Vector3f position, Quaternionf rotation) {
@@ -49,6 +51,7 @@ public class Camera extends GameObject {
         setRotation(rotation);
 
         updateViewFrustum();
+        callUpdate();
     }
 
     public void updateViewFrustum(){

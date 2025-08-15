@@ -73,11 +73,11 @@ public class ShadowRenderer implements IRenderer{
 
             if (recordMetrics) metrics.recordDrawCall();
 
-            if(meshMaterialSet.mesh.isInstanced()){
-                GL33.glDrawElementsInstanced(GL11.GL_TRIANGLES, meshMaterialSet.mesh.getVertexCount(), GL11.GL_UNSIGNED_INT, 0, meshMaterialSet.mesh.getInstanceCount());
+            if(meshMaterialSet.getMesh().isInstanced()){
+                GL33.glDrawElementsInstanced(GL11.GL_TRIANGLES, meshMaterialSet.getMesh().getVertexCount(), GL11.GL_UNSIGNED_INT, 0, meshMaterialSet.getMesh().getInstanceCount());
             }else{
-                if(recordMetrics) metrics.recordVertexCount(meshMaterialSet.mesh.getVertexCount());
-                GL11.glDrawElements(GL11.GL_TRIANGLES, meshMaterialSet.mesh.getVertexCount(), GL11.GL_UNSIGNED_INT, 0);
+                if(recordMetrics) metrics.recordVertexCount(meshMaterialSet.getMesh().getVertexCount());
+                GL11.glDrawElements(GL11.GL_TRIANGLES, meshMaterialSet.getMesh().getVertexCount(), GL11.GL_UNSIGNED_INT, 0);
             }
 
             unbind();
@@ -90,10 +90,10 @@ public class ShadowRenderer implements IRenderer{
 
     @Override
     public void bind(MeshMaterialSet meshMaterialSet) {
-        GL30.glBindVertexArray(meshMaterialSet.mesh.getVaoID());
+        GL30.glBindVertexArray(meshMaterialSet.getMesh().getVaoID());
         if (recordMetrics) metrics.recordVaoBind();
         GL20.glEnableVertexAttribArray(0);
-        if (meshMaterialSet.mesh.isInstanced()) {
+        if (meshMaterialSet.getMesh().isInstanced()) {
             for (int i = 5; i <= 8; i++) GL20.glEnableVertexAttribArray(i);
         }
     }

@@ -1,5 +1,6 @@
 package nl.framegengine.core.entity;
 
+import nl.framegengine.core.IJsonSerializable;
 import nl.framegengine.core.ModelManager;
 import nl.framegengine.core.MouseInput;
 import nl.framegengine.core.WindowManager;
@@ -13,11 +14,17 @@ import nl.framegengine.core.lighting.PointLight;
 import nl.framegengine.core.lighting.SpotLight;
 import nl.framegengine.core.shaders.ShaderManager;
 import nl.framegengine.core.shaders.SimpleLitShader;
+import nl.framegengine.core.utils.JsonHelper;
 import org.joml.Vector3f;
 
+import javax.json.Json;
+import javax.json.JsonObject;
+import javax.json.JsonReader;
+import java.io.StringReader;
+import java.lang.reflect.InvocationTargetException;
 import java.util.*;
 
-public class Scene {
+public class Scene implements IJsonSerializable {
     private final List<GameObject> gameObjects;
     private final List<GameObject> rootGameObjects;
     private final List<GuiObject> guiObjects;
@@ -266,5 +273,23 @@ public class Scene {
 
     public void setLevelName(String levelName) {
         this.levelName = levelName;
+    }
+
+    @Override
+    public JsonObject serializeToJson() {
+        return null;
+    }
+
+    @Override
+    public IJsonSerializable deserializeFromJson(String json) {
+        JsonReader jsonReader = Json.createReader(new StringReader(json));
+        JsonObject jsonInfo = jsonReader.readObject();
+        try {
+            JsonHelper.loadVariableIntoObject(this, jsonInfo);
+        } catch (ClassNotFoundException | InvocationTargetException | NoSuchMethodException | InstantiationException |
+                 IllegalAccessException e) {
+            throw new RuntimeException(e);
+        }
+        return this;
     }
 }
