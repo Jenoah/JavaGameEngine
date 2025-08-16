@@ -39,16 +39,6 @@ public class GamePanel extends EditorPanel {
             inFocus = ImGui.isItemHovered();
         }
 
-        ImGui.setCursorPos((float) sizeX / 2 - 64, sizeY - 64 - 32);
-        if(ImGui.button("Play", 64f, 64f)){
-            startGame();
-        }
-
-        ImGui.setCursorPos((float) sizeX / 2 + 64, sizeY - 64 - 32);
-        if(ImGui.button("Stop", 64f, 64f)){
-            stopGame();
-        }
-
         ImGui.setCursorPos(8, 24);
         ImGui.text("FPS: " + EngineManager.getFps());
     }
@@ -61,7 +51,7 @@ public class GamePanel extends EditorPanel {
         }
     }
 
-    private void startGame(){
+    public void startGame(){
         if(EngineSettings.currentLevelPath.isEmpty()){
             Debug.LogError("Cannot start game. No level selected");
             return;
@@ -72,7 +62,7 @@ public class GamePanel extends EditorPanel {
         }
     }
 
-    private void stopGame(){
+    public void stopGame(){
         if(editorGameLauncher != null){
             editorGameLauncher.stop();
             editorGameLauncher = null;

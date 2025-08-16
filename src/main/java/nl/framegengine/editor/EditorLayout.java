@@ -4,7 +4,7 @@ import imgui.ImGui;
 import nl.framegengine.editor.panels.*;
 
 public class EditorLayout {
-    private final EditorPanel[] editorPanels = new EditorPanel[5];
+    private final EditorPanel[] editorPanels = new EditorPanel[6];
 
     public EditorLayout(){
         editorPanels[0] = new HierarchyPanel(0, 18, (int)(384 / EditorWindow.windowScaleX), (int)(768 / EditorWindow.windowScaleY));
@@ -12,8 +12,10 @@ public class EditorLayout {
         editorPanels[2] = new ConsolePanel((int)(528 / EditorWindow.windowScaleX), (int)(786 / EditorWindow.windowScaleY), (int)(1056 / EditorWindow.windowScaleX), (int)(294 / EditorWindow.windowScaleY));
         editorPanels[3] = new InfoPanel((int)(1584 / EditorWindow.windowScaleX), 18, (int)(336 / EditorWindow.windowScaleX), (int)(1062 / EditorWindow.windowScaleY));
         editorPanels[4] = new ProjectPanel(0, (int)(786 / EditorWindow.windowScaleY), (int)(528 / EditorWindow.windowScaleX), (int)(294 / EditorWindow.windowScaleY));
+        editorPanels[5] = new ControlPanel((int)(384 / EditorWindow.windowScaleX), (int)(693 / EditorWindow.windowScaleY), (int)(1200 / EditorWindow.windowScaleX), (int)(93 / EditorWindow.windowScaleY));
 
         ((HierarchyPanel)editorPanels[0]).setInfoPanel(((InfoPanel)editorPanels[3]));
+        ((ControlPanel)editorPanels[5]).setGamePanel((GamePanel)editorPanels[1]);
     }
 
     public void renderLayout(){
