@@ -11,21 +11,26 @@
         {
             "class": "nl.framegengine.core.entity.GameObject",
             "name": "Player",
+            "localPosition": {
+                "x": -0.3738492727279663,
+                "y": 0.0,
+                "z": 1.1382455825805664
+            },
             "guid": "playerGUID",
             "willUpdate": true,
             "components": [
                 {
                     "class": "nl.framegengine.customScripts.PlayerMovement",
                     "cameraObject": "85c78dc9-aa96-4d67-8816-dff378ae11f1",
-                    "pitch": 0.39522525668144226,
-                    "yaw": -0.13337238132953644,
+                    "pitch": 0.2773333191871643,
+                    "yaw": 0.340071439743042,
                     "root": "playerGUID"
                 },
                 {
                     "class": "nl.framegengine.customScripts.PlayerMovement",
                     "cameraObject": "85c78dc9-aa96-4d67-8816-dff378ae11f1",
-                    "pitch": 0.39522525668144226,
-                    "yaw": -0.13337238132953644,
+                    "pitch": 0.2773333191871643,
+                    "yaw": 0.340071439743042,
                     "root": "playerGUID"
                 }
             ]
@@ -40,10 +45,10 @@
                 "z": 0.0
             },
             "localRotation": {
-                "x": 0.1958926022052765,
-                "y": -0.06533990055322647,
-                "z": -0.013082730583846569,
-                "w": 0.9783586263656616
+                "x": 0.13622935116291046,
+                "y": 0.16759327054023743,
+                "z": 0.023389706388115883,
+                "w": 0.9761183261871338
             },
             "guid": "85c78dc9-aa96-4d67-8816-dff378ae11f1",
             "willUpdate": false
@@ -58,6 +63,7 @@
             },
             "radius": 1.7320507764816284,
             "guid": "123abc",
+            "willUpdate": true,
             "components": [
                 {
                     "class": "nl.framegengine.core.components.RenderComponent",
@@ -72,7 +78,13 @@
                                 "meshPath": "/models/cube.obj"
                             },
                             "material": {
-                                "class": "nl.framegengine.core.entity.Material"
+                                "class": "nl.framegengine.core.entity.Material",
+                                "albedoTexture": {
+                                    "class": "nl.framegengine.core.entity.Texture",
+                                    "id": 15,
+                                    "texturePath": "textures/grid_Kenney_prototype.png",
+                                    "flipped": true
+                                }
                             },
                             "root": "123abc"
                         }
@@ -95,12 +107,39 @@
                 "y": 6.5,
                 "z": -4.0
             },
+            "localRotation": {
+                "x": -0.18299999833106995,
+                "y": 0.18299999833106995,
+                "z": -0.25,
+                "w": 0.9330000281333923
+            },
             "guid": "a75e0e15-8fb5-4076-a16e-48bb7e6c590a",
+            "willUpdate": true,
             "components": [
                 {
                     "class": "nl.framegengine.core.components.RenderComponent",
                     "meshPaths": [
                         ""
+                    ],
+                    "meshMaterialSets": [
+                        {
+                            "class": "nl.framegengine.core.rendering.MeshMaterialSet",
+                            "mesh": {
+                                "class": "nl.framegengine.core.entity.Mesh"
+                            },
+                            "material": {
+                                "class": "nl.framegengine.core.entity.Material",
+                                "diffuseColor": {
+                                    "x": 1.0,
+                                    "y": 1.0,
+                                    "z": 0.75,
+                                    "w": 1.0
+                                },
+                                "isDoubleSided": true,
+                                "isTransparent": true
+                            },
+                            "root": "a75e0e15-8fb5-4076-a16e-48bb7e6c590a"
+                        }
                     ],
                     "root": "a75e0e15-8fb5-4076-a16e-48bb7e6c590a"
                 }
@@ -124,11 +163,32 @@
                 "z": -3.0
             },
             "guid": "e6f5799c-f960-43d5-9090-1c2579e57f3a",
+            "willUpdate": true,
             "components": [
                 {
                     "class": "nl.framegengine.core.components.RenderComponent",
                     "meshPaths": [
                         ""
+                    ],
+                    "meshMaterialSets": [
+                        {
+                            "class": "nl.framegengine.core.rendering.MeshMaterialSet",
+                            "mesh": {
+                                "class": "nl.framegengine.core.entity.Mesh"
+                            },
+                            "material": {
+                                "class": "nl.framegengine.core.entity.Material",
+                                "diffuseColor": {
+                                    "x": 0.25,
+                                    "y": 0.25,
+                                    "z": 1.0,
+                                    "w": 1.0
+                                },
+                                "isDoubleSided": true,
+                                "isTransparent": true
+                            },
+                            "root": "e6f5799c-f960-43d5-9090-1c2579e57f3a"
+                        }
                     ],
                     "root": "e6f5799c-f960-43d5-9090-1c2579e57f3a"
                 }
@@ -155,23 +215,43 @@
             },
             "localRotation": {
                 "x": 0.0,
-                "y": 0.05916224420070648,
+                "y": -0.5509822368621826,
                 "z": 0.0,
-                "w": -0.9982483983039856
+                "w": 0.8345170021057129
             },
             "guid": "120e15a1-a8ec-4d5f-a53c-16d7a02ab84a",
             "willUpdate": true,
             "components": [
                 {
-                    "class": "nl.framegengine.customScripts.RotateOnAxis",
-                    "rotationSpeed": 100.0,
-                    "root": "120e15a1-a8ec-4d5f-a53c-16d7a02ab84a"
-                },
-                {
                     "class": "nl.framegengine.core.components.RenderComponent",
                     "meshPaths": [
                         ""
                     ],
+                    "meshMaterialSets": [
+                        {
+                            "class": "nl.framegengine.core.rendering.MeshMaterialSet",
+                            "mesh": {
+                                "class": "nl.framegengine.core.entity.Mesh"
+                            },
+                            "material": {
+                                "class": "nl.framegengine.core.entity.Material",
+                                "diffuseColor": {
+                                    "x": 0.10000000149011612,
+                                    "y": 1.0,
+                                    "z": 0.10000000149011612,
+                                    "w": 1.0
+                                },
+                                "isDoubleSided": true,
+                                "isTransparent": true
+                            },
+                            "root": "120e15a1-a8ec-4d5f-a53c-16d7a02ab84a"
+                        }
+                    ],
+                    "root": "120e15a1-a8ec-4d5f-a53c-16d7a02ab84a"
+                },
+                {
+                    "class": "nl.framegengine.customScripts.RotateOnAxis",
+                    "rotationSpeed": 100.0,
                     "root": "120e15a1-a8ec-4d5f-a53c-16d7a02ab84a"
                 },
                 {
@@ -202,29 +282,282 @@
             },
             "localRotation": {
                 "x": 0.0,
-                "y": -0.7174946069717407,
+                "y": -0.14537547528743744,
                 "z": 0.0,
-                "w": 0.6965640783309937
+                "w": 0.9893766641616821
             },
             "guid": "12e9d623-62ef-48fb-a351-69b31061b95b",
             "willUpdate": true,
             "components": [
                 {
+                    "class": "nl.framegengine.customScripts.RotateOnAxis",
+                    "rotationSpeed": 25.0,
+                    "root": "12e9d623-62ef-48fb-a351-69b31061b95b"
+                },
+                {
+                    "class": "nl.framegengine.customScripts.RotateOnAxis",
+                    "rotationSpeed": 25.0,
+                    "root": "12e9d623-62ef-48fb-a351-69b31061b95b"
+                },
+                {
                     "class": "nl.framegengine.core.components.RenderComponent",
                     "meshPaths": [
                         ""
                     ],
+                    "meshMaterialSets": [
+                        {
+                            "class": "nl.framegengine.core.rendering.MeshMaterialSet",
+                            "mesh": {
+                                "class": "nl.framegengine.core.entity.Mesh"
+                            },
+                            "material": {
+                                "class": "nl.framegengine.core.entity.Material",
+                                "diffuseColor": {
+                                    "x": 1.0,
+                                    "y": 0.10000000149011612,
+                                    "z": 0.10000000149011612,
+                                    "w": 1.0
+                                },
+                                "isDoubleSided": true,
+                                "isTransparent": true
+                            },
+                            "root": "12e9d623-62ef-48fb-a351-69b31061b95b"
+                        }
+                    ],
                     "root": "12e9d623-62ef-48fb-a351-69b31061b95b"
-                },
+                }
+            ]
+        },
+        {
+            "class": "nl.framegengine.core.entity.GameObject",
+            "name": "Wall",
+            "localPosition": {
+                "x": -3.0,
+                "y": 1.0,
+                "z": -5.0
+            },
+            "scale": {
+                "x": 2.0,
+                "y": 1.0,
+                "z": 0.10000000149011612
+            },
+            "radius": 1.7320507764816284,
+            "guid": "9ef9c7eb-503c-4cc6-86f4-466ecf70d4fb",
+            "willUpdate": true,
+            "components": [
                 {
-                    "class": "nl.framegengine.customScripts.RotateOnAxis",
-                    "rotationSpeed": 25.0,
-                    "root": "12e9d623-62ef-48fb-a351-69b31061b95b"
-                },
+                    "class": "nl.framegengine.core.components.RenderComponent",
+                    "meshPaths": [
+                        "/models/cube.obj"
+                    ],
+                    "meshMaterialSets": [
+                        {
+                            "class": "nl.framegengine.core.rendering.MeshMaterialSet",
+                            "mesh": {
+                                "class": "nl.framegengine.core.entity.Mesh",
+                                "meshPath": "/models/cube.obj"
+                            },
+                            "material": {
+                                "class": "nl.framegengine.core.entity.Material",
+                                "albedoTexture": {
+                                    "class": "nl.framegengine.core.entity.Texture",
+                                    "id": 25,
+                                    "texturePath": "textures/grid_Kenney_prototype.png",
+                                    "flipped": true
+                                }
+                            },
+                            "root": "9ef9c7eb-503c-4cc6-86f4-466ecf70d4fb"
+                        }
+                    ],
+                    "root": "9ef9c7eb-503c-4cc6-86f4-466ecf70d4fb"
+                }
+            ]
+        },
+        {
+            "class": "nl.framegengine.core.entity.GameObject",
+            "name": "Wall 2",
+            "localPosition": {
+                "x": -5.0,
+                "y": 1.0,
+                "z": -3.0
+            },
+            "scale": {
+                "x": 0.10000000149011612,
+                "y": 1.0,
+                "z": 2.0
+            },
+            "radius": 1.7320507764816284,
+            "guid": "fc1e30c6-4539-464c-994d-1086f2e3a396",
+            "willUpdate": true,
+            "components": [
                 {
-                    "class": "nl.framegengine.customScripts.RotateOnAxis",
-                    "rotationSpeed": 25.0,
-                    "root": "12e9d623-62ef-48fb-a351-69b31061b95b"
+                    "class": "nl.framegengine.core.components.RenderComponent",
+                    "meshPaths": [
+                        "/models/cube.obj"
+                    ],
+                    "meshMaterialSets": [
+                        {
+                            "class": "nl.framegengine.core.rendering.MeshMaterialSet",
+                            "mesh": {
+                                "class": "nl.framegengine.core.entity.Mesh",
+                                "meshPath": "/models/cube.obj"
+                            },
+                            "material": {
+                                "class": "nl.framegengine.core.entity.Material",
+                                "albedoTexture": {
+                                    "class": "nl.framegengine.core.entity.Texture",
+                                    "id": 27,
+                                    "texturePath": "textures/grid_Kenney_prototype.png",
+                                    "flipped": true
+                                }
+                            },
+                            "root": "fc1e30c6-4539-464c-994d-1086f2e3a396"
+                        }
+                    ],
+                    "root": "fc1e30c6-4539-464c-994d-1086f2e3a396"
+                }
+            ]
+        },
+        {
+            "class": "nl.framegengine.core.entity.GameObject",
+            "name": "Wall 3",
+            "localPosition": {
+                "x": 5.0,
+                "y": 1.0,
+                "z": -3.0
+            },
+            "scale": {
+                "x": 0.10000000149011612,
+                "y": 1.0,
+                "z": 2.0
+            },
+            "radius": 1.7320507764816284,
+            "guid": "4bf912ec-1732-4936-ae8f-23343fc32506",
+            "willUpdate": true,
+            "components": [
+                {
+                    "class": "nl.framegengine.core.components.RenderComponent",
+                    "meshPaths": [
+                        "/models/cube.obj"
+                    ],
+                    "meshMaterialSets": [
+                        {
+                            "class": "nl.framegengine.core.rendering.MeshMaterialSet",
+                            "mesh": {
+                                "class": "nl.framegengine.core.entity.Mesh",
+                                "meshPath": "/models/cube.obj"
+                            },
+                            "material": {
+                                "class": "nl.framegengine.core.entity.Material",
+                                "albedoTexture": {
+                                    "class": "nl.framegengine.core.entity.Texture",
+                                    "id": 29,
+                                    "texturePath": "textures/grid_Kenney_prototype.png",
+                                    "flipped": true
+                                }
+                            },
+                            "root": "4bf912ec-1732-4936-ae8f-23343fc32506"
+                        }
+                    ],
+                    "root": "4bf912ec-1732-4936-ae8f-23343fc32506"
+                }
+            ]
+        },
+        {
+            "class": "nl.framegengine.core.entity.GameObject",
+            "name": "Wall 4",
+            "localPosition": {
+                "x": 3.0,
+                "y": 1.0,
+                "z": -5.0
+            },
+            "scale": {
+                "x": 2.0,
+                "y": 1.0,
+                "z": 0.10000000149011612
+            },
+            "radius": 1.7320507764816284,
+            "guid": "62041408-b3aa-4484-a291-caf4966791d7",
+            "willUpdate": true,
+            "components": [
+                {
+                    "class": "nl.framegengine.core.components.RenderComponent",
+                    "meshPaths": [
+                        "/models/cube.obj"
+                    ],
+                    "meshMaterialSets": [
+                        {
+                            "class": "nl.framegengine.core.rendering.MeshMaterialSet",
+                            "mesh": {
+                                "class": "nl.framegengine.core.entity.Mesh",
+                                "meshPath": "/models/cube.obj"
+                            },
+                            "material": {
+                                "class": "nl.framegengine.core.entity.Material",
+                                "albedoTexture": {
+                                    "class": "nl.framegengine.core.entity.Texture",
+                                    "id": 31,
+                                    "texturePath": "textures/grid_Kenney_prototype.png",
+                                    "flipped": true
+                                }
+                            },
+                            "root": "62041408-b3aa-4484-a291-caf4966791d7"
+                        }
+                    ],
+                    "root": "62041408-b3aa-4484-a291-caf4966791d7"
+                }
+            ]
+        },
+        {
+            "class": "nl.framegengine.core.entity.GameObject",
+            "name": "Coloured block",
+            "localPosition": {
+                "x": 2.5,
+                "y": 1.0,
+                "z": -2.5
+            },
+            "scale": {
+                "x": 0.25,
+                "y": 0.25,
+                "z": 0.25
+            },
+            "radius": 1.7320507764816284,
+            "guid": "cf9b76f2-2ea4-42de-aeb5-fa0703ee4c82",
+            "willUpdate": true,
+            "components": [
+                {
+                    "class": "nl.framegengine.core.components.RenderComponent",
+                    "meshPaths": [
+                        "/models/cube.obj"
+                    ],
+                    "meshMaterialSets": [
+                        {
+                            "class": "nl.framegengine.core.rendering.MeshMaterialSet",
+                            "mesh": {
+                                "class": "nl.framegengine.core.entity.Mesh",
+                                "meshPath": "/models/cube.obj"
+                            },
+                            "material": {
+                                "class": "nl.framegengine.core.entity.Material",
+                                "diffuseColor": {
+                                    "x": 1.0,
+                                    "y": 0.5,
+                                    "z": 0.0,
+                                    "w": 1.0
+                                },
+                                "reflectance": 0.6000000238418579,
+                                "roughness": 1.0,
+                                "roughnessMap": {
+                                    "class": "nl.framegengine.core.entity.Texture",
+                                    "id": 33,
+                                    "texturePath": "textures/grid_Kenney_prototype.png",
+                                    "flipped": true
+                                }
+                            },
+                            "root": "cf9b76f2-2ea4-42de-aeb5-fa0703ee4c82"
+                        }
+                    ],
+                    "root": "cf9b76f2-2ea4-42de-aeb5-fa0703ee4c82"
                 }
             ]
         }
