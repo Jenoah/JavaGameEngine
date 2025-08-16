@@ -182,8 +182,6 @@ public class JsonHelper {
                                     fieldTypeName = arrayItemJsonObject.getString("class");
                                 }
 
-                                Debug.Log("Field is a " + arrayItemType.getSimpleName() + " vs " + fieldTypeName);
-
                                 if(arrayItemType.isAssignableFrom(Component.class)){
                                     arrayItemInstantiatedObject = SceneManager.componentLoader.loadComponent(fieldTypeName);
                                     ((Component)arrayItemInstantiatedObject).setRoot((GameObject) object);
@@ -192,7 +190,6 @@ public class JsonHelper {
                                 }
 
                                 if (arrayItemInstantiatedObject instanceof IJsonSerializable serializable) {
-                                    Debug.Log("Deserializing " + serializable.getClass().getSimpleName());
                                     arrayItemInstantiatedObject = serializable.deserializeFromJson(arrayItemJsonObject.toString());
                                 }else{
                                     loadVariableIntoObject(arrayItemInstantiatedObject, arrayItemJsonObject, new String[0]);
@@ -203,7 +200,6 @@ public class JsonHelper {
 
                             collection.add(arrayItemInstantiatedObject);
                         }
-                        Debug.Log("The list is filled with " + collection.size() + " items");
 
                         field.set(object, collection);
 

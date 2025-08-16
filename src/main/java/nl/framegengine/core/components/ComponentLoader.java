@@ -1,5 +1,7 @@
 package nl.framegengine.core.components;
 
+import nl.framegengine.core.debugging.Debug;
+
 import javax.tools.JavaCompiler;
 import javax.tools.JavaFileObject;
 import javax.tools.StandardJavaFileManager;
@@ -45,7 +47,7 @@ public class ComponentLoader {
         }
 
         if (javaFiles.isEmpty()) {
-            System.out.println("[ComponentLoader] No .java files found.");
+            Debug.LogError("No .java files found.");
             return;
         }
 
@@ -64,7 +66,7 @@ public class ComponentLoader {
             if (!success) {
                 throw new RuntimeException("Compilation of user scripts failed.");
             } else {
-                System.out.println("[ComponentLoader] Compilation successful.");
+                Debug.Log("Compilation successful.");
             }
         }
     }

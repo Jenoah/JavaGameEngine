@@ -69,7 +69,6 @@ public class RenderComponent extends Component {
     public void addMesh(MeshMaterialSet meshMaterialSet) {
         meshMaterialSets.add(meshMaterialSet.setRoot(this.getRoot()));
         if(!meshPaths.contains(meshMaterialSet.getMesh().getMeshPath())) meshPaths.add(meshMaterialSet.getMesh().getMeshPath());
-
     }
 
     public Set<MeshMaterialSet> getMeshMaterialSets() {
@@ -81,14 +80,6 @@ public class RenderComponent extends Component {
         if (hasInitiated) return;
         super.initiate();
 
-        //TODO: MAKE JSON DESERIALIZED LOADED IN MATERIALS APPLY TO UNDERLYING
-        meshMaterialSets.clear();
-        if(!meshPaths.isEmpty()){
-            meshPaths.forEach(meshPath -> {
-                        if(!meshPath.isEmpty()) addMeshes(OBJLoader.loadOBJModel(meshPath));
-                    }
-            );
-        }
         if(meshMaterialSets.isEmpty()) return;
         calculateRadius();
         calculateAABB();
@@ -184,13 +175,16 @@ public class RenderComponent extends Component {
             throw new RuntimeException(e);
         }
 
-        /*
+        /* */
 
         if(!meshMaterialSets.isEmpty()){
             String meshPath = meshMaterialSets.stream().findFirst().get().getMesh().getMeshPath();
             Material mat = meshMaterialSets.stream().findFirst().get().material;
-            if(meshPath.isEmpty()) return this;
             meshMaterialSets.clear();
+            if(meshPath.isEmpty() || meshPath.isBlank()){
+                return this;
+            }
+
             Set<MeshMaterialSet> mms = OBJLoader.loadOBJModel(meshPath);
             mms.forEach(meshMaterialSet -> {
                 meshMaterialSet.setRoot(getRoot());
@@ -199,8 +193,7 @@ public class RenderComponent extends Component {
             meshMaterialSets.addAll(mms);
         }
 
-
-         */
+         /**/
 
         return this;
     }

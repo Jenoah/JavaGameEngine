@@ -3,6 +3,7 @@ package nl.framegengine.core.entity;
 import nl.framegengine.core.IJsonSerializable;
 import nl.framegengine.core.debugging.Debug;
 import nl.framegengine.core.shaders.Shader;
+import nl.framegengine.core.shaders.ShaderManager;
 import nl.framegengine.core.utils.Constants;
 import nl.framegengine.core.utils.JsonHelper;
 import org.joml.Math;
@@ -229,6 +230,9 @@ public class Material implements IJsonSerializable {
         } catch (Exception e) {
             Debug.LogError("Error loading in data: " + e.getMessage());
         }
+
+        if(shader == null) shader = ShaderManager.pbrShader;
+
         return this;
     }
 }

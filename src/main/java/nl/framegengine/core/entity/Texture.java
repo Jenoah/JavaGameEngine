@@ -4,11 +4,13 @@ import nl.framegengine.core.IJsonSerializable;
 import nl.framegengine.core.debugging.Debug;
 import nl.framegengine.core.loaders.TextureLoader;
 import nl.framegengine.core.utils.JsonHelper;
+import nl.framegengine.editor.EngineSettings;
 
 import javax.json.Json;
 import javax.json.JsonObject;
 import javax.json.JsonReader;
 import java.io.StringReader;
+import java.nio.file.Paths;
 
 public class Texture implements IJsonSerializable {
 
@@ -77,8 +79,11 @@ public class Texture implements IJsonSerializable {
         } catch (Exception e) {
             Debug.LogError("Error loading in data: " + e.getMessage());
         }
-        Debug.Log("Loading in texture with " + texturePath);
-        if(texturePath != null && !texturePath.isEmpty()) this.id = TextureLoader.loadTexture(texturePath, pointFilter, flipped, repeat, isNormalMap);
+
+        if(texturePath != null && !texturePath.isEmpty()){
+            texturePath = Paths.get(EngineSettings.currentProjectDirectory, texturePath).toAbsolutePath().toString();
+            this.id = TextureLoader.loadTexture(texturePath, pointFilter, flipped, repeat, isNormalMap);
+        }
         return this;
     }
 }

@@ -32,7 +32,6 @@ public class OBJLoader {
         String objName = "";
         Random rand = new Random();
         HashMap<String, Material> mtlInfo = new HashMap<>();
-        Debug.Log("Mtlfolder is " + fileName);
         String mtlFolder = Paths.get(fileName).getParent().toString() + "/";
 
         for (String line : lines) {
