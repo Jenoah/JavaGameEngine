@@ -6,6 +6,7 @@ import imgui.gl3.ImGuiImplGl3;
 import imgui.glfw.ImGuiImplGlfw;
 import org.lwjgl.BufferUtils;
 import org.lwjgl.glfw.Callbacks;
+import org.lwjgl.glfw.GLFW;
 import org.lwjgl.glfw.GLFWErrorCallback;
 import org.lwjgl.opengl.GL;
 import org.lwjgl.system.MemoryUtil;
@@ -21,11 +22,13 @@ public class EditorWindow {
 
     private String glslVersion = null;
     private long windowPtr;
-    private EditorLayout editorLayout;
+    public static EditorLayout editorLayout;
     private int gameFBOID = -1;
 
     public static int referenceWidth = 1920;
     public static int referenceHeight = 1080;
+    public static int windowWidth;
+    public static int windowHeight;
     public static float windowScaleX = 1;
     public static float windowScaleY = 1;
 
@@ -79,6 +82,11 @@ public class EditorWindow {
         int width = (int)(referenceWidth / windowScaleX);
         int height = (int)(referenceHeight / windowScaleY);
 
+        this.windowWidth = referenceWidth;
+        this.windowHeight = referenceHeight;
+
+        if(editorLayout != null) editorLayout.recalculatePanels();
+
         // Set GLFW hint to scale to monitor
         glfwWindowHint(GLFW_SCALE_TO_MONITOR, GLFW_TRUE);
 
@@ -88,6 +96,13 @@ public class EditorWindow {
         glfwMakeContextCurrent(windowPtr);
         glfwSwapInterval(1);
         glfwShowWindow(windowPtr);
+
+        GLFW.glfwSetFramebufferSizeCallback(windowPtr, (window, windowWidth, windowHeight) -> {
+            this.windowWidth = windowWidth;
+            this.windowHeight = windowHeight;
+
+            if(editorLayout != null) editorLayout.recalculatePanels();
+        });
 
         GL.createCapabilities();
     }

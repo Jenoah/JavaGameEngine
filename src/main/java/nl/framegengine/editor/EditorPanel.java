@@ -5,11 +5,11 @@ import imgui.flag.ImGuiWindowFlags;
 
 public abstract class EditorPanel {
 
-    protected final int posX;
-    protected final int posY;
-    protected final int sizeX;
-    protected final int sizeY;
-    protected final String windowName;
+    protected int posX;
+    protected int posY;
+    protected int sizeX;
+    protected int sizeY;
+    protected String windowName;
     protected int windowFlags;
     protected boolean inFocus;
 
@@ -39,5 +39,12 @@ public abstract class EditorPanel {
 
     public void addWindowFlag(int windowFlags){
         this.windowFlags = this.windowFlags | windowFlags;
+    }
+
+    public void setSizeAndPosition(int posX, int posY, int sizeX, int sizeY){
+        this.posX = posX;
+        this.posY = posY;
+        this.sizeX = sizeX;
+        this.sizeY = sizeY;
     }
 }

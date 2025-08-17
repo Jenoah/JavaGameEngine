@@ -2,6 +2,7 @@ package nl.framegengine.core;
 
 import nl.framegengine.core.debugging.Debug;
 import nl.framegengine.core.utils.Constants;
+import nl.framegengine.editor.EditorWindow;
 import org.joml.Matrix4f;
 import org.lwjgl.glfw.GLFW;
 import org.lwjgl.glfw.GLFWErrorCallback;
@@ -89,6 +90,13 @@ public class WindowManager {
             this.width = width;
             this.height = height;
             this.setResize(true);
+            if(!standalone){
+                EditorWindow.windowWidth = width;
+                EditorWindow.windowHeight = height;
+                if(EditorWindow.editorLayout != null){
+                    EditorWindow.editorLayout.recalculatePanels();
+                }
+            }
         });
 
         if(standalone) {
