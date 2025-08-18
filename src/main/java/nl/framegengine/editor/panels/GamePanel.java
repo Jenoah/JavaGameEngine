@@ -43,19 +43,14 @@ public class GamePanel extends EditorPanel {
 
             ImVec2 avail = ImGui.getContentRegionAvail();
 
-// Calculate offset to center image
             float offsetX = (avail.x - aspectWidth) / 2.0f;
             float offsetY = (avail.y - (aspectHeight - 20)) / 2.0f;
 
-// Clamp offset to minimum 0 to avoid negative positions
             offsetX = Math.max(offsetX, 0);
             offsetY = Math.max(offsetY, 0);
 
-// Set cursor position offset for rendering the image centered
             ImGui.setCursorPosX(ImGui.getCursorPosX() + offsetX);
             ImGui.setCursorPosY(ImGui.getCursorPosY() + offsetY);
-
-
 
             ImGui.image(EditorWindow.getInstance().getGameFBOID(), aspectWidth, aspectHeight - 20, 0, 1, 1, 0);
             inFocus = ImGui.isItemHovered();

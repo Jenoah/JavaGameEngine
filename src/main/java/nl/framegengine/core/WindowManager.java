@@ -87,9 +87,7 @@ public class WindowManager {
 
 
         GLFW.glfwSetFramebufferSizeCallback(window, (window, width, height) -> {
-            this.width = width;
-            this.height = height;
-            setResize(true);
+            setWindowSize(width, height);
             if(!standalone){
                 EditorWindow.windowWidth = this.width;
                 EditorWindow.windowHeight = this.height;
