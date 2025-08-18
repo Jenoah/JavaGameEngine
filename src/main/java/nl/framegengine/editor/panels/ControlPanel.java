@@ -1,9 +1,12 @@
 package nl.framegengine.editor.panels;
 
 import imgui.ImGui;
+import imgui.ImVec2;
 import imgui.flag.ImGuiWindowFlags;
 import imgui.type.ImInt;
 import nl.framegengine.editor.EditorPanel;
+import nl.framegengine.editor.ImGuiHelper;
+import org.joml.Math;
 
 public class ControlPanel extends EditorPanel {
 
@@ -20,24 +23,37 @@ public class ControlPanel extends EditorPanel {
 
     @Override
     public void renderFrame() {
-        ImGui.setCursorPos((float) sizeX / 2 - 32 - 64, 6);
-        if(ImGui.button("Play", 64f, sizeY - 12f)){
-            if(gamePanel != null) gamePanel.startGame();
-        }
+        float buttonWidth = 64f;
+        float buttonHeight = 32f; // Height for buttons
+        float comboWidth = ImGuiHelper.calculateTextWidth(aspectRatios) + 32;
+        float spacing = 20f;
 
-        ImGui.setCursorPos((float) sizeX / 2 +32, 6);
-        if(ImGui.button("Stop", 64f, sizeY - 12f)){
-            if(gamePanel != null) gamePanel.stopGame();
-        }
+        float totalWidth = buttonWidth * 2 + comboWidth + 2 * spacing;
 
-        ImGui.setCursorPos((float) sizeX / 2 + 128, sizeY / 2 - 9);
-        if(ImGui.combo("Aspect ratio", currentAspectRatio, aspectRatios)){
-            switch (currentAspectRatio.get()){
+        float startX = (sizeX - totalWidth) * 0.5f;
+        float startY = (sizeY - buttonHeight) * 0.5f;
+
+        ImGui.setCursorPos(startX, startY);
+
+        if (ImGui.button("Play", buttonWidth, buttonHeight)) {
+            if (gamePanel != null) gamePanel.startGame();
+        }
+        ImGui.sameLine(0, spacing);
+
+        if (ImGui.button("Stop", buttonWidth, buttonHeight)) {
+            if (gamePanel != null) gamePanel.stopGame();
+        }
+        ImGui.sameLine(0, spacing);
+
+        // Aspect Ratio Combo: The ImGui Java binding differs from C++ here
+        ImGui.setNextItemWidth(comboWidth);
+        if (ImGui.combo("Aspect ratio", currentAspectRatio, aspectRatios)) {
+            switch (currentAspectRatio.get()) {
                 case 0:
-                    gamePanel.setAspectRatio(16f/9f);
+                    gamePanel.setAspectRatio(16f / 9f);
                     break;
                 case 1:
-                    gamePanel.setAspectRatio(16f/10f);
+                    gamePanel.setAspectRatio(16f / 10f);
                     break;
                 default:
                     gamePanel.setAspectRatio(0);

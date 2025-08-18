@@ -4,6 +4,8 @@ import imgui.ImGui;
 import imgui.flag.ImGuiWindowFlags;
 import imgui.type.ImString;
 import nl.framegengine.core.callbacks.NameEnteredCallback;
+import nl.framegengine.core.debugging.Debug;
+import org.joml.Math;
 
 public class ImGuiHelper {
     private static boolean showNewFilePopup = false;
@@ -42,5 +44,15 @@ public class ImGuiHelper {
 
             ImGui.endPopup();
         }
+    }
+
+    public static int calculateTextWidth(String[] items){
+        float biggestWidth = 0;
+        for (String item : items) {
+            float textWidth = ImGui.calcTextSizeX(item);
+            if(textWidth > biggestWidth) biggestWidth = textWidth;
+        }
+
+        return (int) Math.ceil(biggestWidth);
     }
 }
