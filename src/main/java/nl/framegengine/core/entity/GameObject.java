@@ -366,6 +366,15 @@ public class GameObject implements IJsonSerializable {
         return component;
     }
 
+    public void removeComponent(Component component){
+        if(!this.components.contains(component)){
+            Debug.Log("GameObject does not contains component of type " + component.getClass().getSimpleName());
+            return;
+        }
+
+        this.components.remove(component);
+    }
+
     public boolean isStatic() {
         return isStatic;
     }
