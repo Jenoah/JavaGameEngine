@@ -89,10 +89,10 @@ public class WindowManager {
         GLFW.glfwSetFramebufferSizeCallback(window, (window, width, height) -> {
             this.width = width;
             this.height = height;
-            this.setResize(true);
+            setResize(true);
             if(!standalone){
-                EditorWindow.windowWidth = width;
-                EditorWindow.windowHeight = height;
+                EditorWindow.windowWidth = this.width;
+                EditorWindow.windowHeight = this.height;
                 if(EditorWindow.editorLayout != null){
                     EditorWindow.editorLayout.recalculatePanels();
                 }
@@ -226,5 +226,11 @@ public class WindowManager {
 
     public final boolean getFocus(){
         return this.isInFocus;
+    }
+
+    public void setWindowSize(int width, int height){
+        this.width = width;
+        this.height = height;
+        setResize(true);
     }
 }

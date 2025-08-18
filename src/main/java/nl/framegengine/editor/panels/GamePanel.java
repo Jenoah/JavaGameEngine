@@ -15,9 +15,14 @@ import nl.framegengine.core.debugging.Debug;
 public class GamePanel extends EditorPanel {
 
     private EditorGameLauncher editorGameLauncher;
+    private int aspectWidth = 0;
+    private int aspectHeight = 0;
+    private float aspectRatio = 1.7778f;
 
     public GamePanel(int posX, int posY, int sizeX, int sizeY) {
         super(posX, posY, sizeX, sizeY);
+        recalculateResolution();
+
         addWindowFlag(ImGuiWindowFlags.NoNavFocus);
     }
 
@@ -35,7 +40,24 @@ public class GamePanel extends EditorPanel {
         if(editorGameLauncher != null) editorGameLauncher.render();
 
         if(EditorWindow.getInstance().getGameFBOID() != -1){
-            ImGui.image(EditorWindow.getInstance().getGameFBOID(), sizeX, sizeY - 20, 0, 1, 1, 0);
+
+            ImVec2 avail = ImGui.getContentRegionAvail();
+
+// Calculate offset to center image
+            float offsetX = (avail.x - aspectWidth) / 2.0f;
+            float offsetY = (avail.y - (aspectHeight - 20)) / 2.0f;
+
+// Clamp offset to minimum 0 to avoid negative positions
+            offsetX = Math.max(offsetX, 0);
+            offsetY = Math.max(offsetY, 0);
+
+// Set cursor position offset for rendering the image centered
+            ImGui.setCursorPosX(ImGui.getCursorPosX() + offsetX);
+            ImGui.setCursorPosY(ImGui.getCursorPosY() + offsetY);
+
+
+
+            ImGui.image(EditorWindow.getInstance().getGameFBOID(), aspectWidth, aspectHeight - 20, 0, 1, 1, 0);
             inFocus = ImGui.isItemHovered();
         }
 
@@ -67,6 +89,33 @@ public class GamePanel extends EditorPanel {
             editorGameLauncher.stop();
             editorGameLauncher = null;
             EditorWindow.getInstance().resetGameFBOID();
+        }
+    }
+
+    public void setAspectRatio(float aspectRatio){
+        this.aspectRatio = aspectRatio;
+        recalculateResolution(true);
+    }
+
+    public void recalculateResolution(){
+        recalculateResolution(false);
+    }
+
+    public void recalculateResolution(boolean refreshGameInstance) {
+        if (aspectRatio <= 0) {
+            aspectWidth = sizeX;
+            aspectHeight = sizeY;
+        }else {
+            aspectWidth = Math.round(sizeY * aspectRatio);
+            aspectHeight = sizeY;
+            if (aspectWidth > sizeX) {
+                aspectWidth = sizeX;
+                aspectHeight = Math.round(sizeX / aspectRatio);
+            }
+        }
+
+        if(refreshGameInstance && WindowManager.getInstance() != null){
+            WindowManager.getInstance().setWindowSize(aspectWidth, aspectHeight);
         }
     }
 }
