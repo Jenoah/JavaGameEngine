@@ -1,3 +1,4 @@
+
 {
     "levelName": "Test level",
     "fogGradient": 10.0,
@@ -12,9 +13,9 @@
             "class": "nl.framegengine.core.entity.GameObject",
             "name": "Player",
             "localPosition": {
-                "x": -0.3738492727279663,
-                "y": 0.0,
-                "z": 1.1382455825805664
+                "x": -1.8826969861984253,
+                "y": -0.35061001777648926,
+                "z": 1.2753393650054932
             },
             "guid": "playerGUID",
             "willUpdate": true,
@@ -22,15 +23,9 @@
                 {
                     "class": "nl.framegengine.customScripts.PlayerMovement",
                     "cameraObject": "85c78dc9-aa96-4d67-8816-dff378ae11f1",
-                    "pitch": 0.2773333191871643,
-                    "yaw": 0.340071439743042,
-                    "root": "playerGUID"
-                },
-                {
-                    "class": "nl.framegengine.customScripts.PlayerMovement",
-                    "cameraObject": "85c78dc9-aa96-4d67-8816-dff378ae11f1",
-                    "pitch": 0.2773333191871643,
-                    "yaw": 0.340071439743042,
+                    "pitch": 0.21185696125030518,
+                    "yaw": 0.05461491644382477,
+                    "moveSpeed": 6.0,
                     "root": "playerGUID"
                 }
             ]
@@ -45,10 +40,10 @@
                 "z": 0.0
             },
             "localRotation": {
-                "x": 0.13622935116291046,
-                "y": 0.16759327054023743,
-                "z": 0.023389706388115883,
-                "w": 0.9761183261871338
+                "x": 0.10569106787443161,
+                "y": 0.027151020243763924,
+                "z": 0.0028868720401078463,
+                "w": 0.9940240979194641
             },
             "guid": "85c78dc9-aa96-4d67-8816-dff378ae11f1",
             "willUpdate": false
@@ -103,9 +98,9 @@
             "intensity": 1.0,
             "name": "Directional Light",
             "localPosition": {
-                "x": -2.5,
-                "y": 6.5,
-                "z": -4.0
+                "x": 0.0,
+                "y": 1.0,
+                "z": 0.0
             },
             "localRotation": {
                 "x": -0.18299999833106995,
@@ -113,6 +108,7 @@
                 "z": -0.25,
                 "w": 0.9330000281333923
             },
+            "radius": 0.7071067690849304,
             "guid": "a75e0e15-8fb5-4076-a16e-48bb7e6c590a",
             "willUpdate": true,
             "components": [
@@ -134,6 +130,12 @@
                                     "y": 1.0,
                                     "z": 0.75,
                                     "w": 1.0
+                                },
+                                "albedoTexture": {
+                                    "class": "nl.framegengine.core.entity.Texture",
+                                    "id": 34,
+                                    "texturePath": "textures/lightDirection.png",
+                                    "flipped": true
                                 },
                                 "isDoubleSided": true,
                                 "isTransparent": true
@@ -162,6 +164,7 @@
                 "y": 0.5,
                 "z": -3.0
             },
+            "radius": 0.7071067690849304,
             "guid": "e6f5799c-f960-43d5-9090-1c2579e57f3a",
             "willUpdate": true,
             "components": [
@@ -183,6 +186,11 @@
                                     "y": 0.25,
                                     "z": 1.0,
                                     "w": 1.0
+                                },
+                                "albedoTexture": {
+                                    "class": "nl.framegengine.core.entity.Texture",
+                                    "id": 35,
+                                    "texturePath": "textures/light.png"
                                 },
                                 "isDoubleSided": true,
                                 "isTransparent": true
@@ -215,10 +223,11 @@
             },
             "localRotation": {
                 "x": 0.0,
-                "y": -0.5509822368621826,
+                "y": -0.42653384804725647,
                 "z": 0.0,
-                "w": 0.8345170021057129
+                "w": -0.9044716358184814
             },
+            "radius": 0.7071067690849304,
             "guid": "120e15a1-a8ec-4d5f-a53c-16d7a02ab84a",
             "willUpdate": true,
             "components": [
@@ -240,6 +249,12 @@
                                     "y": 1.0,
                                     "z": 0.10000000149011612,
                                     "w": 1.0
+                                },
+                                "albedoTexture": {
+                                    "class": "nl.framegengine.core.entity.Texture",
+                                    "id": 36,
+                                    "texturePath": "textures/lightDirection.png",
+                                    "flipped": true
                                 },
                                 "isDoubleSided": true,
                                 "isTransparent": true
@@ -282,23 +297,14 @@
             },
             "localRotation": {
                 "x": 0.0,
-                "y": -0.14537547528743744,
+                "y": -0.6250854730606079,
                 "z": 0.0,
-                "w": 0.9893766641616821
+                "w": 0.7805563807487488
             },
+            "radius": 0.7071067690849304,
             "guid": "12e9d623-62ef-48fb-a351-69b31061b95b",
             "willUpdate": true,
             "components": [
-                {
-                    "class": "nl.framegengine.customScripts.RotateOnAxis",
-                    "rotationSpeed": 25.0,
-                    "root": "12e9d623-62ef-48fb-a351-69b31061b95b"
-                },
-                {
-                    "class": "nl.framegengine.customScripts.RotateOnAxis",
-                    "rotationSpeed": 25.0,
-                    "root": "12e9d623-62ef-48fb-a351-69b31061b95b"
-                },
                 {
                     "class": "nl.framegengine.core.components.RenderComponent",
                     "meshPaths": [
@@ -318,12 +324,28 @@
                                     "z": 0.10000000149011612,
                                     "w": 1.0
                                 },
+                                "albedoTexture": {
+                                    "class": "nl.framegengine.core.entity.Texture",
+                                    "id": 37,
+                                    "texturePath": "textures/lightDirection.png",
+                                    "flipped": true
+                                },
                                 "isDoubleSided": true,
                                 "isTransparent": true
                             },
                             "root": "12e9d623-62ef-48fb-a351-69b31061b95b"
                         }
                     ],
+                    "root": "12e9d623-62ef-48fb-a351-69b31061b95b"
+                },
+                {
+                    "class": "nl.framegengine.customScripts.RotateOnAxis",
+                    "rotationSpeed": 25.0,
+                    "root": "12e9d623-62ef-48fb-a351-69b31061b95b"
+                },
+                {
+                    "class": "nl.framegengine.customScripts.RotateOnAxis",
+                    "rotationSpeed": 25.0,
                     "root": "12e9d623-62ef-48fb-a351-69b31061b95b"
                 }
             ]
@@ -557,6 +579,11 @@
                             "root": "cf9b76f2-2ea4-42de-aeb5-fa0703ee4c82"
                         }
                     ],
+                    "root": "cf9b76f2-2ea4-42de-aeb5-fa0703ee4c82"
+                },
+                {
+                    "class": "nl.framegengine.customScripts.MoveWithArrows",
+                    "moveSpeed": 3.0,
                     "root": "cf9b76f2-2ea4-42de-aeb5-fa0703ee4c82"
                 }
             ]
