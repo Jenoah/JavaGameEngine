@@ -53,7 +53,9 @@ public class SceneManager {
         scene.deserializeFromJson(sceneInfo.toString());
 
         scene.getGameObjects().forEach(go -> {
-            go.getComponents().forEach(Component::initiate);
+            for (Component component : go.components.stream().toList()) {
+                component.initiate();
+            }
             if(go instanceof Light light) tryAddLight(light, scene);
             go.callUpdate();
         });

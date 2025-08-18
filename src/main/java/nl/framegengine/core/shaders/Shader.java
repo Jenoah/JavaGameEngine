@@ -2,7 +2,6 @@ package nl.framegengine.core.shaders;
 
 import nl.framegengine.core.entity.Camera;
 import nl.framegengine.core.WindowManager;
-import nl.framegengine.core.debugging.Debug;
 import nl.framegengine.core.entity.Material;
 import nl.framegengine.core.rendering.MeshMaterialSet;
 import nl.framegengine.core.utils.FileHelper;
@@ -39,8 +38,6 @@ public class Shader {
         if(vertexShaderID == 0 || fragmentShaderID == 0){
             throw new Exception("Shaders not initialized");
         }
-
-        Debug.Log("Initializing " + getClass().getSimpleName());
         createRequiredUniforms();
     }
 

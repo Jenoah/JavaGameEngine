@@ -80,7 +80,10 @@ public class RenderComponent extends Component {
         if (hasInitiated) return;
         super.initiate();
 
-        if(meshMaterialSets.isEmpty()) return;
+        if(meshMaterialSets.isEmpty()){
+            root.removeComponent(this);
+            return;
+        }
         calculateRadius();
         calculateAABB();
         queueRender();

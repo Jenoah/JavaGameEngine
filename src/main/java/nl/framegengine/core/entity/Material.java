@@ -232,7 +232,6 @@ public class Material implements IJsonSerializable {
         }
 
         if(shader == null) shader = ShaderManager.pbrShader;
-
         return this;
     }
 }
