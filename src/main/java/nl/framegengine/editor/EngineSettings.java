@@ -4,14 +4,20 @@ import nl.framegengine.core.debugging.Debug;
 import nl.framegengine.core.entity.SceneManager;
 import nl.framegengine.core.utils.FileHelper;
 import nl.framegengine.core.utils.JsonHelper;
+import org.apache.commons.io.filefilter.FileFilterUtils;
+import org.apache.commons.io.filefilter.IOFileFilter;
+import org.apache.commons.io.monitor.FileAlterationListener;
+import org.apache.commons.io.monitor.FileAlterationListenerAdaptor;
+import org.apache.commons.io.monitor.FileAlterationMonitor;
+import org.apache.commons.io.monitor.FileAlterationObserver;
 
 import javax.json.*;
 import javax.json.stream.JsonGenerator;
 import java.io.File;
+import java.io.IOException;
 import java.io.StringReader;
 import java.io.StringWriter;
-import java.nio.file.Path;
-import java.nio.file.Paths;
+import java.nio.file.*;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -48,8 +54,30 @@ public class EngineSettings {
         currentProjectName = FileHelper.getDirectoryName(currentProjectDirectory);
         saveEngineConfig();
         updateManifest();
+        registerManifestListener();
 
         Debug.Log("Project settings successfully loaded in");
+    }
+
+    private static void registerManifestListener(){
+        try {
+            String filteredManifestFileName = FileHelper.getFileName(manifestFileName) + "." + FileHelper.getExtension(manifestFileName);
+            IOFileFilter excludeManifestFilter = FileFilterUtils.notFileFilter(FileFilterUtils.nameFileFilter(filteredManifestFileName));
+            FileAlterationObserver observer = FileAlterationObserver.builder()
+                    .setFile(new File(currentProjectDirectory))
+                    .setFileFilter(excludeManifestFilter)
+                    .get();
+
+            FileAlterationMonitor monitor = new FileAlterationMonitor(1000);
+            FileAlterationListener listener = new ManifestFileListener();
+
+            observer.addListener(listener);
+            monitor.addObserver(observer);
+            monitor.start();
+
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
 
     public static void createNewProject(){
@@ -120,18 +148,18 @@ public class EngineSettings {
         JsonArrayBuilder scriptArray = Json.createArrayBuilder();
         JsonArrayBuilder levelArray = Json.createArrayBuilder();
 
-        File[] filesInProject = FileHelper.listDirectoryAndFiles(currentProjectDirectory);
+        File[] filesInProject = FileHelper.findFilesInDirectory(new File(currentProjectDirectory)).toArray(File[]::new);
 
-        //TODO: Make filesInProject recursively look though folders too. It stays in root dir ATM.
         for (File file : filesInProject) {
             manifestFileType fileType = fileToManifestFileType(file);
             if(!file.exists()) continue;
             String fileGUID = "" + java.util.UUID.randomUUID();
+            String relativePath = Paths.get(currentProjectDirectory).relativize(file.toPath()).toString();
+
             JsonObjectBuilder fileInfo = Json.createObjectBuilder();
             fileInfo.add("guid", fileGUID);
-            fileInfo.add("path", file.getPath());
-
-            Debug.Log("Writing " + fileGUID + " for " + file.getPath());
+            fileInfo.add("path", relativePath);
+            fileInfo.add("filename", FileHelper.getFileName(file.getPath()));
 
             switch (fileType){
                 case TEXTURE -> textureArray.add(fileInfo.build());
@@ -173,10 +201,49 @@ public class EngineSettings {
                 return manifestFileType.TEXTURE;
             case "lvl":
                 return manifestFileType.LEVEL;
-            case ".java":
+            case "java":
                 return manifestFileType.SCRIPT;
             case null, default:
                 return manifestFileType.NULL;
         }
     }
+
+    private static class ManifestFileListener implements FileAlterationListener {
+        @Override
+        public void onFileCreate(File file) {
+            updateManifest();
+        }
+
+        @Override
+        public void onDirectoryChange(File file) {
+
+        }
+
+        @Override
+        public void onDirectoryCreate(File file) {
+
+        }
+
+        @Override
+        public void onDirectoryDelete(File file) {
+
+        }
+
+        @Override
+        public void onFileChange(File file) {
+            updateManifest();
+        }
+
+        @Override
+        public void onFileDelete(File file) {
+            updateManifest();
+        }
+
+        @Override
+        public void onStart(FileAlterationObserver fileAlterationObserver) {}
+
+        @Override
+        public void onStop(FileAlterationObserver observer) {}
+    }
+
 }

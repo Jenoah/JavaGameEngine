@@ -65,6 +65,21 @@ public class FileHelper {
         return javaFiles;
     }
 
+    public static List<File> findFilesInDirectory(File rootDir) {
+        List<File> files = new ArrayList<>();
+        File[] directoryFiles = rootDir.listFiles();
+        if (directoryFiles != null) {
+            for (File file : directoryFiles) {
+                if (file.isDirectory()) {
+                    files.addAll(findFilesInDirectory(file));
+                } else {
+                    files.add(file);
+                }
+            }
+        }
+        return files;
+    }
+
     public static File[] listDirectoryAndFiles(String dir) {
         try {
             return new File(dir).listFiles();

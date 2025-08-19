@@ -53,6 +53,9 @@ dependencies {
     implementation "io.github.spair:imgui-java-natives-windows:$imguiVersion"
     implementation "io.github.spair:imgui-java-natives-macos:$imguiVersion"
     implementation "io.github.spair:imgui-java-natives-linux:$imguiVersion"
+
+    //Apache IO
+    implementation "commons-io:commons-io:2.20.0"
 }
 
 test {
