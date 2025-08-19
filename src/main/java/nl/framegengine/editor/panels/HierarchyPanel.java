@@ -7,15 +7,18 @@ import imgui.flag.ImGuiCol;
 import imgui.flag.ImGuiMouseButton;
 import imgui.flag.ImGuiStyleVar;
 import nl.framegengine.core.components.RenderComponent;
+import nl.framegengine.core.debugging.Debug;
 import nl.framegengine.core.entity.Camera;
 import nl.framegengine.core.lighting.DirectionalLight;
 import nl.framegengine.core.lighting.PointLight;
 import nl.framegengine.core.lighting.SpotLight;
 import nl.framegengine.core.loaders.OBJLoader.OBJLoader;
 import nl.framegengine.core.rendering.MeshMaterialSet;
+import nl.framegengine.core.utils.FileHelper;
 import nl.framegengine.editor.EditorPanel;
 import nl.framegengine.core.entity.GameObject;
 import nl.framegengine.core.entity.SceneManager;
+import nl.framegengine.editor.ImGuiHelper;
 import org.joml.Vector3f;
 
 import java.util.List;
@@ -145,6 +148,12 @@ public class HierarchyPanel extends EditorPanel {
                     currentlySelectedGameObject.remove();
                     currentlySelectedGameObject = null;
                     infoPanel.setCurrentlySelectedObject(null);
+                }
+            }
+            if (ImGui.menuItem("Rename")) {
+                if(SceneManager.currentScene != null){
+                    ImGuiHelper.setInputFieldModal(name -> currentlySelectedGameObject.setName(name));
+                    ImGui.closeCurrentPopup();
                 }
             }
             ImGui.endPopup();

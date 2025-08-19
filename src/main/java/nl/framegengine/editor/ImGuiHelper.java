@@ -30,7 +30,7 @@ public class ImGuiHelper {
 
             if (ImGui.button("OK", 100, 0)) {
                 String name = newNameBuffer.get().trim();
-                if (!name.isEmpty() && nameEnteredCallback != null) {
+                if (!name.isBlank() && nameEnteredCallback != null) {
                     nameEnteredCallback.onNameEntered(name);
                 }
                 ImGui.closeCurrentPopup();
