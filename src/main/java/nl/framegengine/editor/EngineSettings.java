@@ -5,17 +5,22 @@ import nl.framegengine.core.entity.SceneManager;
 import nl.framegengine.core.utils.FileHelper;
 import nl.framegengine.core.utils.JsonHelper;
 
-import javax.json.Json;
-import javax.json.JsonObject;
-import javax.json.JsonObjectBuilder;
+import javax.json.*;
+import javax.json.stream.JsonGenerator;
 import java.io.File;
 import java.io.StringReader;
+import java.io.StringWriter;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.HashMap;
+import java.util.Map;
 
 public class EngineSettings {
     public static String currentProjectDirectory = "";
     public static String currentLevelPath = "";
     public static String currentProjectName = "Unknown project";
 
+    private static final String manifestFileName = "/.fgmanifest";
     private static final String settingsFileName = "/.fgsettings";
 
     public static void saveSettings(){
@@ -42,6 +47,7 @@ public class EngineSettings {
         if (JsonHelper.hasJsonKey(projectInfo, "currentLevelPath")) currentLevelPath = projectInfo.getString("currentLevelPath");
         currentProjectName = FileHelper.getDirectoryName(currentProjectDirectory);
         saveEngineConfig();
+        updateManifest();
 
         Debug.Log("Project settings successfully loaded in");
     }
@@ -106,5 +112,71 @@ public class EngineSettings {
 
         currentProjectDirectory = projectInfo.getString("currentProjectDirectory");
         currentProjectName = FileHelper.getDirectoryName(currentProjectDirectory);
+    }
+
+    public static void updateManifest(){
+        JsonObjectBuilder jsonManifestContent = Json.createObjectBuilder();
+        JsonArrayBuilder textureArray = Json.createArrayBuilder();
+        JsonArrayBuilder scriptArray = Json.createArrayBuilder();
+        JsonArrayBuilder levelArray = Json.createArrayBuilder();
+
+        File[] filesInProject = FileHelper.listDirectoryAndFiles(currentProjectDirectory);
+
+        //TODO: Make filesInProject recursively look though folders too. It stays in root dir ATM.
+        for (File file : filesInProject) {
+            manifestFileType fileType = fileToManifestFileType(file);
+            if(!file.exists()) continue;
+            String fileGUID = "" + java.util.UUID.randomUUID();
+            JsonObjectBuilder fileInfo = Json.createObjectBuilder();
+            fileInfo.add("guid", fileGUID);
+            fileInfo.add("path", file.getPath());
+
+            Debug.Log("Writing " + fileGUID + " for " + file.getPath());
+
+            switch (fileType){
+                case TEXTURE -> textureArray.add(fileInfo.build());
+                case SCRIPT -> scriptArray.add(fileInfo.build());
+                case LEVEL -> levelArray.add(fileInfo.build());
+            }
+        }
+        jsonManifestContent.add("textures", textureArray.build());
+        jsonManifestContent.add("scripts", scriptArray.build());
+        jsonManifestContent.add("levels", levelArray.build());
+
+        Map<String, Boolean> config = new HashMap<>();
+        config.put(JsonGenerator.PRETTY_PRINTING, true);
+        JsonWriterFactory jsonWriterFactory = Json.createWriterFactory(config);
+
+        StringWriter stringWriter = new StringWriter();
+        JsonWriter jsonWriter = jsonWriterFactory.createWriter(stringWriter);
+        jsonWriter.write(jsonManifestContent.build());
+
+        FileHelper.writeToFile(stringWriter.toString(), getManifestPath());
+    }
+
+    public static String getManifestPath(){
+        return Paths.get(currentProjectDirectory, manifestFileName).toString();
+    }
+
+    enum manifestFileType{
+        TEXTURE,
+        SCRIPT,
+        LEVEL,
+        NULL
+    }
+
+    private static manifestFileType fileToManifestFileType(File file){
+        String extension = FileHelper.getExtension(file.getPath());
+
+        switch (extension){
+            case "jpg", "png", "gif", "tiff":
+                return manifestFileType.TEXTURE;
+            case "lvl":
+                return manifestFileType.LEVEL;
+            case ".java":
+                return manifestFileType.SCRIPT;
+            case null, default:
+                return manifestFileType.NULL;
+        }
     }
 }
