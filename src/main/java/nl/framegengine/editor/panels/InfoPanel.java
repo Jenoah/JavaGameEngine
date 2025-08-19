@@ -60,6 +60,8 @@ public class InfoPanel extends EditorPanel {
     public void setCurrentlySelectedObject(GameObject gameObject){
         currentlySelectedObject = gameObject;
         hierarchyObjects.clear();
+
+        if(currentlySelectedObject == null) return;
         try {
             hierarchyObjects.add(ClassHelper.getFieldFromObject("localPosition", currentlySelectedObject.getClass()));
             hierarchyObjects.add(ClassHelper.getFieldFromObject("localRotation", currentlySelectedObject.getClass()));

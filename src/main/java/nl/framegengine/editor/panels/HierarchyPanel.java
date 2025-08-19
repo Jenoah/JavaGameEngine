@@ -36,6 +36,7 @@ public class HierarchyPanel extends EditorPanel {
     private List<GameObject> hierarchyObjects;
 
     private final String contextMenuStrID = "hierarchyContextMenuID";
+    private final String contextObjectMenuStrID = "hierarchyObjectContextMenuID";
 
     public HierarchyPanel(int posX, int posY, int sizeX, int sizeY) {
         super(posX, posY, sizeX, sizeY);
@@ -48,7 +49,7 @@ public class HierarchyPanel extends EditorPanel {
 
         frameCount++;
         if(SceneManager.getInstance() == null || SceneManager.getInstance().getCurrentScene() == null) return;
-        if(frameCount > 30){
+        if(frameCount > 60){
             hierarchyObjects = SceneManager.getInstance().getCurrentScene().getRootGameObjects();
             frameCount = 0;
         }
@@ -108,6 +109,11 @@ public class HierarchyPanel extends EditorPanel {
         });
         ImGui.popStyleColor(2);
         ImGui.popStyleVar();
+
+        if(ImGui.isWindowHovered() && !ImGui.isAnyItemHovered() && ImGui.isMouseReleased(ImGuiMouseButton.Left)){
+            infoPanel.setCurrentlySelectedObject(null);
+            currentlySelectedGameObject = null;
+        }
     }
 
     public void setInfoPanel(InfoPanel infoPanel){
@@ -115,13 +121,36 @@ public class HierarchyPanel extends EditorPanel {
     }
 
     private void showContextMenu(){
-
         if(SceneManager.getInstance() == null || SceneManager.getInstance().getCurrentScene() == null) return;
 
         if(ImGui.isWindowHovered() && ImGui.isMouseReleased(ImGuiMouseButton.Right)){
-            ImGui.openPopup(contextMenuStrID);
+            if(currentlySelectedGameObject != null){
+                ImGui.openPopup(contextObjectMenuStrID);
+            }else {
+                ImGui.openPopup(contextMenuStrID);
+            }
         }
 
+        showContextMenuEmpty();
+        showContextMenuObject();
+    }
+
+    private void showContextMenuObject(){
+        if (ImGui.beginPopupContextItem(contextObjectMenuStrID)) {
+            ImGui.text("-- Object settings --");
+            if (ImGui.menuItem("Cube")) {
+                if(SceneManager.getInstance() != null && SceneManager.getInstance().getCurrentScene() != null){
+                    GameObject cubeObject = new GameObject("Cube");
+                    Set<MeshMaterialSet> meshMaterialSets = OBJLoader.loadOBJModel("/models/cube.obj");
+                    cubeObject.addComponent(new RenderComponent(meshMaterialSets));
+                    SceneManager.getInstance().getCurrentScene().addEntity(cubeObject);
+                }
+            }
+            ImGui.endPopup();
+        }
+    }
+
+    private void showContextMenuEmpty(){
         if (ImGui.beginPopupContextItem(contextMenuStrID)) {
             ImGui.text("-- Add new --");
             if (ImGui.beginMenu("Shape")) {
