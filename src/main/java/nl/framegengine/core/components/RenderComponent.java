@@ -1,7 +1,6 @@
 package nl.framegengine.core.components;
 
 import nl.framegengine.core.IJsonSerializable;
-import nl.framegengine.core.debugging.Debug;
 import nl.framegengine.core.entity.GameObject;
 import nl.framegengine.core.entity.Material;
 import nl.framegengine.core.entity.Mesh;
@@ -160,9 +159,7 @@ public class RenderComponent extends Component {
     @Override
     public void cleanUp() {
         super.cleanUp();
-        meshMaterialSets.forEach(mms -> {
-            mms.getMesh().cleanUp();
-        });
+        meshMaterialSets.forEach(mms -> mms.getMesh().cleanUp());
     }
 
     @Override

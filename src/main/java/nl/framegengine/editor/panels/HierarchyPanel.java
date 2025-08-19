@@ -60,22 +60,23 @@ public class HierarchyPanel extends EditorPanel {
         ImGui.pushStyleColor(ImGuiCol.ButtonHovered, hoverButtonBackgroundColor);
         ImGui.pushStyleVar(ImGuiStyleVar.ButtonTextAlign, 0f, 0.5f);
         hierarchyObjects.forEach(go -> {
+            String goLabel = go.getName() + "##" + go.getGuid();
             if(go.getParent() == null) {
                 if(currentlySelectedGameObject == go){
                     ImGui.pushStyleColor(ImGuiCol.Text, selectedButtonTextColor);
-                    if(ImGui.button(go.getName(), buttonSize)){
+                    if(ImGui.button(goLabel, buttonSize)){
                         infoPanel.setCurrentlySelectedObject(go);
                         currentlySelectedGameObject = go;
                     }
                 }else if(!go.isEnabled()){
                     ImGui.pushStyleColor(ImGuiCol.Text, inactiveButtonTextColor);
-                    if(ImGui.button(go.getName(), buttonSize)){
+                    if(ImGui.button(goLabel, buttonSize)){
                         infoPanel.setCurrentlySelectedObject(go);
                         currentlySelectedGameObject = go;
                     }
                 }else{
                     ImGui.pushStyleColor(ImGuiCol.Text, activeButtonTextColor);
-                    if(ImGui.button(go.getName(), buttonSize)){
+                    if(ImGui.button(goLabel, buttonSize)){
                         infoPanel.setCurrentlySelectedObject(go);
                         currentlySelectedGameObject = go;
                     }
@@ -84,21 +85,22 @@ public class HierarchyPanel extends EditorPanel {
                 ImGui.popStyleColor();
 
                 go.getChildren().forEach(child -> {
+                    String childLabel = child.getName() + "##" + child.getGuid();
                     if(currentlySelectedGameObject == child){
                         ImGui.pushStyleColor(ImGuiCol.Text, selectedButtonTextColor);
-                        if(ImGui.button("- " + child.getName(), buttonSize)){
+                        if(ImGui.button("- " + childLabel, buttonSize)){
                             infoPanel.setCurrentlySelectedObject(child);
                             currentlySelectedGameObject = child;
                         }
                     }else if(!child.isEnabled()){
                         ImGui.pushStyleColor(ImGuiCol.Text, inactiveButtonTextColor);
-                        if(ImGui.button("- " + child.getName(), buttonSize)){
+                        if(ImGui.button("- " + childLabel, buttonSize)){
                             infoPanel.setCurrentlySelectedObject(child);
                             currentlySelectedGameObject = child;
                         }
                     }else{
                         ImGui.pushStyleColor(ImGuiCol.Text, activeButtonTextColor);
-                        if(ImGui.button("- " + child.getName(), buttonSize)){
+                        if(ImGui.button("- " + childLabel, buttonSize)){
                             infoPanel.setCurrentlySelectedObject(child);
                             currentlySelectedGameObject = child;
                         }

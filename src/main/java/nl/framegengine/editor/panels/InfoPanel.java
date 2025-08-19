@@ -141,7 +141,7 @@ public class InfoPanel extends EditorPanel {
                         AtomicInteger idx = new AtomicInteger();
                         idx.set(1);
                         set.forEach(setItem -> {
-                            if(ImGui.collapsingHeader(setItem.getClass().getSimpleName() + " " + String.valueOf(idx.getAndIncrement()))) {
+                            if(ImGui.collapsingHeader(setItem.getClass().getSimpleName() + "##" + idx + currentlySelectedObject.getGuid())) {
                                 drawObject(setItem);
                             }
                         });
