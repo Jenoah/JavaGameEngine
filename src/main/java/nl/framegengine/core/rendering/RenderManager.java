@@ -167,6 +167,7 @@ public class RenderManager {
 
     public void dequeueRender(RenderComponent renderComponent){
         componentRenderer.dequeue(renderComponent);
+        shadowRenderer.dequeue(renderComponent);
     }
 
     public void setRenderCamera(Camera renderCamera){

@@ -138,12 +138,11 @@ public class HierarchyPanel extends EditorPanel {
     private void showContextMenuObject(){
         if (ImGui.beginPopupContextItem(contextObjectMenuStrID)) {
             ImGui.text("-- Object settings --");
-            if (ImGui.menuItem("Cube")) {
-                if(SceneManager.getInstance() != null && SceneManager.getInstance().getCurrentScene() != null){
-                    GameObject cubeObject = new GameObject("Cube");
-                    Set<MeshMaterialSet> meshMaterialSets = OBJLoader.loadOBJModel("/models/cube.obj");
-                    cubeObject.addComponent(new RenderComponent(meshMaterialSets));
-                    SceneManager.getInstance().getCurrentScene().addEntity(cubeObject);
+            if (ImGui.menuItem("Remove")) {
+                if(SceneManager.currentScene != null){
+                    currentlySelectedGameObject.remove();
+                    currentlySelectedGameObject = null;
+                    infoPanel.setCurrentlySelectedObject(null);
                 }
             }
             ImGui.endPopup();
@@ -155,11 +154,11 @@ public class HierarchyPanel extends EditorPanel {
             ImGui.text("-- Add new --");
             if (ImGui.beginMenu("Shape")) {
                 if (ImGui.menuItem("Cube")) {
-                    if(SceneManager.getInstance() != null && SceneManager.getInstance().getCurrentScene() != null){
+                    if(SceneManager.currentScene != null){
                         GameObject cubeObject = new GameObject("Cube");
                         Set<MeshMaterialSet> meshMaterialSets = OBJLoader.loadOBJModel("/models/cube.obj");
                         cubeObject.addComponent(new RenderComponent(meshMaterialSets));
-                        SceneManager.getInstance().getCurrentScene().addEntity(cubeObject);
+                        SceneManager.currentScene.addEntity(cubeObject);
                     }
                     ImGui.closeCurrentPopup();
                 }
@@ -168,7 +167,7 @@ public class HierarchyPanel extends EditorPanel {
                         GameObject sphereObject = new GameObject("Sphere");
                         Set<MeshMaterialSet> meshMaterialSets = OBJLoader.loadOBJModel("/models/sphere.obj");
                         sphereObject.addComponent(new RenderComponent(meshMaterialSets));
-                        SceneManager.getInstance().getCurrentScene().addEntity(sphereObject);
+                        SceneManager.currentScene.addEntity(sphereObject);
                     }
                     ImGui.closeCurrentPopup();
                 }
@@ -177,7 +176,7 @@ public class HierarchyPanel extends EditorPanel {
             if (ImGui.beginMenu("Built-in")) {
                 if (ImGui.menuItem("Camera")) {
                     Camera cameraObject = new Camera();
-                    SceneManager.getInstance().getCurrentScene().addEntity(cameraObject);
+                    SceneManager.currentScene.addEntity(cameraObject);
                     ImGui.closeCurrentPopup();
                 }
                 if (ImGui.beginMenu("Light")) {
@@ -186,27 +185,27 @@ public class HierarchyPanel extends EditorPanel {
                         directionalLight.setName("Directional light");
                         directionalLight.setPosition(0, 1, 0);
                         directionalLight.showProxy();
-                        SceneManager.getInstance().getCurrentScene().setDirectionalLight(directionalLight);
-                        SceneManager.getInstance().getCurrentScene().addEntity(directionalLight);
-                        SceneManager.getInstance().getCurrentScene().updateLights();
+                        SceneManager.currentScene.setDirectionalLight(directionalLight);
+                        SceneManager.currentScene.addEntity(directionalLight);
+                        SceneManager.currentScene.updateLights();
                         ImGui.closeCurrentPopup();
                     }
                     if (ImGui.menuItem("Point light")) {
                         PointLight pointLight = new PointLight(new Vector3f(1, 1, 0), new Vector3f(0f, 1f, 0f), 5, 15);
                         pointLight.setName("Point light");
                         pointLight.showProxy();
-                        SceneManager.getInstance().getCurrentScene().addPointLight(pointLight);
-                        SceneManager.getInstance().getCurrentScene().addEntity(pointLight);
-                        SceneManager.getInstance().getCurrentScene().updateLights();
+                        SceneManager.currentScene.addPointLight(pointLight);
+                        SceneManager.currentScene.addEntity(pointLight);
+                        SceneManager.currentScene.updateLights();
                         ImGui.closeCurrentPopup();
                     }
                     if (ImGui.menuItem("Spot light")) {
                         SpotLight spotLight = new SpotLight(new Vector3f(1, 1, 0), new Vector3f(0f, 1f, 0f), 3f, 10f, 0.8660254f, 0.81915206f);
                         spotLight.setName("Spot light");
                         spotLight.showProxy();
-                        SceneManager.getInstance().getCurrentScene().addSpotLight(spotLight);
-                        SceneManager.getInstance().getCurrentScene().addEntity(spotLight);
-                        SceneManager.getInstance().getCurrentScene().updateLights();
+                        SceneManager.currentScene.addSpotLight(spotLight);
+                        SceneManager.currentScene.addEntity(spotLight);
+                        SceneManager.currentScene.updateLights();
                         ImGui.closeCurrentPopup();
                     }
                     ImGui.endMenu();

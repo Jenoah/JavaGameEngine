@@ -142,7 +142,15 @@ public class ComponentRenderer implements IRenderer {
     }
 
     public void dequeue(RenderComponent renderComponent) {
-        //TODO: Make dequeue function for render component
+        renderComponent.getMeshMaterialSets().forEach(meshMaterialSet -> {
+            if(meshMaterialSet.material.isTransparent()){
+                sortedTransparentRenderObjects.get(meshMaterialSet.material.getShader()).remove(meshMaterialSet);
+            }else{
+                sortedRenderObjects.get(meshMaterialSet.material.getShader()).remove(meshMaterialSet);
+            }
+        });
+
+        renderObjects.remove(renderComponent);
     }
 
     public void setShadowSpaceMatrix(Matrix4f shadowSpaceMatrix){

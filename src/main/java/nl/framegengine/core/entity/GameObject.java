@@ -37,6 +37,7 @@ public class GameObject implements IJsonSerializable {
     private GameObject parent;
 
     protected boolean willUpdate = false;
+    private boolean isRemoving = false;
 
     protected final Set<Component> components = new HashSet<>();
 
@@ -372,6 +373,8 @@ public class GameObject implements IJsonSerializable {
             return;
         }
 
+        component.disable();
+        component.cleanUp();
         this.components.remove(component);
     }
 
@@ -458,6 +461,20 @@ public class GameObject implements IJsonSerializable {
 
     public static GameObject getByGUID(String guid){
         return instancedObjects.get(guid);
+    }
+
+    public void remove(){
+        if(isRemoving) return;
+        isRemoving = true;
+
+        for (Component component : components.stream().toList()) {
+            removeComponent(component);
+        }
+        GameObject.instancedObjects.remove(guid);
+        if(SceneManager.currentScene != null){
+            SceneManager.currentScene.removeFromRoot(this);
+            SceneManager.currentScene.removeGameObject(this);
+        }
     }
 
     @Override

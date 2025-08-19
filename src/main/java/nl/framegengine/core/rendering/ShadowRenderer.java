@@ -62,7 +62,7 @@ public class ShadowRenderer implements IRenderer{
 
 
         shadowSets.forEach((meshMaterialSet) -> {
-            if (!meshMaterialSet.getRoot().isEnabled()) return;
+            if (!meshMaterialSet.getRoot().isEnabled() || !meshMaterialSet.material.castShadow()) return;
             if (recordMetrics) {
                 metrics.recordStateChange();
             }
@@ -123,11 +123,11 @@ public class ShadowRenderer implements IRenderer{
     }
 
     public void queue(RenderComponent renderComponent) {
-        renderComponent.getMeshMaterialSets().forEach((meshMaterialSet -> {
-            if(meshMaterialSet.material.castShadow()){
-                shadowSets.add(meshMaterialSet);
-            }
-        }));
+        shadowSets.addAll(renderComponent.getMeshMaterialSets());
+    }
+
+    public void dequeue(RenderComponent renderComponent){
+        renderComponent.getMeshMaterialSets().forEach((shadowSets::remove));
     }
 
     public final int getShadowMapID(){

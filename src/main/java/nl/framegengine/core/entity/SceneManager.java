@@ -20,7 +20,7 @@ import java.util.*;
 
 public class SceneManager {
     private List<Scene> scenes = new ArrayList<>();
-    private Scene currentScene = null;
+    public static Scene currentScene = null;
     public static Vector3f fogColor = new Vector3f(1);
     public static float fogDensity = 0.01f;
     public static float fogGradient = 15f;
@@ -208,7 +208,7 @@ public class SceneManager {
     }
 
     public void setCurrentScene(int sceneIndex) {
-        this.currentScene = scenes.get(sceneIndex);
+        currentScene = scenes.get(sceneIndex);
         fogColor = currentScene.getFogColor();
         fogDensity = currentScene.getFogDensity();
         fogGradient = currentScene.getFogGradient();

@@ -1,6 +1,7 @@
 package nl.framegengine.core.components;
 
 import nl.framegengine.core.IJsonSerializable;
+import nl.framegengine.core.debugging.Debug;
 import nl.framegengine.core.entity.GameObject;
 import nl.framegengine.core.entity.Material;
 import nl.framegengine.core.entity.Mesh;
@@ -148,6 +149,12 @@ public class RenderComponent extends Component {
         max.mul(root.getScale());
 
         root.setAabb(new AABB(min, max));
+    }
+
+    @Override
+    public void disable() {
+        super.disable();
+        dequeueRender();
     }
 
     @Override

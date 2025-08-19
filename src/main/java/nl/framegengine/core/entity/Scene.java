@@ -122,6 +122,12 @@ public class Scene implements IJsonSerializable {
         this.rootGameObjects.remove(gameObject);
     }
 
+    public void removeGameObject(GameObject gameObject){
+        this.rootGameObjects.remove(gameObject);
+        gameObjects.remove(gameObject);
+        gameObject.remove();
+    }
+
     public void addGUI(GuiObject guiObject) {
         if (!guiObjects.contains(guiObject)) {
             guiObjects.add(guiObject);
