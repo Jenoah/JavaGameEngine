@@ -8,7 +8,6 @@ public class Settings {
     private static int MSAASamples = 8;
     private static float gamma = 2.2f;
 
-
     public static boolean isUseAnisotropic() {
         return useAnisotropic;
     }

@@ -16,8 +16,11 @@ import java.io.File;
 import java.io.StringReader;
 import java.io.StringWriter;
 import java.nio.file.*;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 public class EngineSettings {
     public static String currentProjectDirectory = "";
@@ -141,30 +144,128 @@ public class EngineSettings {
     }
 
     public static void updateManifest(){
+        File manifestFile = new File(getManifestPath());
+        List<HashMap<String, String>> existingTextures = new ArrayList<>();
+        List<HashMap<String, String>> existingScripts = new ArrayList<>();
+        List<HashMap<String, String>> existingLevels = new ArrayList<>();
+
+        if(manifestFile.exists()){
+            String manifestFileContent = FileHelper.readFile(manifestFile.getAbsolutePath());
+            if(manifestFileContent != null && !manifestFileContent.isBlank()) {
+                JsonObject manifestInfo = Json.createReader(new StringReader(manifestFileContent)).readObject();
+                manifestInfo.forEach((s, jsonValue) -> {
+                    if(jsonValue.getValueType() == JsonValue.ValueType.ARRAY){
+                        switch (s) {
+                            case "textures" -> jsonValue.asJsonArray().forEach(jsonArrayValue -> {
+                                if (jsonArrayValue.getValueType() == JsonValue.ValueType.OBJECT) {
+                                    existingTextures.add(manifestJsonToHashmapItem(jsonArrayValue.asJsonObject()));
+                                }
+                            });
+                            case "scripts" -> jsonValue.asJsonArray().forEach(jsonArrayValue -> {
+                                if (jsonArrayValue.getValueType() == JsonValue.ValueType.OBJECT) {
+                                    existingScripts.add(manifestJsonToHashmapItem(jsonArrayValue.asJsonObject()));
+                                }
+                            });
+                            case "levels" -> jsonValue.asJsonArray().forEach(jsonArrayValue -> {
+                                if (jsonArrayValue.getValueType() == JsonValue.ValueType.OBJECT) {
+                                    existingLevels.add(manifestJsonToHashmapItem(jsonArrayValue.asJsonObject()));
+                                }
+                            });
+                        }
+                    }
+                });
+            }
+        }
+
         JsonObjectBuilder jsonManifestContent = Json.createObjectBuilder();
         JsonArrayBuilder textureArray = Json.createArrayBuilder();
         JsonArrayBuilder scriptArray = Json.createArrayBuilder();
         JsonArrayBuilder levelArray = Json.createArrayBuilder();
+
+        List<HashMap<String, String>> manifestTextures = new ArrayList<>();
+        List<HashMap<String, String>> manifestScripts = new ArrayList<>();
+        List<HashMap<String, String>> manifestLevels = new ArrayList<>();
 
         File[] filesInProject = FileHelper.findFilesInDirectory(new File(currentProjectDirectory)).toArray(File[]::new);
 
         for (File file : filesInProject) {
             manifestFileType fileType = fileToManifestFileType(file);
             if(!file.exists()) continue;
-            String fileGUID = "" + java.util.UUID.randomUUID();
+            AtomicBoolean hasAddedFile = new AtomicBoolean(false);
+            String fileGUID = FileHelper.getChecksum(file.getAbsolutePath());
             String relativePath = Paths.get(currentProjectDirectory).relativize(file.toPath()).toString();
 
-            JsonObjectBuilder fileInfo = Json.createObjectBuilder();
-            fileInfo.add("guid", fileGUID);
-            fileInfo.add("path", relativePath);
-            fileInfo.add("filename", FileHelper.getFileName(file.getPath()));
-
-            switch (fileType){
-                case TEXTURE -> textureArray.add(fileInfo.build());
-                case SCRIPT -> scriptArray.add(fileInfo.build());
-                case LEVEL -> levelArray.add(fileInfo.build());
+            if(fileType == manifestFileType.TEXTURE){
+                existingTextures.forEach(textureHashmap -> {
+                    if(textureHashmap.get("guid").equals(fileGUID) && !textureHashmap.get("path").equals(relativePath)){
+                        textureHashmap.replace("path", relativePath);
+                        textureHashmap.replace("filename", FileHelper.getFileName(file.getPath()));
+                        manifestTextures.add(textureHashmap);
+                        hasAddedFile.set(true);
+                    }
+                });
+                if(!hasAddedFile.get()){
+                    HashMap<String, String> fileHashmap = new HashMap<>();
+                    fileHashmap.put("guid", fileGUID);
+                    fileHashmap.put("path", relativePath);
+                    fileHashmap.put("filename", FileHelper.getFileName(file.getPath()));
+                    manifestTextures.add(fileHashmap);
+                }
+            } else if (fileType == manifestFileType.SCRIPT) {
+                existingScripts.forEach(scriptHashmap -> {
+                    if(scriptHashmap.get("guid").equals(fileGUID) && !scriptHashmap.get("path").equals(relativePath)){
+                        scriptHashmap.replace("path", relativePath);
+                        manifestScripts.add(scriptHashmap);
+                        hasAddedFile.set(true);
+                    }
+                });
+                if(!hasAddedFile.get()){
+                    HashMap<String, String> fileHashmap = new HashMap<>();
+                    fileHashmap.put("guid", fileGUID);
+                    fileHashmap.put("path", relativePath);
+                    fileHashmap.put("filename", FileHelper.getFileName(file.getPath()));
+                    manifestScripts.add(fileHashmap);
+                }
+            } else if (fileType == manifestFileType.LEVEL) {
+                existingLevels.forEach(levelHashmap -> {
+                    if(levelHashmap.get("guid").equals(fileGUID) && !levelHashmap.get("path").equals(relativePath)){
+                        levelHashmap.replace("path", relativePath);
+                        manifestLevels.add(levelHashmap);
+                        hasAddedFile.set(true);
+                    }
+                });
+                if(!hasAddedFile.get()){
+                    HashMap<String, String> fileHashmap = new HashMap<>();
+                    fileHashmap.put("guid", fileGUID);
+                    fileHashmap.put("path", relativePath);
+                    fileHashmap.put("filename", FileHelper.getFileName(file.getPath()));
+                    manifestLevels.add(fileHashmap);
+                }
             }
         }
+
+        manifestTextures.forEach(manifestTexture -> {
+            JsonObjectBuilder fileInfo = Json.createObjectBuilder();
+            fileInfo.add("guid", manifestTexture.get("guid"));
+            fileInfo.add("path", manifestTexture.get("path"));
+            fileInfo.add("filename", manifestTexture.get("filename"));
+            textureArray.add(fileInfo.build());
+        });
+        manifestScripts.forEach(manifestScript -> {
+            JsonObjectBuilder fileInfo = Json.createObjectBuilder();
+            fileInfo.add("guid", manifestScript.get("guid"));
+            fileInfo.add("path", manifestScript.get("path"));
+            fileInfo.add("filename", manifestScript.get("filename"));
+            scriptArray.add(fileInfo.build());
+        });
+        manifestLevels.forEach(manifestLevel -> {
+            JsonObjectBuilder fileInfo = Json.createObjectBuilder();
+            fileInfo.add("guid", manifestLevel.get("guid"));
+            fileInfo.add("path", manifestLevel.get("path"));
+            fileInfo.add("filename", manifestLevel.get("filename"));
+            levelArray.add(fileInfo.build());
+        });
+
         jsonManifestContent.add("textures", textureArray.build());
         jsonManifestContent.add("scripts", scriptArray.build());
         jsonManifestContent.add("levels", levelArray.build());
@@ -178,6 +279,15 @@ public class EngineSettings {
         jsonWriter.write(jsonManifestContent.build());
 
         FileHelper.writeToFile(stringWriter.toString(), getManifestPath());
+    }
+
+    private static HashMap<String, String> manifestJsonToHashmapItem(JsonObject jsonObject){
+        HashMap<String, String> itemInfo = new HashMap<>();
+        if(JsonHelper.hasJsonKey(jsonObject, "guid")) itemInfo.put("guid", jsonObject.getString("guid"));
+        if(JsonHelper.hasJsonKey(jsonObject, "path")) itemInfo.put("path", jsonObject.getString("path"));
+        if(JsonHelper.hasJsonKey(jsonObject, "filename")) itemInfo.put("filename", jsonObject.getString("filename"));
+
+        return itemInfo;
     }
 
     public static String getManifestPath(){

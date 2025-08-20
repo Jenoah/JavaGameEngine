@@ -14,6 +14,9 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
+import java.security.DigestInputStream;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.List;
@@ -303,5 +306,23 @@ public class FileHelper {
             }
         }
         return inputFile.delete();
+    }
+
+    public static String getChecksum(String filepath){
+        try {
+            MessageDigest md = MessageDigest.getInstance("SHA-256");
+            try (DigestInputStream dis = new DigestInputStream(new FileInputStream(filepath), md)) {
+                while (dis.read() != -1) ; // read entire file
+                md = dis.getMessageDigest();
+            }
+            // bytes to hex
+            StringBuilder result = new StringBuilder();
+            for (byte b : md.digest()) {
+                result.append(String.format("%02x", b));
+            }
+            return result.toString();
+        } catch (Exception e) {
+            return "";
+        }
     }
 }
