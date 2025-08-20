@@ -196,14 +196,19 @@ public class EngineSettings {
             String relativePath = Paths.get(currentProjectDirectory).relativize(file.toPath()).toString();
 
             if(fileType == manifestFileType.TEXTURE){
-                existingTextures.forEach(textureHashmap -> {
-                    if(textureHashmap.get("guid").equals(fileGUID) && !textureHashmap.get("path").equals(relativePath)){
-                        textureHashmap.replace("path", relativePath);
-                        textureHashmap.replace("filename", FileHelper.getFileName(file.getPath()));
-                        manifestTextures.add(textureHashmap);
+                for (HashMap<String, String> textures : existingTextures) {
+                    if(textures.get("guid").equals(fileGUID) && !textures.get("path").equals(relativePath)){
+                        textures.replace("path", relativePath);
+                        textures.replace("filename", FileHelper.getFileName(file.getPath()));
+                        manifestTextures.add(textures);
                         hasAddedFile.set(true);
+                        break;
+                    }else if(textures.get("path").equals(relativePath) && !textures.get("guid").equals(fileGUID)){
+                        manifestTextures.add(textures);
+                        hasAddedFile.set(true);
+                        break;
                     }
-                });
+                }
                 if(!hasAddedFile.get()){
                     HashMap<String, String> fileHashmap = new HashMap<>();
                     fileHashmap.put("guid", fileGUID);
@@ -212,13 +217,19 @@ public class EngineSettings {
                     manifestTextures.add(fileHashmap);
                 }
             } else if (fileType == manifestFileType.SCRIPT) {
-                existingScripts.forEach(scriptHashmap -> {
-                    if(scriptHashmap.get("guid").equals(fileGUID) && !scriptHashmap.get("path").equals(relativePath)){
-                        scriptHashmap.replace("path", relativePath);
-                        manifestScripts.add(scriptHashmap);
+                for (HashMap<String, String> script : existingScripts) {
+                    if(script.get("guid").equals(fileGUID) && !script.get("path").equals(relativePath)){
+                        script.replace("path", relativePath);
+                        script.replace("filename", FileHelper.getFileName(file.getPath()));
+                        manifestScripts.add(script);
                         hasAddedFile.set(true);
+                        break;
+                    }else if(script.get("path").equals(relativePath) && !script.get("guid").equals(fileGUID)){
+                        manifestTextures.add(script);
+                        hasAddedFile.set(true);
+                        break;
                     }
-                });
+                }
                 if(!hasAddedFile.get()){
                     HashMap<String, String> fileHashmap = new HashMap<>();
                     fileHashmap.put("guid", fileGUID);
@@ -227,13 +238,19 @@ public class EngineSettings {
                     manifestScripts.add(fileHashmap);
                 }
             } else if (fileType == manifestFileType.LEVEL) {
-                existingLevels.forEach(levelHashmap -> {
-                    if(levelHashmap.get("guid").equals(fileGUID) && !levelHashmap.get("path").equals(relativePath)){
-                        levelHashmap.replace("path", relativePath);
-                        manifestLevels.add(levelHashmap);
+                for (HashMap<String, String> level : existingLevels) {
+                    if(level.get("guid").equals(fileGUID) && !level.get("path").equals(relativePath)){
+                        level.replace("path", relativePath);
+                        level.replace("filename", FileHelper.getFileName(file.getPath()));
+                        manifestLevels.add(level);
                         hasAddedFile.set(true);
+                        break;
+                    }else if(level.get("path").equals(relativePath) && !level.get("guid").equals(fileGUID)){
+                        manifestLevels.add(level);
+                        hasAddedFile.set(true);
+                        break;
                     }
-                });
+                }
                 if(!hasAddedFile.get()){
                     HashMap<String, String> fileHashmap = new HashMap<>();
                     fileHashmap.put("guid", fileGUID);
@@ -279,6 +296,8 @@ public class EngineSettings {
         jsonWriter.write(jsonManifestContent.build());
 
         FileHelper.writeToFile(stringWriter.toString(), getManifestPath());
+
+        //Debug.Log("Manifest updated");
     }
 
     private static HashMap<String, String> manifestJsonToHashmapItem(JsonObject jsonObject){
