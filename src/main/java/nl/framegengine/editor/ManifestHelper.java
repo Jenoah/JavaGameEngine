@@ -275,6 +275,22 @@ public class ManifestHelper {
         };
     }
 
+    public static final List<HashMap<String, String>> getTextures(){
+        return textures;
+    }
+
+    public static final List<HashMap<String, String>> getScripts(){
+        return scripts;
+    }
+
+    public static final List<HashMap<String, String>> getLevels(){
+        return levels;
+    }
+
+    public static final List<HashMap<String, String>> getOthers(){
+        return others;
+    }
+
     private static class ManifestFileListener implements FileAlterationListener {
         @Override
         public void onFileCreate(File file) {
