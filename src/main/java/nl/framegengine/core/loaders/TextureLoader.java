@@ -1,6 +1,7 @@
 package nl.framegengine.core.loaders;
 
 import nl.framegengine.core.Settings;
+import nl.framegengine.editor.ManifestHelper;
 import org.joml.Math;
 import org.lwjgl.opengl.*;
 import org.lwjgl.stb.STBImage;
@@ -8,20 +9,30 @@ import org.lwjgl.system.MemoryStack;
 
 import java.nio.ByteBuffer;
 import java.nio.IntBuffer;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.HashMap;
+import java.util.Map;
 
 import static org.lwjgl.stb.STBImage.stbi_set_flip_vertically_on_load;
 
 public class TextureLoader {
 
-    private static final Set<Integer> textures = new HashSet<>();
+    private static final Map<String, Integer> textures = new HashMap<>();
     private static boolean flipTexture = true;
     private static boolean pointFilter = false;
     private static boolean repeatTexture = true;
     private static boolean isNormalMap = false;
 
+    public static int getTextureByGUID(String guid){
+        if(textures.containsKey(guid)) return textures.get(guid);
+        return -1;
+    }
+
     public static int loadTexture(String fileName){
+        String textureGUID = ManifestHelper.getGUIDbyPath(ManifestHelper.manifestFileType.TEXTURE, fileName);
+        if(textures.containsKey(textureGUID)){
+            return textures.get(textureGUID);
+        }
+
         ByteBuffer imageBuffer;
         int width, height, alphaFormat;
         IntBuffer comp;
@@ -97,11 +108,13 @@ public class TextureLoader {
 
         STBImage.stbi_image_free(imageBuffer);
 
-        textures.add(id);
         TextureLoader.flipTexture = true;
         TextureLoader.pointFilter = false;
         TextureLoader.repeatTexture = true;
         TextureLoader.isNormalMap = false;
+
+        if(textureGUID != null) textures.put(textureGUID, id);
+
         return id;
     }
 
@@ -146,7 +159,7 @@ public class TextureLoader {
         GL11.glTexParameteri(GL13.GL_TEXTURE_CUBE_MAP, GL11.GL_TEXTURE_WRAP_S, GL12.GL_CLAMP_TO_EDGE);
         GL11.glTexParameteri(GL13.GL_TEXTURE_CUBE_MAP, GL11.GL_TEXTURE_WRAP_T, GL12.GL_CLAMP_TO_EDGE);
 
-        textures.add(textureID);
+        textures.put(java.util.UUID.randomUUID().toString(), textureID);
         return textureID;
     }
 
@@ -178,9 +191,9 @@ public class TextureLoader {
 
 
     public static void cleanUp(){
-        for(int texture: textures){
-            GL11.glDeleteTextures(texture);
-        }
+        textures.forEach((guid, id) -> {
+            GL11.glDeleteTextures(id);
+        });
     }
 
     private static class TextureData{

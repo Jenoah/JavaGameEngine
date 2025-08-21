@@ -19,6 +19,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicReference;
 
 public class ManifestHelper {
     private static final String manifestFileName = "/.fgmanifest";
@@ -257,7 +258,7 @@ public class ManifestHelper {
         return Paths.get(EngineSettings.currentProjectDirectory, manifestFileName).toString();
     }
 
-    enum manifestFileType{
+    public enum manifestFileType{
         TEXTURE,
         SCRIPT,
         LEVEL,
@@ -268,7 +269,7 @@ public class ManifestHelper {
         String extension = FileHelper.getExtension(file.getPath());
 
         return switch (extension) {
-            case "jpg", "png", "gif", "tiff" -> manifestFileType.TEXTURE;
+            case "jpg", "jpeg", "JPG", "JPEG", "png", "PNG", "gif", "tiff" -> manifestFileType.TEXTURE;
             case "lvl" -> manifestFileType.LEVEL;
             case "java" -> manifestFileType.SCRIPT;
             case null, default -> manifestFileType.NULL;
@@ -289,6 +290,34 @@ public class ManifestHelper {
 
     public static final List<HashMap<String, String>> getOthers(){
         return others;
+    }
+
+    public static final List<HashMap<String, String>> getOfType(manifestFileType fileType){
+        switch (fileType){
+            case TEXTURE -> { return getTextures(); }
+            case SCRIPT -> { return getScripts(); }
+            case LEVEL -> { return getLevels(); }
+            case null, default -> { return getOthers(); }
+        }
+    }
+
+    public static final String getGUIDbyPath(manifestFileType fileType, String path){
+        AtomicReference<String> guid = new AtomicReference<>();
+        File file = new File(path);
+        if(!file.exists()) return null;
+        if(file.isAbsolute()){
+            path = Paths.get(EngineSettings.currentProjectDirectory).relativize(Paths.get(path)).toString();
+        }
+
+        List<HashMap<String, String>> typeArray = getOfType(fileType);
+        String finalPath = path;
+        typeArray.forEach(map -> {
+            if(map.get("path").equals(finalPath)){
+                guid.set(map.get("guid"));
+                return;
+            }
+        });
+        return guid.get();
     }
 
     private static class ManifestFileListener implements FileAlterationListener {
@@ -328,5 +357,4 @@ public class ManifestHelper {
         @Override
         public void onStop(FileAlterationObserver observer) {}
     }
-
 }
