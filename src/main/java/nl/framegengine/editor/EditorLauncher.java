@@ -10,5 +10,6 @@ public class EditorLauncher{
         editorWindow.setEditorLayout(new EditorLayout());
         editorWindow.run();
         editorWindow.cleanUp();
+        System.exit(0);
     }
 }
