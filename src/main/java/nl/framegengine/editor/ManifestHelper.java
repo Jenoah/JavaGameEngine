@@ -1,5 +1,6 @@
 package nl.framegengine.editor;
 
+import nl.framegengine.core.callbacks.EventCallback;
 import nl.framegengine.core.utils.FileHelper;
 import nl.framegengine.core.utils.JsonHelper;
 import org.apache.commons.io.filefilter.FileFilterUtils;
@@ -28,6 +29,8 @@ public class ManifestHelper {
     private static final List<HashMap<String, String>> scripts = new ArrayList<>();
     private static final List<HashMap<String, String>> levels = new ArrayList<>();
     private static final List<HashMap<String, String>> others = new ArrayList<>();
+
+    private static EventCallback eventCallback = null;
 
     public static void registerManifestListener(){
         try {
@@ -242,7 +245,11 @@ public class ManifestHelper {
 
         FileHelper.writeToFile(stringWriter.toString(), getManifestPath());
 
-        //Debug.Log("Manifest updated");
+        if(eventCallback != null) eventCallback.onTrigger();
+    }
+
+    public static void setEventCallback(EventCallback callback){
+        eventCallback = callback;
     }
 
     private static HashMap<String, String> manifestJsonToHashmapItem(JsonObject jsonObject){
@@ -314,7 +321,6 @@ public class ManifestHelper {
         typeArray.forEach(map -> {
             if(map.get("path").equals(finalPath)){
                 guid.set(map.get("guid"));
-                return;
             }
         });
         return guid.get();

@@ -4,7 +4,6 @@ import imgui.ImGui;
 import imgui.flag.ImGuiWindowFlags;
 import imgui.type.ImString;
 import nl.framegengine.core.callbacks.NameEnteredCallback;
-import nl.framegengine.core.debugging.Debug;
 import org.joml.Math;
 
 public class ImGuiHelper {
@@ -54,5 +53,16 @@ public class ImGuiHelper {
         }
 
         return (int) Math.ceil(biggestWidth);
+    }
+
+    public static String guidFromName(String name){
+        String guid = "";
+
+        int i = name.lastIndexOf("##");
+        if(i >= 0) i++;
+        if (i > 0) {
+            guid = name.substring(i+1);
+        }
+        return guid;
     }
 }

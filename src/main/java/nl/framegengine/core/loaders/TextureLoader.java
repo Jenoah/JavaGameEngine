@@ -10,22 +10,17 @@ import org.lwjgl.system.MemoryStack;
 import java.nio.ByteBuffer;
 import java.nio.IntBuffer;
 import java.util.HashMap;
-import java.util.Map;
+import java.util.concurrent.atomic.AtomicReference;
 
 import static org.lwjgl.stb.STBImage.stbi_set_flip_vertically_on_load;
 
 public class TextureLoader {
 
-    private static final Map<String, Integer> textures = new HashMap<>();
+    private static final HashMap<String, Integer> textures = new HashMap<>();
     private static boolean flipTexture = true;
     private static boolean pointFilter = false;
     private static boolean repeatTexture = true;
     private static boolean isNormalMap = false;
-
-    public static int getTextureByGUID(String guid){
-        if(textures.containsKey(guid)) return textures.get(guid);
-        return -1;
-    }
 
     public static int loadTexture(String fileName){
         String textureGUID = ManifestHelper.getGUIDbyPath(ManifestHelper.manifestFileType.TEXTURE, fileName);
@@ -219,4 +214,17 @@ public class TextureLoader {
         }
     }
 
+    public static int getTextureByGUID(String guid){
+        if(textures.containsKey(guid)) return textures.get(guid);
+        return -1;
+    }
+
+    public static String getGuidById(int textureId) {
+        AtomicReference<String> guid = new AtomicReference<>();
+
+        textures.forEach((textureGuid, id) -> {
+            if (id == textureId) guid.set(textureGuid);
+        });
+        return guid.get();
+    }
 }

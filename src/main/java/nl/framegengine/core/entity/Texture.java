@@ -14,6 +14,7 @@ import java.nio.file.Paths;
 public class Texture implements IJsonSerializable {
 
     private int id;
+    private String guid;
     protected String texturePath;
     private boolean pointFilter = false;
     private boolean flipped = false;
@@ -29,19 +30,20 @@ public class Texture implements IJsonSerializable {
     public Texture(int id) {
         this.id = id;
         this.texturePath = "";
+        this.guid = TextureLoader.getGuidById(this.id);
     }
 
     public Texture(String texturePath){
-
         this.id = TextureLoader.loadTexture(texturePath);
         this.texturePath = texturePath;
+        this.guid = TextureLoader.getGuidById(this.id);
     }
 
     public Texture(String texturePath, boolean pointFilter){
         this.id = TextureLoader.loadTexture(texturePath, pointFilter);
         this.texturePath = texturePath;
         this.pointFilter = pointFilter;
-
+        this.guid = TextureLoader.getGuidById(this.id);
     }
 
     public Texture(String texturePath, boolean pointFilter, boolean flipped){
@@ -49,6 +51,7 @@ public class Texture implements IJsonSerializable {
         this.texturePath = texturePath;
         this.pointFilter = pointFilter;
         this.flipped = flipped;
+        this.guid = TextureLoader.getGuidById(this.id);
     }
 
     public Texture(String texturePath, boolean pointFilter, boolean flipped, boolean repeat, boolean isNormalMap){
@@ -58,6 +61,7 @@ public class Texture implements IJsonSerializable {
         this.flipped = flipped;
         this.repeat = repeat;
         this.isNormalMap = isNormalMap;
+        this.guid = TextureLoader.getGuidById(this.id);
     }
 
     public final String getTexturePath(){
@@ -66,7 +70,7 @@ public class Texture implements IJsonSerializable {
 
     @Override
     public JsonObject serializeToJson() {
-        return JsonHelper.objectToJson(this);
+        return JsonHelper.objectToJson(this, new String[]{"id"});
     }
 
     @Override
@@ -88,6 +92,11 @@ public class Texture implements IJsonSerializable {
                     repeat,
                     isNormalMap);
         }
+        this.guid = TextureLoader.getGuidById(this.id);
         return this;
+    }
+
+    public final String getGuid(){
+        return guid;
     }
 }

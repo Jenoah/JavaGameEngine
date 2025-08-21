@@ -211,7 +211,6 @@ public class JsonHelper {
                             fieldValue = jsonToObject(jsonItemValue);
                         }
 
-                        //TODO: COMPONENT ROOT WILL PROBABLY BE OVERWRITTEN HERE
                         if (fieldValue != null && fieldValue.getClass().isAssignableFrom(IJsonSerializable.class)) {
                             ((IJsonSerializable) fieldValue).deserializeFromJson(((JsonString) jsonItemValue).getString());
                         }
