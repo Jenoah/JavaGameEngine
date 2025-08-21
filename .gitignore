@@ -25,5 +25,4 @@ replay_pid*
 /build/
 /.gradle/
 /.idea/
-/src/main/java/game/myGame/
-Imgui.ini
+imgui.ini
