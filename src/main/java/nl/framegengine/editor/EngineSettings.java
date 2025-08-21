@@ -4,30 +4,16 @@ import nl.framegengine.core.debugging.Debug;
 import nl.framegengine.core.entity.SceneManager;
 import nl.framegengine.core.utils.FileHelper;
 import nl.framegengine.core.utils.JsonHelper;
-import org.apache.commons.io.filefilter.FileFilterUtils;
-import org.apache.commons.io.filefilter.IOFileFilter;
-import org.apache.commons.io.monitor.FileAlterationListener;
-import org.apache.commons.io.monitor.FileAlterationMonitor;
-import org.apache.commons.io.monitor.FileAlterationObserver;
 
 import javax.json.*;
-import javax.json.stream.JsonGenerator;
 import java.io.File;
 import java.io.StringReader;
-import java.io.StringWriter;
-import java.nio.file.*;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 public class EngineSettings {
     public static String currentProjectDirectory = "";
     public static String currentLevelPath = "";
     public static String currentProjectName = "Unknown project";
 
-    private static final String manifestFileName = "/.fgmanifest";
     private static final String settingsFileName = "/.fgsettings";
 
     public static void saveSettings(){
@@ -54,31 +40,10 @@ public class EngineSettings {
         if (JsonHelper.hasJsonKey(projectInfo, "currentLevelPath")) currentLevelPath = projectInfo.getString("currentLevelPath");
         currentProjectName = FileHelper.getDirectoryName(currentProjectDirectory);
         saveEngineConfig();
-        updateManifest();
-        registerManifestListener();
+        ManifestHelper.updateManifest();
+        ManifestHelper.registerManifestListener();
 
         Debug.Log("Project settings successfully loaded in");
-    }
-
-    private static void registerManifestListener(){
-        try {
-            String filteredManifestFileName = FileHelper.getFileName(manifestFileName) + "." + FileHelper.getExtension(manifestFileName);
-            IOFileFilter excludeManifestFilter = FileFilterUtils.notFileFilter(FileFilterUtils.nameFileFilter(filteredManifestFileName));
-            FileAlterationObserver observer = FileAlterationObserver.builder()
-                    .setFile(new File(currentProjectDirectory))
-                    .setFileFilter(excludeManifestFilter)
-                    .get();
-
-            FileAlterationMonitor monitor = new FileAlterationMonitor(1000);
-            FileAlterationListener listener = new ManifestFileListener();
-
-            observer.addListener(listener);
-            monitor.addObserver(observer);
-            monitor.start();
-
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
     }
 
     public static void createNewProject(){
@@ -142,235 +107,4 @@ public class EngineSettings {
         currentProjectDirectory = projectInfo.getString("currentProjectDirectory");
         currentProjectName = FileHelper.getDirectoryName(currentProjectDirectory);
     }
-
-    public static void updateManifest(){
-        File manifestFile = new File(getManifestPath());
-        List<HashMap<String, String>> existingTextures = new ArrayList<>();
-        List<HashMap<String, String>> existingScripts = new ArrayList<>();
-        List<HashMap<String, String>> existingLevels = new ArrayList<>();
-
-        if(manifestFile.exists()){
-            String manifestFileContent = FileHelper.readFile(manifestFile.getAbsolutePath());
-            if(manifestFileContent != null && !manifestFileContent.isBlank()) {
-                JsonObject manifestInfo = Json.createReader(new StringReader(manifestFileContent)).readObject();
-                manifestInfo.forEach((s, jsonValue) -> {
-                    if(jsonValue.getValueType() == JsonValue.ValueType.ARRAY){
-                        switch (s) {
-                            case "textures" -> jsonValue.asJsonArray().forEach(jsonArrayValue -> {
-                                if (jsonArrayValue.getValueType() == JsonValue.ValueType.OBJECT) {
-                                    existingTextures.add(manifestJsonToHashmapItem(jsonArrayValue.asJsonObject()));
-                                }
-                            });
-                            case "scripts" -> jsonValue.asJsonArray().forEach(jsonArrayValue -> {
-                                if (jsonArrayValue.getValueType() == JsonValue.ValueType.OBJECT) {
-                                    existingScripts.add(manifestJsonToHashmapItem(jsonArrayValue.asJsonObject()));
-                                }
-                            });
-                            case "levels" -> jsonValue.asJsonArray().forEach(jsonArrayValue -> {
-                                if (jsonArrayValue.getValueType() == JsonValue.ValueType.OBJECT) {
-                                    existingLevels.add(manifestJsonToHashmapItem(jsonArrayValue.asJsonObject()));
-                                }
-                            });
-                        }
-                    }
-                });
-            }
-        }
-
-        JsonObjectBuilder jsonManifestContent = Json.createObjectBuilder();
-        JsonArrayBuilder textureArray = Json.createArrayBuilder();
-        JsonArrayBuilder scriptArray = Json.createArrayBuilder();
-        JsonArrayBuilder levelArray = Json.createArrayBuilder();
-
-        List<HashMap<String, String>> manifestTextures = new ArrayList<>();
-        List<HashMap<String, String>> manifestScripts = new ArrayList<>();
-        List<HashMap<String, String>> manifestLevels = new ArrayList<>();
-
-        File[] filesInProject = FileHelper.findFilesInDirectory(new File(currentProjectDirectory)).toArray(File[]::new);
-
-        for (File file : filesInProject) {
-            manifestFileType fileType = fileToManifestFileType(file);
-            if(!file.exists()) continue;
-            AtomicBoolean hasAddedFile = new AtomicBoolean(false);
-            String fileGUID = FileHelper.getChecksum(file.getAbsolutePath());
-            String relativePath = Paths.get(currentProjectDirectory).relativize(file.toPath()).toString();
-
-            if(fileType == manifestFileType.TEXTURE){
-                for (HashMap<String, String> textures : existingTextures) {
-                    if(textures.get("guid").equals(fileGUID) && !textures.get("path").equals(relativePath)){
-                        textures.replace("path", relativePath);
-                        textures.replace("filename", FileHelper.getFileName(file.getPath()));
-                        manifestTextures.add(textures);
-                        hasAddedFile.set(true);
-                        break;
-                    }else if(textures.get("path").equals(relativePath) && !textures.get("guid").equals(fileGUID)){
-                        manifestTextures.add(textures);
-                        hasAddedFile.set(true);
-                        break;
-                    }
-                }
-                if(!hasAddedFile.get()){
-                    HashMap<String, String> fileHashmap = new HashMap<>();
-                    fileHashmap.put("guid", fileGUID);
-                    fileHashmap.put("path", relativePath);
-                    fileHashmap.put("filename", FileHelper.getFileName(file.getPath()));
-                    manifestTextures.add(fileHashmap);
-                }
-            } else if (fileType == manifestFileType.SCRIPT) {
-                for (HashMap<String, String> script : existingScripts) {
-                    if(script.get("guid").equals(fileGUID) && !script.get("path").equals(relativePath)){
-                        script.replace("path", relativePath);
-                        script.replace("filename", FileHelper.getFileName(file.getPath()));
-                        manifestScripts.add(script);
-                        hasAddedFile.set(true);
-                        break;
-                    }else if(script.get("path").equals(relativePath) && !script.get("guid").equals(fileGUID)){
-                        manifestTextures.add(script);
-                        hasAddedFile.set(true);
-                        break;
-                    }
-                }
-                if(!hasAddedFile.get()){
-                    HashMap<String, String> fileHashmap = new HashMap<>();
-                    fileHashmap.put("guid", fileGUID);
-                    fileHashmap.put("path", relativePath);
-                    fileHashmap.put("filename", FileHelper.getFileName(file.getPath()));
-                    manifestScripts.add(fileHashmap);
-                }
-            } else if (fileType == manifestFileType.LEVEL) {
-                for (HashMap<String, String> level : existingLevels) {
-                    if(level.get("guid").equals(fileGUID) && !level.get("path").equals(relativePath)){
-                        level.replace("path", relativePath);
-                        level.replace("filename", FileHelper.getFileName(file.getPath()));
-                        manifestLevels.add(level);
-                        hasAddedFile.set(true);
-                        break;
-                    }else if(level.get("path").equals(relativePath) && !level.get("guid").equals(fileGUID)){
-                        manifestLevels.add(level);
-                        hasAddedFile.set(true);
-                        break;
-                    }
-                }
-                if(!hasAddedFile.get()){
-                    HashMap<String, String> fileHashmap = new HashMap<>();
-                    fileHashmap.put("guid", fileGUID);
-                    fileHashmap.put("path", relativePath);
-                    fileHashmap.put("filename", FileHelper.getFileName(file.getPath()));
-                    manifestLevels.add(fileHashmap);
-                }
-            }
-        }
-
-        manifestTextures.forEach(manifestTexture -> {
-            JsonObjectBuilder fileInfo = Json.createObjectBuilder();
-            fileInfo.add("guid", manifestTexture.get("guid"));
-            fileInfo.add("path", manifestTexture.get("path"));
-            fileInfo.add("filename", manifestTexture.get("filename"));
-            textureArray.add(fileInfo.build());
-        });
-        manifestScripts.forEach(manifestScript -> {
-            JsonObjectBuilder fileInfo = Json.createObjectBuilder();
-            fileInfo.add("guid", manifestScript.get("guid"));
-            fileInfo.add("path", manifestScript.get("path"));
-            fileInfo.add("filename", manifestScript.get("filename"));
-            scriptArray.add(fileInfo.build());
-        });
-        manifestLevels.forEach(manifestLevel -> {
-            JsonObjectBuilder fileInfo = Json.createObjectBuilder();
-            fileInfo.add("guid", manifestLevel.get("guid"));
-            fileInfo.add("path", manifestLevel.get("path"));
-            fileInfo.add("filename", manifestLevel.get("filename"));
-            levelArray.add(fileInfo.build());
-        });
-
-        jsonManifestContent.add("textures", textureArray.build());
-        jsonManifestContent.add("scripts", scriptArray.build());
-        jsonManifestContent.add("levels", levelArray.build());
-
-        Map<String, Boolean> config = new HashMap<>();
-        config.put(JsonGenerator.PRETTY_PRINTING, true);
-        JsonWriterFactory jsonWriterFactory = Json.createWriterFactory(config);
-
-        StringWriter stringWriter = new StringWriter();
-        JsonWriter jsonWriter = jsonWriterFactory.createWriter(stringWriter);
-        jsonWriter.write(jsonManifestContent.build());
-
-        FileHelper.writeToFile(stringWriter.toString(), getManifestPath());
-
-        //Debug.Log("Manifest updated");
-    }
-
-    private static HashMap<String, String> manifestJsonToHashmapItem(JsonObject jsonObject){
-        HashMap<String, String> itemInfo = new HashMap<>();
-        if(JsonHelper.hasJsonKey(jsonObject, "guid")) itemInfo.put("guid", jsonObject.getString("guid"));
-        if(JsonHelper.hasJsonKey(jsonObject, "path")) itemInfo.put("path", jsonObject.getString("path"));
-        if(JsonHelper.hasJsonKey(jsonObject, "filename")) itemInfo.put("filename", jsonObject.getString("filename"));
-
-        return itemInfo;
-    }
-
-    public static String getManifestPath(){
-        return Paths.get(currentProjectDirectory, manifestFileName).toString();
-    }
-
-    enum manifestFileType{
-        TEXTURE,
-        SCRIPT,
-        LEVEL,
-        NULL
-    }
-
-    private static manifestFileType fileToManifestFileType(File file){
-        String extension = FileHelper.getExtension(file.getPath());
-
-        switch (extension){
-            case "jpg", "png", "gif", "tiff":
-                return manifestFileType.TEXTURE;
-            case "lvl":
-                return manifestFileType.LEVEL;
-            case "java":
-                return manifestFileType.SCRIPT;
-            case null, default:
-                return manifestFileType.NULL;
-        }
-    }
-
-    private static class ManifestFileListener implements FileAlterationListener {
-        @Override
-        public void onFileCreate(File file) {
-            updateManifest();
-        }
-
-        @Override
-        public void onDirectoryChange(File file) {
-
-        }
-
-        @Override
-        public void onDirectoryCreate(File file) {
-
-        }
-
-        @Override
-        public void onDirectoryDelete(File file) {
-
-        }
-
-        @Override
-        public void onFileChange(File file) {
-            updateManifest();
-        }
-
-        @Override
-        public void onFileDelete(File file) {
-            updateManifest();
-        }
-
-        @Override
-        public void onStart(FileAlterationObserver fileAlterationObserver) {}
-
-        @Override
-        public void onStop(FileAlterationObserver observer) {}
-    }
-
 }

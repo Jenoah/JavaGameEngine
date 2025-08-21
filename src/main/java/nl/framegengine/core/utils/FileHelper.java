@@ -16,7 +16,6 @@ import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.security.DigestInputStream;
 import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.List;
@@ -69,11 +68,16 @@ public class FileHelper {
     }
 
     public static List<File> findFilesInDirectory(File rootDir) {
+        return findFilesInDirectory(rootDir, false);
+    }
+
+    public static List<File> findFilesInDirectory(File rootDir, boolean showHiddenFiles) {
         List<File> files = new ArrayList<>();
         File[] directoryFiles = rootDir.listFiles();
         if (directoryFiles != null) {
             for (File file : directoryFiles) {
                 if (file.isDirectory()) {
+                    if(showHiddenFiles || (!showHiddenFiles && !file.isHidden()))
                     files.addAll(findFilesInDirectory(file));
                 } else {
                     files.add(file);
