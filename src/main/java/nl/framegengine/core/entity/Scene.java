@@ -145,6 +145,8 @@ public class Scene implements IJsonSerializable {
     public void updateLights(){
         for (SimpleLitShader s : Arrays.asList(ShaderManager.litShader, ShaderManager.triplanarShader, ShaderManager.pbrShader))
             s.setLights(getDirectionalLight(), getPointLights(), getSpotLights());
+
+        ShaderManager.updateGenericUniforms();
     }
 
     public List<GuiObject> getGuiObjects() {
@@ -157,10 +159,12 @@ public class Scene implements IJsonSerializable {
 
     public void setAmbientLight(Vector3f ambientLight) {
         this.ambientLight = ambientLight;
+        ShaderManager.updateGenericUniforms();
     }
 
     public void setAmbientLight(float r, float g, float b) {
         this.ambientLight = new Vector3f(r, g, b);
+        ShaderManager.updateGenericUniforms();
     }
 
     public PointLight[] getPointLights() {
@@ -246,6 +250,7 @@ public class Scene implements IJsonSerializable {
 
     public void setFogColor(Vector3f fogColor) {
         this.fogColor = fogColor;
+        ShaderManager.updateGenericUniforms();
     }
 
     public float getFogDensity() {
@@ -258,15 +263,18 @@ public class Scene implements IJsonSerializable {
 
     public void setFogDensity(float fogDensity) {
         this.fogDensity = fogDensity;
+        ShaderManager.updateGenericUniforms();
     }
 
     public void setFogGradient(float fogGradient) {
         this.fogGradient = fogGradient;
+        ShaderManager.updateGenericUniforms();
     }
 
     public void disableFog(){
         this.fogGradient = 100000;
         this.fogDensity = 0;
+        ShaderManager.updateGenericUniforms();
     }
 
     public List<GameObject> getGameObjects() {

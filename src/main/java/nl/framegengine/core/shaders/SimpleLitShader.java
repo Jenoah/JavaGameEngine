@@ -55,6 +55,8 @@ public class SimpleLitShader extends Shader {
         createDirectionalLightUniform("directionalLight");
         createPointLightArrayUniform("pointLights", 5);
         createSpotLightArrayUniform("spotLights", 5);
+
+        updateGenericUniforms();
     }
 
     @Override
@@ -66,16 +68,7 @@ public class SimpleLitShader extends Shader {
         this.setUniform("material", meshMaterialSet.material);
         this.setUniform("modelMatrix", modelMatrix);
         this.setUniform("viewMatrix", camera.getViewMatrix());
-        this.setUniform("projectionMatrix", window.getProjectionMatrix());
-        this.setUniform("fogColor", SceneManager.fogColor);
-        this.setUniform("fogDensity", SceneManager.fogDensity);
-        this.setUniform("fogGradient", SceneManager.fogGradient);
         this.setUniform("shadowSpaceMatrix", shadowSpaceMatrix);
-        this.setUniform("shadowDistance", Constants.SHADOW_DISTANCE);
-        this.setUniform("shadowBias", Constants.SHADOW_BIAS);
-        this.setUniform("shadowTransitionDistance", Constants.SHADOW_TRANSITION_DISTANCE);
-        this.setUniform("shadowPCFCount", Constants.SHADOW_PCF_COUNT);
-        this.setUniform("shadowMapSize", Constants.SHADOW_MAP_SIZE);
 
         /*
         if(mat.getAlbedoTexture() != null){
@@ -98,8 +91,6 @@ public class SimpleLitShader extends Shader {
     }
 
     public void render(Camera camera){
-        setUniform("ambientColor", Constants.AMBIENT_COLOR);
-        setUniform("specularPower", Constants.SPECULAR_POWER);
         setUniform("viewPosition", camera.getPosition());
 
         int lightCount = spotLights != null ? spotLights.length : 0;
@@ -208,5 +199,30 @@ public class SimpleLitShader extends Shader {
 
     public void setShadowSpaceMatrix(Matrix4f shadowSpaceMatrix){
         this.shadowSpaceMatrix = shadowSpaceMatrix;
+    }
+
+    public void updateGenericUniforms(){
+        bind();
+
+        //Fog
+        this.setUniform("fogColor", SceneManager.fogColor);
+        this.setUniform("fogDensity", SceneManager.fogDensity);
+        this.setUniform("fogGradient", SceneManager.fogGradient);
+
+        //Shadows
+        this.setUniform("shadowDistance", Constants.SHADOW_DISTANCE);
+        this.setUniform("shadowBias", Constants.SHADOW_BIAS);
+        this.setUniform("shadowTransitionDistance", Constants.SHADOW_TRANSITION_DISTANCE);
+        this.setUniform("shadowPCFCount", Constants.SHADOW_PCF_COUNT);
+        this.setUniform("shadowMapSize", Constants.SHADOW_MAP_SIZE);
+
+        //Lighting
+        setUniform("ambientColor", Constants.AMBIENT_COLOR);
+        setUniform("specularPower", Constants.SPECULAR_POWER);
+
+        //Camera
+        setUniform("projectionMatrix", window.getProjectionMatrix());
+
+        unbind();
     }
 }

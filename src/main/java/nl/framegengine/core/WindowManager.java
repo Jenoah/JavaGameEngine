@@ -1,6 +1,7 @@
 package nl.framegengine.core;
 
 import nl.framegengine.core.debugging.Debug;
+import nl.framegengine.core.shaders.ShaderManager;
 import nl.framegengine.core.utils.Constants;
 import nl.framegengine.editor.EditorWindow;
 import org.joml.Matrix4f;
@@ -88,6 +89,8 @@ public class WindowManager {
 
         GLFW.glfwSetFramebufferSizeCallback(window, (window, width, height) -> {
             setWindowSize(width, height);
+            updateProjectionMatrix();
+            ShaderManager.updateGenericUniforms();
             if(!standalone){
                 EditorWindow.windowWidth = this.width;
                 EditorWindow.windowHeight = this.height;
@@ -206,12 +209,16 @@ public class WindowManager {
 
     public Matrix4f updateProjectionMatrix() {
         float aspectRatio = (float) width / height;
-        return projectionMatrix.setPerspective(Constants.FOV, aspectRatio, Constants.Z_NEAR, Constants.Z_FAR);
+        projectionMatrix.setPerspective(Constants.FOV, aspectRatio, Constants.Z_NEAR, Constants.Z_FAR);
+        ShaderManager.updateGenericUniforms();        ShaderManager.updateGenericUniforms();
+        return projectionMatrix;
     }
 
     public Matrix4f updateProjectionMatrix(Matrix4f matrix, int width, int height) {
         float aspectRatio = (float) width / height;
-        return matrix.setPerspective(Constants.FOV, aspectRatio, Constants.Z_NEAR, Constants.Z_FAR);
+        matrix.setPerspective(Constants.FOV, aspectRatio, Constants.Z_NEAR, Constants.Z_FAR);
+        ShaderManager.updateGenericUniforms();
+        return matrix;
     }
 
     public boolean isStandalone() {

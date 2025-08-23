@@ -27,4 +27,12 @@ public class ShaderManager {
             throw new RuntimeException(e);
         }
     }
+
+    public static void updateGenericUniforms(){
+        if(litShader != null) litShader.updateGenericUniforms();
+        if(pbrShader != null) pbrShader.updateGenericUniforms();
+        if(triplanarShader != null) triplanarShader.updateGenericUniforms();
+        if(unlitShader != null) unlitShader.updateGenericUniforms();
+        if(billboardShader != null) billboardShader.updateGenericUniforms();
+    }
 }
